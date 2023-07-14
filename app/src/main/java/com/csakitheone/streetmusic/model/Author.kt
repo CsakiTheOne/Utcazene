@@ -1,0 +1,60 @@
+package com.csakitheone.streetmusic.model
+
+import androidx.annotation.Keep
+import com.csakitheone.streetmusic.R
+
+@Keep
+data class Author(
+    val name: String,
+    val description: String? = null,
+    val country: String? = null,
+    val imageUrl: String? = null,
+    val youtubeUrl: String? = null,
+    val tags: List<Int>? = null,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other !is Author) return false
+        return name.equals(other.name, true)
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
+    companion object {
+
+        val TAG_FOREIGN = R.string.author_tag_foreign // Külföldi előadó
+        val TAG_FRIEND = R.string.author_tag_friend // Csáki haverja
+        val TAG_COMPETING = R.string.author_tag_competing // Utcazenész versenyző
+
+        val countryFlags = mapOf(
+            "A" to "🇦🇹",
+            "B" to "🇧🇪",
+            "D" to "🇩🇪",
+            "FR" to "🇫🇷",
+            "IRE" to "🇮🇪",
+            "IT" to "🇮🇹",
+            "NL" to "🇳🇱",
+            "NZ" to "🇳🇿",
+            "P" to "🇵🇹",
+            "PL" to "🇵🇱",
+            "UK" to "🇬🇧",
+            "US" to "🇺🇸",
+            "ZA" to "🇿🇦",
+        )
+
+        fun fromString(string: String): Author {
+            if (!string.contains("(")) {
+                return Author(name = string)
+            }
+            val name = string.substringBefore(" (")
+            val countryCode = string.substringAfter("(").removeSuffix(")")
+            return Author(
+                name = name,
+                country = if (countryFlags.containsKey(countryCode)) "${countryFlags[countryCode]} $countryCode"
+                else countryCode,
+            )
+        }
+
+    }
+}

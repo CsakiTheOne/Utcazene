@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="events"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_events"
+        android:shortcutShortLabel="@string/events">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.CalendarActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="authors"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_authors"
+        android:shortcutShortLabel="@string/authors">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.AuthorsActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="places"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_places"
+        android:shortcutShortLabel="@string/places">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.PlacesActivity" />
+    </shortcut>
+</shortcuts>

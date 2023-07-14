@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="motds">
+        <item>Your luck lies on the streets of Veszprém.</item>
+        <item>You don\'t need alcohol to be happy. You also don\'t need happiness to drink alcohol. But it\'s good if you have both.</item>
+        <!-- expand this list here just type <item>YOUR TEXT</item> and it will show up randomly on the main page -->
+    </string-array>
+</resources>

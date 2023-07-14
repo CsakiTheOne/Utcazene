@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">Utcazene</string>
+
+    <!-- GENERAL TEXT -->
+    <string name="close">Close</string>
+    <string name="turn_off">Turn off</string>
+    <string name="turn_on">Turn on</string>
+    <string name="hide">Hide</string>
+    <string name="filter_pinned">Favorites</string>
+    <string name="filter_upcoming">Upcoming</string>
+    <string name="month_july">July</string>
+
+    <!-- MAIN FEATURES -->
+    <string name="events">Calendar</string>
+    <string name="authors">Authors</string>
+    <string name="places">Places</string>
+    <string name="extras">Extras</string>
+
+    <!-- MAIN ACTIVITY -->
+    <string name="battery_saver">Battery saver mode</string>
+    <string name="battery_saver_description">If the battery\'s low, but the night is young, turn this on. The app will turn black and it will use less data.</string>
+
+    <string name="developer_warning">The app is still work in progress so it may has bugs. Check the Play Store regularly for updates!</string>
+    <string name="made_by_csaki">Unofficially created by Csáki</string>
+
+    <string name="open_in_tab">Open in a separate tab</string>
+    <string name="open_facebook">Open Facebook page</string>
+    <string name="open_instagram">Open Instagram page</string>
+
+    <!-- EVENTS -->
+    <string name="export_to_calendar">Export to calendar</string>
+    <string name="exported_event_description">Added from Utcazene app. https://utcazene.hu</string>
+
+    <string name="choose_day">Choose a day</string>
+    <string name="day_wednesday">Wednesday</string>
+    <string name="day_thursday">Thursday</string>
+    <string name="day_friday">Friday</string>
+    <string name="day_saturday">Saturday</string>
+
+    <!-- AUTHORS -->
+    <string name="watch_on_youtube">Watch on YouTube</string>
+    <string name="author_performances">Performances</string>
+    <string name="author_tag_foreign">Foreign author</string>
+    <string name="author_tag_friend">Csáki\'s friend</string>
+    <string name="author_tag_competing">Street musician competitor</string>
+
+    <!-- Support the dev -->
+    <string name="support_the_dev">Support the developer</string>
+    <string name="other_apps_by_csaki">Other apps by Csáki</string>
+    <string name="more_apps">More apps</string>
+    <string name="support_methods">Other ways to support</string>
+    <string name="show_account_number">Show account number for transfer</string>
+    <string name="depressed_altgirl">I\'m a depressed altgirl</string>
+
+    <string name="account_number">Account number</string>
+    <string name="easter_egg_account_number">Bro, I don\'t need money, I need someone to love me</string>
+</resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Utcazene</string>
+    <string name="app_name" translatable="false">Utcazene</string>
 
     <!-- GENERAL TEXT -->
     <string name="close">Close</string>

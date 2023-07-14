@@ -1,0 +1,55 @@
+<resources>
+    <!-- GENERAL TEXT -->
+    <string name="close">Bezárás</string>
+    <string name="turn_off">Kikapcsolás</string>
+    <string name="turn_on">Bekapcsolás</string>
+    <string name="hide">Elrejtés</string>
+    <string name="filter_pinned">Kedvencek</string>
+    <string name="filter_upcoming">Következők</string>
+    <string name="month_july">Július</string>
+
+    <!-- MAIN FEATURES -->
+    <string name="events">Naptár</string>
+    <string name="authors">Zenészek</string>
+    <string name="places">Helyek</string>
+    <string name="extras">Extrák</string>
+
+    <!-- MAIN ACTIVITY -->
+    <string name="battery_saver">Energiatakarékos mód</string>
+    <string name="battery_saver_description">Ha merül a telefon, de még hosszú az éjszaka, kapcsold be ezt. Az alkalmazás fekete témára vált és kevesebb netet fog használni.</string>
+
+    <string name="developer_warning">Az alkalmazás még fejlesztés alatt van ezért előfordulhatnak hibák. Nézegesd gyakran a Play Áruházat frissítésekért!</string>
+    <string name="made_by_csaki">Nem hivatalosan készítette: Csáki</string>
+
+    <string name="open_in_tab">Megnyitás külön lapon</string>
+    <string name="open_facebook">Facebook oldal megnyitása</string>
+    <string name="open_instagram">Instagram oldal megnyitása</string>
+
+    <!-- EVENTS -->
+    <string name="export_to_calendar">Exportálás naptárba</string>
+    <string name="exported_event_description">Hozzáadva az Utcazene alkalmazásból. https://utcazene.hu</string>
+
+    <string name="choose_day">Válassz egy napot</string>
+    <string name="day_wednesday">Szerda</string>
+    <string name="day_thursday">Csütörtök</string>
+    <string name="day_friday">Péntek</string>
+    <string name="day_saturday">Szombat</string>
+
+    <!-- AUTHORS -->
+    <string name="watch_on_youtube">Megtekintés YouTube-on</string>
+    <string name="author_performances">Fellépések</string>
+    <string name="author_tag_foreign">Külföldi zenész</string>
+    <string name="author_tag_friend">Csáki haverja</string>
+    <string name="author_tag_competing">Utcazenész versenyző</string>
+
+    <!-- Support the dev -->
+    <string name="support_the_dev">Fejlesztő támogatása</string>
+    <string name="other_apps_by_csaki">Más alkalmazások Csákitól</string>
+    <string name="more_apps">További alkalmazások</string>
+    <string name="support_methods">További lehetőségek támogatásra</string>
+    <string name="show_account_number">Számlaszám mutatása utaláshoz</string>
+    <string name="depressed_altgirl">Egy depressziós alterlány vagyok</string>
+
+    <string name="account_number">Számlaszám</string>
+    <string name="easter_egg_account_number">Tesó, nekem nem kell pénz csak az hogy valaki szeressen</string>
+</resources>

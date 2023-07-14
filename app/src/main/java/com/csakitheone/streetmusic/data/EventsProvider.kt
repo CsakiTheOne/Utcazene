@@ -3,23 +3,23 @@ package com.csakitheone.streetmusic.data
 import android.content.Context
 import android.util.Log
 import com.csakitheone.streetmusic.R
-import com.csakitheone.streetmusic.model.Author
+import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Place
 
 class EventsProvider {
     companion object {
 
-        private val customAuthors = listOf(
-            Author(
+        private val customMusicians = listOf(
+            Musician(
                 name = "Shántolók",
-                tags = listOf(Author.TAG_FRIEND),
+                tags = listOf(Musician.TAG_FRIEND),
             )
         )
 
         private val customEvents = listOf(
             Event(
-                author = customAuthors[0],
+                musician = customMusicians[0],
                 day = 19,
                 time = "TBA",
                 place = Place(name = "TBA"),
@@ -28,59 +28,59 @@ class EventsProvider {
 
         private var rawEvents = mutableListOf<Event>()
 
-        val authors = listOf(
-            Author.fromString("Bare Jams (UK)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Charles Pasi (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Che Sudaka (CO/RA/E)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("CQMD (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Daiana Lou (IT)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Estrela Gomes (P)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Félix Rabin (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Henry Facey (UK)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Hugo Barriol (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Keanan Eksteen (ZA)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Kraków Street Band (PL)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Markus Koehorst (NL)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Martin Harley (UK)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Moonshiners (P)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Nathan Johnston (IRE)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Noble Jacks (UK)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Opsa Dehëli (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Reuben Stone (NZ)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Rob Heron & The Tea Pad Orchestra (UK)")
-                .copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Roe Byrne (IRE)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Sean Koch (ZA)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Sebastian Schub (UK)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Siricaia (P)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Sissos (AUS)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Slim Paul Trio (FR)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("Tanga Elektra (D)").copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author.fromString("The Hillbilly Moonshiners (NL)")
-                .copy(tags = listOf(Author.TAG_FOREIGN)),
-            Author(name = "A few mistakes ago", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "BlechKraft", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Borostyán & Veronika", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Feed The Mogul", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Géem", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Hajdu Erik", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "KAM", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Kustan Adam", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Léhárt Míra és Polgár Patrik", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Magácska", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "The Flow Acoustic", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Nani On The Run", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "No Rules", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "OSSO", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Prommer Patrik", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "QUACK", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Red Roosters", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Rézeleje Fanfárosok", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Sun Syndrome", tags = listOf(Author.TAG_COMPETING)),
-            Author(name = "Tibi and the Otters", tags = listOf(Author.TAG_COMPETING)),
+        val musicians = listOf(
+            Musician.fromString("Bare Jams (UK)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Charles Pasi (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Che Sudaka (CO/RA/E)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("CQMD (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Daiana Lou (IT)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Estrela Gomes (P)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Félix Rabin (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Henry Facey (UK)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Hugo Barriol (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Keanan Eksteen (ZA)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Kraków Street Band (PL)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Markus Koehorst (NL)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Martin Harley (UK)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Moonshiners (P)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Nathan Johnston (IRE)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Noble Jacks (UK)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Opsa Dehëli (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Reuben Stone (NZ)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Rob Heron & The Tea Pad Orchestra (UK)")
+                .copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Roe Byrne (IRE)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Sean Koch (ZA)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Sebastian Schub (UK)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Siricaia (P)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Sissos (AUS)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Slim Paul Trio (FR)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("Tanga Elektra (D)").copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician.fromString("The Hillbilly Moonshiners (NL)")
+                .copy(tags = listOf(Musician.TAG_FOREIGN)),
+            Musician(name = "A few mistakes ago", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "BlechKraft", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Borostyán & Veronika", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Feed The Mogul", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Géem", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Hajdu Erik", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "KAM", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Kustan Adam", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Léhárt Míra és Polgár Patrik", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Magácska", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "The Flow Acoustic", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Nani On The Run", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "No Rules", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "OSSO", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Prommer Patrik", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "QUACK", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Red Roosters", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Rézeleje Fanfárosok", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Sun Syndrome", tags = listOf(Musician.TAG_COMPETING)),
+            Musician(name = "Tibi and the Otters", tags = listOf(Musician.TAG_COMPETING)),
 
-            Author(name = "Gála"),
-            Author(name = "Daniel Docherty"),
+            Musician(name = "Gála"),
+            Musician(name = "Daniel Docherty"),
         ).sortedBy { it.name }
 
         fun loadEvents(context: Context): List<Event> {
@@ -112,7 +112,7 @@ class EventsProvider {
                     time = cells.first().replace('.', ':')
                     (1..4).forEach { col ->
                         if (cells[col].isNotBlank()) {
-                            val author = authors.firstOrNull {
+                            val author = musicians.firstOrNull {
                                 it.name.take(25)
                                     .equals(cells[col].substringBefore('(').trim().take(25), true)
                             }
@@ -125,7 +125,7 @@ class EventsProvider {
                                 )
                             rawEvents.add(
                                 Event(
-                                    author = author,
+                                    musician = author,
                                     day = 19 + col - 1,
                                     time = time,
                                     place = place,

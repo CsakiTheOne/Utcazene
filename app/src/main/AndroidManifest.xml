@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -15,13 +16,13 @@
         android:theme="@style/Theme.Utcazene"
         tools:targetApi="s">
         <activity
-            android:name=".AuthorActivity"
+            android:name=".MusicianActivity"
             android:exported="false" />
         <activity
             android:name=".EventActivity"
             android:exported="false" />
         <activity
-            android:name=".AuthorsActivity"
+            android:name=".MusiciansActivity"
             android:exported="false" />
         <activity
             android:name=".CalendarActivity"
@@ -34,6 +35,9 @@
             android:exported="false" />
         <activity
             android:name=".ExtrasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DiceActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

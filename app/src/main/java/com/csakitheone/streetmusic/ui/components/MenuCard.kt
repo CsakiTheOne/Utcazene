@@ -84,7 +84,7 @@ fun MenuCard(
     onClick: () -> Unit = {},
     painter: Painter,
     title: String? = "",
-    contentOrientationVertical: Boolean = false,
+    contentOrientationHorizontal: Boolean = false,
     content: @Composable () -> Unit = {},
 ) {
     UzCard(
@@ -104,9 +104,10 @@ fun MenuCard(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.tertiary,
             )
-            if (contentOrientationVertical) {
-                Column(
+            if (contentOrientationHorizontal) {
+                Row(
                     modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = title ?: "",
@@ -116,13 +117,14 @@ fun MenuCard(
                 }
             }
             else {
-                Row(
+                Column(
                     modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
+                        modifier = Modifier.fillMaxWidth(),
                         text = title ?: "",
                         style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
                     )
                     content()
                 }

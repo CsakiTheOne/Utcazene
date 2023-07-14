@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -25,6 +26,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -56,7 +58,7 @@ class ExtrasActivity : ComponentActivity() {
                         //shadowElevation = if (scroll.canScrollBackward) 16.dp else 0.dp,
                     ) {
                         TopAppBar(
-                            title = { Text(text = "Extrák") },
+                            title = { Text(text = stringResource(id = R.string.extras)) },
                             navigationIcon = {
                                 IconButton(onClick = { finish() }) {
                                     Icon(
@@ -86,7 +88,7 @@ class ExtrasActivity : ComponentActivity() {
                             Text(
                                 modifier = Modifier.padding(16.dp),
                                 text = "This page is work in progress and not yet translated! /\n" +
-                                        "Ez az oldal még készülőben van és nincs lefordítva!"
+                                        "Ez az oldal készülőben van és még nincs lefordítva!"
                             )
                         }
                         Text(
@@ -127,14 +129,15 @@ class ExtrasActivity : ComponentActivity() {
                                 .padding(8.dp)
                                 .fillMaxWidth(),
                             onClick = {
-                                Toast.makeText(
-                                    this@ExtrasActivity,
-                                    "wip",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                startActivity(
+                                    Intent(
+                                        this@ExtrasActivity,
+                                        DiceActivity::class.java
+                                    )
+                                )
                             },
                             painter = painterResource(id = R.drawable.ic_dice_5),
-                            title = "Dobókocka (wip)",
+                            title = "Dobókocka",
                         )
                         Text(
                             modifier = Modifier.padding(8.dp),

@@ -26,7 +26,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.AuthorsActivity" />
+            android:targetClass="com.csakitheone.streetmusic.MusiciansActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="places"

@@ -207,32 +207,36 @@ class SupportActivity : ComponentActivity() {
                         UzCard(
                             modifier = Modifier.padding(8.dp),
                         ) {
-                            Text(
+                            Column(
                                 modifier = Modifier.padding(8.dp),
-                                text = stringResource(id = R.string.support_methods),
-                            )
-                            TextButton(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxWidth(),
-                                onClick = {
-                                    isAccountNumberDialogVisible = true
-                                },
                             ) {
-                                Text(text = stringResource(id = R.string.show_account_number))
-                            }
-                            TextButton(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxWidth(),
-                                onClick = {
-                                    CustomTabsManager.open(
-                                        this@SupportActivity,
-                                        "https://imgv2-2-f.scribdassets.com/img/document/8367982/original/0225210b85/1684555739?v=1"
-                                    )
-                                },
-                            ) {
-                                Text(text = stringResource(id = R.string.depressed_altgirl))
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = stringResource(id = R.string.support_methods),
+                                )
+                                TextButton(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    onClick = {
+                                        isAccountNumberDialogVisible = true
+                                    },
+                                ) {
+                                    Text(text = stringResource(id = R.string.show_account_number))
+                                }
+                                TextButton(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    onClick = {
+                                        CustomTabsManager.open(
+                                            this@SupportActivity,
+                                            "https://imgv2-2-f.scribdassets.com/img/document/8367982/original/0225210b85/1684555739?v=1"
+                                        )
+                                    },
+                                ) {
+                                    Text(text = stringResource(id = R.string.depressed_altgirl))
+                                }
                             }
                         }
                     }

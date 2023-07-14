@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.csakitheone.streetmusic.R
 
 @Keep
-data class Author(
+data class Musician(
     val name: String,
     val description: String? = null,
     val country: String? = null,
@@ -13,7 +13,7 @@ data class Author(
     val tags: List<Int>? = null,
 ) {
     override fun equals(other: Any?): Boolean {
-        if (other !is Author) return false
+        if (other !is Musician) return false
         return name.equals(other.name, true)
     }
 
@@ -43,13 +43,13 @@ data class Author(
             "ZA" to "🇿🇦",
         )
 
-        fun fromString(string: String): Author {
+        fun fromString(string: String): Musician {
             if (!string.contains("(")) {
-                return Author(name = string)
+                return Musician(name = string)
             }
             val name = string.substringBefore(" (")
             val countryCode = string.substringAfter("(").removeSuffix(")")
-            return Author(
+            return Musician(
                 name = name,
                 country = if (countryFlags.containsKey(countryCode)) "${countryFlags[countryCode]} $countryCode"
                 else countryCode,

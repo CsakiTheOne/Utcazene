@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.csakitheone.streetmusic.util.BatteryManager
-import com.csakitheone.streetmusic.model.Author
+import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.ui.components.AuthorCard
+import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
@@ -137,9 +137,10 @@ class EventActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (!BatteryManager.isBatterySaverEnabled && Helper.isUnmeteredNetworkAvailable(
-                                context
-                            )
+                        if (
+                            !BatteryManager.isBatterySaverEnabled &&
+                            Helper.isUnmeteredNetworkAvailable(context) &&
+                            !event?.musician?.imageUrl.isNullOrBlank()
                         ) {
                             OutlinedCard(
                                 modifier = Modifier
@@ -148,15 +149,15 @@ class EventActivity : ComponentActivity() {
                             ) {
                                 AsyncImage(
                                     modifier = Modifier.fillMaxWidth(),
-                                    model = if (event != null && !event!!.author.imageUrl.isNullOrBlank()) event!!.author.imageUrl
+                                    model = if (event != null && !event!!.musician.imageUrl.isNullOrBlank()) event!!.musician.imageUrl
                                     else "https://http.cat/images/404.jpg",
                                     contentDescription = null,
                                 )
                             }
                         }
-                        AuthorCard(
+                        MusicianCard(
                             modifier = Modifier.padding(8.dp),
-                            author = event?.author ?: Author.fromString("Előadó neve (Ország)"),
+                            musician = event?.musician ?: Musician.fromString("Előadó neve (Ország)"),
                         )
                         Row {
                             Row(
@@ -257,7 +258,7 @@ class EventActivity : ComponentActivity() {
                                         .setType("vnd.android.cursor.item/event")
                                         .putExtra(
                                             CalendarContract.Events.TITLE,
-                                            event?.author?.name
+                                            event?.musician?.name
                                         )
                                         .putExtra(
                                             CalendarContract.EXTRA_EVENT_BEGIN_TIME,

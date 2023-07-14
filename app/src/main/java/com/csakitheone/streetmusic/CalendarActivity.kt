@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -29,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +41,7 @@ import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.ui.components.DaySelectorDialog
+import com.csakitheone.streetmusic.ui.components.DaySelectorRow
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
@@ -72,7 +70,6 @@ class CalendarActivity : ComponentActivity() {
                 else 19
             )
         }
-        var isDaySelectorDialogVisible by remember { mutableStateOf(false) }
 
         var isOnlyUpcoming by remember { mutableStateOf(true) }
         var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
@@ -94,7 +91,7 @@ class CalendarActivity : ComponentActivity() {
                     }
                     .filter { !isOnlyPinned || eventsPinned.contains(it) }
                     .filter { it.day == selectedDay }
-                    .sortedBy { it.author.name }
+                    .sortedBy { it.musician.name }
                     .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
                     .toList()
             )
@@ -115,14 +112,6 @@ class CalendarActivity : ComponentActivity() {
         )
 
         UtcazeneTheme {
-            if (isDaySelectorDialogVisible) {
-                DaySelectorDialog(
-                    selectedDay = selectedDay,
-                    onChanged = { selectedDay = it },
-                    onDismissRequest = { isDaySelectorDialogVisible = false },
-                )
-            }
-
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
@@ -158,22 +147,14 @@ class CalendarActivity : ComponentActivity() {
                         state = scroll,
                     ) {
                         item {
+                            DaySelectorRow(
+                                selectedDay = selectedDay,
+                                onChange = { selectedDay = it },
+                            )
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                ElevatedFilterChip(
-                                    modifier = Modifier.padding(8.dp),
-                                    selected = LocalDate.now().dayOfMonth == selectedDay,
-                                    onClick = { isDaySelectorDialogVisible = true },
-                                    label = { Text(text = "$selectedDay.") },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.CalendarToday,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                )
                                 ElevatedFilterChip(
                                     modifier = Modifier.padding(8.dp),
                                     selected = isOnlyPinned,
@@ -204,7 +185,7 @@ class CalendarActivity : ComponentActivity() {
                         }
                         items(
                             items = eventsToday,
-                            key = { "${it.author.name} ${it.day} ${it.time}" }) { event ->
+                            key = { "${it.musician.name} ${it.day} ${it.time}" }) { event ->
                             if (event == nextEvent) {
                                 NowIndicator(modifier = Modifier.padding(8.dp))
                             }

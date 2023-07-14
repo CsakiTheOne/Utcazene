@@ -1,6 +1,5 @@
 package com.csakitheone.streetmusic.ui.components
 
-import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,47 +11,31 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.AuthorActivity
+import com.csakitheone.streetmusic.MusicianActivity
 import com.csakitheone.streetmusic.R
-import com.csakitheone.streetmusic.model.Author
-import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
-import com.csakitheone.streetmusic.ui.components.util.PreferenceHolder
+import com.csakitheone.streetmusic.model.Musician
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun AuthorCard(
+fun MusicianCard(
     modifier: Modifier = Modifier,
-    author: Author = Author(
+    musician: Musician = Musician(
         name = "Előadó neve",
         country = "Ország",
-        tags = listOf(R.string.author_tag_friend),
+        tags = listOf(Musician.TAG_FRIEND),
     ),
     isPinned: Boolean? = null,
     onPinnedChangeRequest: (Boolean) -> Unit = {},
@@ -63,8 +46,8 @@ fun AuthorCard(
         modifier = modifier,
         onClick = {
             context.startActivity(
-                Intent(context, AuthorActivity::class.java)
-                    .putExtra(AuthorActivity.EXTRA_AUTHOR_JSON, Gson().toJson(author))
+                Intent(context, MusicianActivity::class.java)
+                    .putExtra(MusicianActivity.EXTRA_MUSICIAN_JSON, Gson().toJson(musician))
             )
         },
     ) {
@@ -78,7 +61,7 @@ fun AuthorCard(
                     modifier = Modifier
                         .padding(8.dp)
                         .weight(1f),
-                    text = author.name,
+                    text = musician.name,
                     style = MaterialTheme.typography.titleSmall,
                 )
                 if (isPinned != null) {
@@ -102,16 +85,16 @@ fun AuthorCard(
                     .horizontalScroll(rememberScrollState()),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (!author.country.isNullOrBlank()) {
+                if (!musician.country.isNullOrBlank()) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = author.country,
+                        text = musician.country,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = author.tags?.joinToString { context.getString(it) } ?: "",
+                    text = musician.tags?.joinToString { context.getString(it) } ?: "",
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

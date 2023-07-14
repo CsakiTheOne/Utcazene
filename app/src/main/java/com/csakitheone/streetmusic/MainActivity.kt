@@ -229,7 +229,7 @@ class MainActivity : ComponentActivity() {
                                     startActivity(
                                         Intent(
                                             this@MainActivity,
-                                            AuthorsActivity::class.java
+                                            MusiciansActivity::class.java
                                         )
                                     )
                                 },

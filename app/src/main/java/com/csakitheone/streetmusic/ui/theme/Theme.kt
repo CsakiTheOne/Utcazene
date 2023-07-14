@@ -62,6 +62,7 @@ fun UtcazeneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
+    isTintingNavbar: Boolean = true,
     content: @Composable () -> Unit
 ) {
     var isBatterySaverOn by remember { mutableStateOf(false) }
@@ -94,7 +95,9 @@ fun UtcazeneTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme && !isBatterySaverOn
-            window.navigationBarColor = colorScheme.background.toArgb()
+            if (isTintingNavbar) {
+                window.navigationBarColor = colorScheme.background.toArgb()
+            }
         }
     }
 

@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.csakitheone.streetmusic.util.BatteryManager
 import com.csakitheone.streetmusic.data.EventsProvider
-import com.csakitheone.streetmusic.model.Author
+import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
@@ -52,48 +52,49 @@ import com.csakitheone.streetmusic.util.Helper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class AuthorActivity : ComponentActivity() {
+class MusicianActivity : ComponentActivity() {
     companion object {
-        const val EXTRA_AUTHOR_JSON = "author_json"
+        const val EXTRA_MUSICIAN_JSON = "musician_json"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AuthorScreen()
+            MusicianScreen()
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Preview
     @Composable
-    fun AuthorScreen() {
+    fun MusicianScreen() {
         val context = LocalContext.current
 
-        var author: Author? by remember { mutableStateOf(null) }
-        val events by remember(author) {
+        var musician: Musician? by remember { mutableStateOf(null) }
+        val events by remember(musician) {
             mutableStateOf(
                 EventsProvider.getEvents(this)
-                    .filter { it.author == author }
+                    .filter { it.musician == musician }
                     .sortedBy { it.time }
                     .groupBy { it.day }
+                    .toSortedMap()
             )
         }
-        var authorsPinned by remember { mutableStateOf<List<Author>>(listOf()) }
-        val isPinned by remember(author, authorsPinned) {
-            mutableStateOf(authorsPinned.contains(author))
+        var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
+        val isPinned by remember(musician, musiciansPinned) {
+            mutableStateOf(musiciansPinned.contains(musician))
         }
         var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
 
         LaunchedEffect(Unit) {
-            author = Gson().fromJson(intent.getStringExtra(EXTRA_AUTHOR_JSON), Author::class.java)
+            musician = Gson().fromJson(intent.getStringExtra(EXTRA_MUSICIAN_JSON), Musician::class.java)
         }
 
         ListPreferenceHolder(
             id = "authorsPinned",
-            value = authorsPinned,
-            onValueChanged = { authorsPinned = it.toList() },
-            type = object : TypeToken<Author>() {}.type,
+            value = musiciansPinned,
+            onValueChanged = { musiciansPinned = it.toList() },
+            type = object : TypeToken<Musician>() {}.type,
         )
 
         ListPreferenceHolder(
@@ -112,10 +113,10 @@ class AuthorActivity : ComponentActivity() {
                     TopAppBar(
                         title = {
                             Column {
-                                Text(text = author?.name ?: "Előadó neve")
-                                if (author?.country != null) {
+                                Text(text = musician?.name ?: "Zenész neve")
+                                if (musician?.country != null) {
                                     Text(
-                                        text = author?.country ?: "Ország",
+                                        text = musician?.country ?: "Ország",
                                         style = MaterialTheme.typography.labelSmall,
                                     )
                                 }
@@ -133,8 +134,8 @@ class AuthorActivity : ComponentActivity() {
                             IconButton(
                                 modifier = Modifier.padding(start = 8.dp),
                                 onClick = {
-                                    authorsPinned = if (!isPinned) authorsPinned + author!!
-                                    else authorsPinned.filter { it != author }
+                                    musiciansPinned = if (!isPinned) musiciansPinned + musician!!
+                                    else musiciansPinned.filter { it != musician }
                                 },
                             ) {
                                 Icon(
@@ -156,9 +157,10 @@ class AuthorActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (!BatteryManager.isBatterySaverEnabled && Helper.isUnmeteredNetworkAvailable(
-                                context
-                            )
+                        if (
+                            !BatteryManager.isBatterySaverEnabled &&
+                            Helper.isUnmeteredNetworkAvailable(context) &&
+                            !musician?.imageUrl.isNullOrBlank()
                         ) {
                             OutlinedCard(
                                 modifier = Modifier
@@ -167,13 +169,13 @@ class AuthorActivity : ComponentActivity() {
                             ) {
                                 AsyncImage(
                                     modifier = Modifier.fillMaxWidth(),
-                                    model = if (author != null && !author?.imageUrl.isNullOrBlank()) author!!.imageUrl
+                                    model = if (musician != null && !musician?.imageUrl.isNullOrBlank()) musician!!.imageUrl
                                     else "https://http.cat/images/404.jpg",
                                     contentDescription = null,
                                 )
                             }
                         }
-                        if (author?.description != null) {
+                        if (musician?.description != null) {
                             UzCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -182,12 +184,12 @@ class AuthorActivity : ComponentActivity() {
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     Text(
                                         modifier = Modifier.padding(8.dp),
-                                        text = author!!.description!!
+                                        text = musician!!.description!!
                                     )
                                 }
                             }
                         }
-                        if (author?.youtubeUrl != null) {
+                        if (musician?.youtubeUrl != null) {
                             MenuCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -196,7 +198,7 @@ class AuthorActivity : ComponentActivity() {
                                     startActivity(
                                         Intent(
                                             Intent.ACTION_VIEW,
-                                            Uri.parse(author!!.youtubeUrl!!)
+                                            Uri.parse(musician!!.youtubeUrl!!)
                                         )
                                     )
                                 },
@@ -205,7 +207,7 @@ class AuthorActivity : ComponentActivity() {
                             )
                         }
                         Row {
-                            author?.tags?.map { tag ->
+                            musician?.tags?.map { tag ->
                                 FilterChip(
                                     modifier = Modifier.padding(8.dp),
                                     selected = false,

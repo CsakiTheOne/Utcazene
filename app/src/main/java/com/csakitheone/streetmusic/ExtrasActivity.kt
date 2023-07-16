@@ -115,14 +115,15 @@ class ExtrasActivity : ComponentActivity() {
                                 .padding(8.dp)
                                 .fillMaxWidth(),
                             onClick = {
-                                Toast.makeText(
-                                    this@ExtrasActivity,
-                                    "wip",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                startActivity(
+                                    Intent(
+                                        this@ExtrasActivity,
+                                        PlayingCardsActivity::class.java
+                                    )
+                                )
                             },
                             painter = painterResource(id = R.drawable.ic_cards_playing),
-                            title = "Francia kártya pakli (wip)",
+                            title = "Francia kártya",
                         )
                         MenuCard(
                             modifier = Modifier

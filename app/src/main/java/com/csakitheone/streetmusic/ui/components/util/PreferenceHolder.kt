@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.csakitheone.streetmusic.data.PreferenceHolderSyncManager
+import com.csakitheone.streetmusic.util.PreferenceHolderSyncManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

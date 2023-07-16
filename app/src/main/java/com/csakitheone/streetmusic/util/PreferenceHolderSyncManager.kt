@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic.data
+package com.csakitheone.streetmusic.util
 
 class PreferenceHolderSyncManager {
     companion object {

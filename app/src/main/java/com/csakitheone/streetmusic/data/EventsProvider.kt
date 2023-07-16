@@ -10,6 +10,9 @@ import com.csakitheone.streetmusic.model.Place
 class EventsProvider {
     companion object {
 
+        val isDownloaded: Boolean
+            get() = false
+
         private val customMusicians = listOf(
             Musician(
                 name = "Shántolók",

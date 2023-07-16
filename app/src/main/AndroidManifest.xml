@@ -40,6 +40,9 @@
             android:name=".DiceActivity"
             android:exported="false" />
         <activity
+            android:name=".PlayingCardsActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/SplashScreen">

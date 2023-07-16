@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,17 +17,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Feed
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
@@ -35,23 +42,27 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.util.BatteryManager
 import com.csakitheone.streetmusic.data.MotdProvider
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
-import com.csakitheone.streetmusic.ui.components.WebCard
 import com.csakitheone.streetmusic.ui.components.util.PreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
+import com.csakitheone.streetmusic.util.CustomTabsManager
+import com.csakitheone.streetmusic.util.Helper
 
 class MainActivity : ComponentActivity() {
     private var isBatterySaverPreferenceLoaded by mutableStateOf(false)
@@ -71,8 +82,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         var isDevWarningVisible by remember { mutableStateOf(true) }
-        var isBatterySaverDialogVisible by remember { mutableStateOf(false) }
+        var canDownload by remember { mutableStateOf(false) }
+        var isDownloaded by remember { mutableStateOf(false) }
         var motd by remember { mutableStateOf(MotdProvider.getRandomMotd(this)) }
+        var isBatterySaverDialogVisible by remember { mutableStateOf(false) }
+        var isWebsitesMenuVisible by remember { mutableStateOf(false) }
 
         PreferenceHolder(
             id = "batterySaver",
@@ -83,6 +97,11 @@ class MainActivity : ComponentActivity() {
             },
             defaultValue = false,
         )
+
+        LaunchedEffect(Unit) {
+            canDownload = Helper.isUnmeteredNetworkAvailable(this@MainActivity)
+            isDownloaded = EventsProvider.isDownloaded
+        }
 
         UtcazeneTheme {
             if (isBatterySaverDialogVisible) {
@@ -100,7 +119,8 @@ class MainActivity : ComponentActivity() {
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                BatteryManager.isBatterySaverEnabled = !BatteryManager.isBatterySaverEnabled
+                                BatteryManager.isBatterySaverEnabled =
+                                    !BatteryManager.isBatterySaverEnabled
                                 isBatterySaverDialogVisible = false
                             }
                         ) {
@@ -126,18 +146,11 @@ class MainActivity : ComponentActivity() {
                                         isDevWarningVisible = true
                                     }
                                 ) {
-                                    Icon(imageVector = Icons.Default.Warning, contentDescription = null)
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = null
+                                    )
                                 }
-                            }
-                            IconButton(
-                                onClick = {
-                                    isBatterySaverDialogVisible = true
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BatterySaver,
-                                    contentDescription = null,
-                                )
                             }
                         },
                         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -173,10 +186,31 @@ class MainActivity : ComponentActivity() {
                                     )
                                     TextButton(
                                         onClick = { isDevWarningVisible = false },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                        ),
                                     ) {
                                         Text(text = stringResource(id = R.string.hide))
                                     }
                                 }
+                            }
+                        }
+                        AnimatedVisibility(visible = !isDownloaded) {
+                            UzCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp)) {
+                                    Text(
+                                        modifier = Modifier.padding(8.dp),
+                                        text = "TODO REWRITE Az alkalmazás nem tudja letölteni a legfrissebb adatokat! Várakozás frissítésre...",
+                                    )
+                                }
+                                LinearProgressIndicator(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    progress = 0f,
+                                )
                             }
                         }
                         Row {
@@ -197,7 +231,9 @@ class MainActivity : ComponentActivity() {
                             }
                             SmallFloatingActionButton(
                                 modifier = Modifier.padding(8.dp),
-                                onClick = { motd = MotdProvider.getRandomMotd(this@MainActivity, motd) },
+                                onClick = {
+                                    motd = MotdProvider.getRandomMotd(this@MainActivity, motd)
+                                },
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.NavigateNext,
@@ -269,30 +305,88 @@ class MainActivity : ComponentActivity() {
                                 title = stringResource(id = R.string.extras),
                             )
                         }
-                        if (BatteryManager.isBatterySaverEnabled) {
-                            MenuCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                onClick = { isBatterySaverDialogVisible = true },
-                                imageVector = Icons.Default.BatterySaver,
-                                title = stringResource(id = R.string.battery_saver)
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                        else {
-                            WebCard(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .weight(1f),
-                            )
+                        MenuCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            onClick = { isWebsitesMenuVisible = true },
+                            imageVector = Icons.Default.Language,
+                            title = "TODO TRANSLATE Weboldalak",
+                        ) {
+                            DropdownMenu(
+                                expanded = isWebsitesMenuVisible,
+                                onDismissRequest = { isWebsitesMenuVisible = false }
+                            ) {
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Feed,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = { Text(text = "TODO TRANSLATE Utcazene hivatalos oldal megnyitása") },
+                                    onClick = {
+                                        CustomTabsManager.open(
+                                            this@MainActivity,
+                                            "https://utcazene.hu/"
+                                        )
+                                        isWebsitesMenuVisible = false
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_facebook),
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = { Text(text = stringResource(id = R.string.open_facebook)) },
+                                    onClick = {
+                                        CustomTabsManager.open(
+                                            this@MainActivity,
+                                            "https://facebook.com/utcazene"
+                                        )
+                                        isWebsitesMenuVisible = false
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_instagram),
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    text = { Text(text = stringResource(id = R.string.open_instagram)) },
+                                    onClick = {
+                                        CustomTabsManager.open(
+                                            this@MainActivity,
+                                            "https://instagram.com/utcazene"
+                                        )
+                                        isWebsitesMenuVisible = false
+                                    },
+                                )
+                            }
                         }
                         MenuCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
+                            onClick = { isBatterySaverDialogVisible = true },
+                            imageVector = Icons.Default.BatterySaver,
+                            title = stringResource(id = R.string.battery_saver)
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        MenuCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
                             onClick = {
-                                startActivity(Intent(this@MainActivity, SupportActivity::class.java))
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        SupportActivity::class.java
+                                    )
+                                )
                             },
                             imageVector = Icons.Default.Code,
                             title = stringResource(id = R.string.made_by_csaki),

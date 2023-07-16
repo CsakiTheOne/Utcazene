@@ -2,7 +2,6 @@ package com.csakitheone.streetmusic.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,14 +22,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import com.csakitheone.streetmusic.ui.components.util.PreferenceHolder
 
 private val DarkColorScheme = darkColorScheme(
     primary = Yellow,
     secondary = Blue,
-    tertiary = Cyan,
+    tertiary = YellowDark,
 
     surface = Blue,
     onSurface = YellowLight,
@@ -39,13 +36,13 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer = Rose,
 
     background = BlueDark,
-    onBackground = CyanLight,
+    onBackground = YellowLight,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = YellowDark,
     secondary = Blue,
-    tertiary = Blue,
+    tertiary = Yellow,
 
     surface = CyanDark,
     onSurface = CyanLight,
@@ -55,6 +52,14 @@ private val LightColorScheme = lightColorScheme(
 
     background = YellowLight,
     onBackground = BlueDark,
+)
+
+private val BatterySaverColorScheme = darkColorScheme(
+    primary = Yellow,
+    secondary = Cyan,
+    tertiary = Blue,
+    surfaceVariant = Cyan,
+    background = Color.Black,
 )
 
 @Composable
@@ -75,13 +80,7 @@ fun UtcazeneTheme(
     )
     
     val colorScheme = when {
-        isBatterySaverOn -> darkColorScheme(
-            primary = Yellow,
-            secondary = Cyan,
-            tertiary = Blue,
-            surfaceVariant = Cyan,
-            background = Color.Black,
-        )
+        isBatterySaverOn -> BatterySaverColorScheme
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)

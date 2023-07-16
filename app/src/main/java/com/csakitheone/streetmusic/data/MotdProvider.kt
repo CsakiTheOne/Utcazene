@@ -21,7 +21,7 @@ class MotdProvider {
         
 
         fun getRandomMotd(context: Context, currentMotd: String? = null): String {
-            val motdList = context.resources.getStringArray(R.array.motds)
+            val motdList = context.applicationContext.resources.getStringArray(R.array.motds)
             return motdList.filter { it != currentMotd }.random()
         }
 

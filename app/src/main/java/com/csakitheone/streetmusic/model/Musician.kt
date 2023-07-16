@@ -12,6 +12,10 @@ data class Musician(
     val youtubeUrl: String? = null,
     val tags: List<Int>? = null,
 ) {
+    fun getFlag(): String {
+        return countryFlags[country] ?: ""
+    }
+
     override fun equals(other: Any?): Boolean {
         if (other !is Musician) return false
         return name.equals(other.name, true)
@@ -23,17 +27,19 @@ data class Musician(
 
     companion object {
 
-        val TAG_FOREIGN = R.string.author_tag_foreign // Külföldi előadó
-        val TAG_FRIEND = R.string.author_tag_friend // Csáki haverja
-        val TAG_COMPETING = R.string.author_tag_competing // Utcazenész versenyző
+        val TAG_FOREIGN = R.string.musician_tag_foreign // Külföldi előadó
+        val TAG_FRIEND = R.string.musician_tag_friend // Csáki haverja
+        val TAG_COMPETING = R.string.musician_tag_competing // Utcazenész versenyző
 
         val countryFlags = mapOf(
             "A" to "🇦🇹",
+            "AUS" to "🇦🇹",
             "B" to "🇧🇪",
             "D" to "🇩🇪",
             "FR" to "🇫🇷",
             "IRE" to "🇮🇪",
             "IT" to "🇮🇹",
+            "HU" to "🇭🇺",
             "NL" to "🇳🇱",
             "NZ" to "🇳🇿",
             "P" to "🇵🇹",

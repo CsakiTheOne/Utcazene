@@ -37,7 +37,11 @@ fun DaySelectorRow(
                     onChange(it.key)
                 },
                 icon = {
-                    Text(text = it.key.toString())
+                    Text(
+                        text = it.key.toString(),
+                        color = if (selectedDay == it.key) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onBackground,
+                    )
                 },
                 label = { Text(text = it.value) },
                 colors = NavigationBarItemDefaults.colors(

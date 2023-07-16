@@ -88,7 +88,7 @@ fun MusicianCard(
                 if (!musician.country.isNullOrBlank()) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = musician.country,
+                        text = "${musician.getFlag()} ${musician.country}",
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

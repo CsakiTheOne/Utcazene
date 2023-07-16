@@ -14,7 +14,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Utcazene"
-        tools:targetApi="s">
+        tools:targetApi="s"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MusicianActivity"
             android:exported="false" />

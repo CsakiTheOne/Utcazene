@@ -18,7 +18,7 @@
         android:shortcutId="authors"
         android:enabled="true"
         android:icon="@drawable/shortcut_authors"
-        android:shortcutShortLabel="@string/authors">
+        android:shortcutShortLabel="@string/musicians">
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"

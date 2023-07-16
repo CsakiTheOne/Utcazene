@@ -17,7 +17,7 @@ val CyanLight = Color(0xFFEBFEFF)
 val Cyan = Color(0xFF60c6ce)
 val CyanDark = Color(0xFF0F9DAC)
 
-val YellowLight = Color(0xFFF3EFD8)
+val YellowLight = Color(0xFFFDF5C6)
 val Yellow = Color(0xFFefd744)
 val YellowDark = Color(0xFFFFC107)
 

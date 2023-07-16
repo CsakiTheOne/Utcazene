@@ -23,7 +23,7 @@ data class Place(
             name = "VEB 2023 nagyszínpad (az Óváros téren)",
         )
         val MOL = Place(
-            name = "MOL Nagyon Balaton színpad (a Hangvilla melletti téren)",
+            name = "MOL Nagyon Balaton nagyszínpad (a Hangvilla melletti téren)",
         )
         val CEMIX = Place(
             name = "Cemix színpad (a Fortuna udvarban)",

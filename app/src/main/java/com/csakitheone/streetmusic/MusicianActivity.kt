@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,15 +40,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.csakitheone.streetmusic.util.BatteryManager
 import com.csakitheone.streetmusic.data.EventsProvider
-import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
+import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
+import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.Helper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -68,43 +69,42 @@ class MusicianActivity : ComponentActivity() {
     @Preview
     @Composable
     fun MusicianScreen() {
-        val context = LocalContext.current
-
-        var musician: Musician? by remember { mutableStateOf(null) }
-        val events by remember(musician) {
-            mutableStateOf(
-                EventsProvider.getEvents(this)
-                    .filter { it.musician == musician }
-                    .sortedBy { it.time }
-                    .groupBy { it.day }
-                    .toSortedMap()
-            )
-        }
-        var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
-        val isPinned by remember(musician, musiciansPinned) {
-            mutableStateOf(musiciansPinned.contains(musician))
-        }
-        var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
-
-        LaunchedEffect(Unit) {
-            musician = Gson().fromJson(intent.getStringExtra(EXTRA_MUSICIAN_JSON), Musician::class.java)
-        }
-
-        ListPreferenceHolder(
-            id = "authorsPinned",
-            value = musiciansPinned,
-            onValueChanged = { musiciansPinned = it.toList() },
-            type = object : TypeToken<Musician>() {}.type,
-        )
-
-        ListPreferenceHolder(
-            id = "eventsPinned",
-            value = eventsPinned,
-            onValueChanged = { eventsPinned = it.toList() },
-            type = object : TypeToken<Event>() {}.type,
-        )
-
         UtcazeneTheme {
+            val context = LocalContext.current
+
+            var musician: Musician? by remember { mutableStateOf(null) }
+            var performances by remember { mutableStateOf(mapOf<Int, List<Event>>()) }
+            var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
+            val isPinned by remember(musician, musiciansPinned) {
+                mutableStateOf(musiciansPinned.contains(musician))
+            }
+            var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
+
+            LaunchedEffect(Unit) {
+                musician = Gson().fromJson(intent.getStringExtra(EXTRA_MUSICIAN_JSON), Musician::class.java)
+                EventsProvider.getEvents(this@MusicianActivity) { events ->
+                    performances = events
+                        .filter { it.musician == musician }
+                        .sortedBy { it.time }
+                        .groupBy { it.day }
+                        .toSortedMap()
+                }
+            }
+
+            ListPreferenceHolder(
+                id = "authorsPinned",
+                value = musiciansPinned,
+                onValueChanged = { musiciansPinned = it.toList() },
+                type = object : TypeToken<Musician>() {}.type,
+            )
+
+            ListPreferenceHolder(
+                id = "eventsPinned",
+                value = eventsPinned,
+                onValueChanged = { eventsPinned = it.toList() },
+                type = object : TypeToken<Event>() {}.type,
+            )
+
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
@@ -116,7 +116,7 @@ class MusicianActivity : ComponentActivity() {
                                 Text(text = musician?.name ?: "Zenész neve")
                                 if (musician?.country != null) {
                                     Text(
-                                        text = musician?.country ?: "Ország",
+                                        text = "${musician!!.getFlag()} ${musician!!.country}",
                                         style = MaterialTheme.typography.labelSmall,
                                     )
                                 }
@@ -158,7 +158,8 @@ class MusicianActivity : ComponentActivity() {
                             .verticalScroll(rememberScrollState()),
                     ) {
                         if (
-                            !BatteryManager.isBatterySaverEnabled &&
+                            musician != null &&
+                            !BatterySaverManager.isBatterySaverEnabled &&
                             Helper.isUnmeteredNetworkAvailable(context) &&
                             !musician?.imageUrl.isNullOrBlank()
                         ) {
@@ -168,9 +169,10 @@ class MusicianActivity : ComponentActivity() {
                                     .padding(8.dp),
                             ) {
                                 AsyncImage(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    model = if (musician != null && !musician?.imageUrl.isNullOrBlank()) musician!!.imageUrl
-                                    else "https://http.cat/images/404.jpg",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(min = 64.dp, max = 300.dp),
+                                    model = musician!!.imageUrl,
                                     contentDescription = null,
                                 )
                             }
@@ -184,7 +186,8 @@ class MusicianActivity : ComponentActivity() {
                                 Column(modifier = Modifier.padding(8.dp)) {
                                     Text(
                                         modifier = Modifier.padding(8.dp),
-                                        text = musician!!.description!!
+                                        text = musician!!.description!!,
+                                        style = MaterialTheme.typography.bodySmall,
                                     )
                                 }
                             }
@@ -218,10 +221,10 @@ class MusicianActivity : ComponentActivity() {
                         }
                         Text(
                             modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.author_performances),
+                            text = stringResource(id = R.string.musician_performances),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        events.map { day ->
+                        performances.map { day ->
                             Text(
                                 modifier = Modifier.padding(8.dp),
                                 text = "${stringResource(id = R.string.month_july)} ${day.key}.",

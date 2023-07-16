@@ -1,14 +1,11 @@
 package com.csakitheone.streetmusic
 
-import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.csakitheone.streetmusic.data.EventsProvider
-
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -26,7 +23,7 @@ class EventsProviderTest {
 
     @Test
     fun loadEventsTest() {
-        val rawEvents = EventsProvider.loadEvents(InstrumentationRegistry.getInstrumentation().targetContext)
+        val rawEvents = EventsProvider.readEventsFromCsv(InstrumentationRegistry.getInstrumentation().targetContext)
         assertEquals(rawEvents.size, 34 * 4 + 2)
     }
 }

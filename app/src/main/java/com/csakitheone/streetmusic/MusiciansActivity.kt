@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,7 +70,7 @@ class MusiciansActivity : ComponentActivity() {
         var isOnlyPinned by remember { mutableStateOf(false) }
         var filterTags by remember { mutableStateOf(listOf<Int>()) }
 
-        val musicians by remember { mutableStateOf(EventsProvider.getEvents(this).groupBy { it.musician }.keys.toList()) }
+        var musicians by remember { mutableStateOf(listOf<Musician>()) }
         val visibleMusicians by remember(musicians, musiciansPinned, isOnlyPinned, filterTags) {
             mutableStateOf(
                 musicians
@@ -77,6 +78,12 @@ class MusiciansActivity : ComponentActivity() {
                     .filter { !isOnlyPinned || (isOnlyPinned && musiciansPinned.contains(it)) }
                     .sortedBy { it.name }
             )
+        }
+
+        LaunchedEffect(Unit) {
+            EventsProvider.getEvents(this@MusiciansActivity) { events ->
+                musicians = events.groupBy { it.musician }.keys.toList()
+            }
         }
 
         ListPreferenceHolder(
@@ -113,7 +120,7 @@ class MusiciansActivity : ComponentActivity() {
                         shadowElevation = if (scroll.canScrollBackward) 16.dp else 0.dp,
                     ) {
                         TopAppBar(
-                            title = { Text(text = stringResource(id = R.string.authors)) },
+                            title = { Text(text = stringResource(id = R.string.musicians)) },
                             navigationIcon = {
                                 IconButton(onClick = { finish() }) {
                                     Icon(

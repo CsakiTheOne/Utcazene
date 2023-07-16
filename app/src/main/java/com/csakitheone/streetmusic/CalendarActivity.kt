@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.DaySelectorRow
@@ -46,6 +46,7 @@ import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
+import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.google.gson.reflect.TypeToken
 import java.time.LocalDate
 import java.time.LocalTime
@@ -62,56 +63,63 @@ class CalendarActivity : ComponentActivity() {
     @Preview
     @Composable
     fun CalendarScreen() {
-        val scroll = rememberLazyListState()
-
-        var selectedDay by remember {
-            mutableStateOf(
-                if ((19..22).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
-                else 19
-            )
-        }
-
-        var isOnlyUpcoming by remember { mutableStateOf(true) }
-        var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
-        var isOnlyPinned by remember { mutableStateOf(false) }
-
-        val events by remember { mutableStateOf(EventsProvider.getEvents(this)) }
-        val eventsToday by remember(
-            events,
-            selectedDay,
-            eventsPinned,
-            isOnlyPinned,
-            isOnlyUpcoming
-        ) {
-            mutableStateOf(
-                events
-                    .asSequence()
-                    .filter {
-                        !isOnlyUpcoming || (LocalTime.now().isBefore(it.time.toLocalTime()) || it.time.toLocalTime().hour < 5)
-                    }
-                    .filter { !isOnlyPinned || eventsPinned.contains(it) }
-                    .filter { it.day == selectedDay }
-                    .sortedBy { it.musician.name }
-                    .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
-                    .toList()
-            )
-        }
-        val nextEvent by remember(eventsToday) {
-            mutableStateOf(
-                eventsToday.firstOrNull {
-                    LocalTime.now().isBefore(it.time.toLocalTime())
-                }
-            )
-        }
-
-        ListPreferenceHolder(
-            id = "eventsPinned",
-            value = eventsPinned,
-            onValueChanged = { eventsPinned = it.toList() },
-            type = object : TypeToken<Event>() {}.type,
-        )
-
         UtcazeneTheme {
+            val scroll = rememberLazyListState()
+
+            var selectedDay by remember {
+                mutableStateOf(
+                    if ((19..22).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
+                    else 19
+                )
+            }
+
+            var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
+            var isOnlyPinned by remember { mutableStateOf(false) }
+            var isOnlyUpcoming by remember { mutableStateOf(true) }
+
+            var events by remember { mutableStateOf(listOf<Event>()) }
+            val eventsToday by remember(
+                events,
+                selectedDay,
+                eventsPinned,
+                isOnlyPinned,
+                isOnlyUpcoming
+            ) {
+                mutableStateOf(
+                    events
+                        .asSequence()
+                        .filter {
+                            !isOnlyUpcoming || (LocalTime.now()
+                                .isBefore(it.time.toLocalTime()) || it.time.toLocalTime().hour < 5)
+                        }
+                        .filter { !isOnlyPinned || eventsPinned.contains(it) }
+                        .filter { it.day == selectedDay }
+                        .sortedBy { it.musician.name }
+                        .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
+                        .toList()
+                )
+            }
+            val nextEvent by remember(eventsToday) {
+                mutableStateOf(
+                    eventsToday.firstOrNull {
+                        LocalTime.now().isBefore(it.time.toLocalTime())
+                    }
+                )
+            }
+
+            LaunchedEffect(Unit) {
+                EventsProvider.getEvents(this@CalendarActivity) {
+                    events = it
+                }
+            }
+
+            ListPreferenceHolder(
+                id = "eventsPinned",
+                value = eventsPinned,
+                onValueChanged = { eventsPinned = it.toList() },
+                type = object : TypeToken<Event>() {}.type,
+            )
+
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,

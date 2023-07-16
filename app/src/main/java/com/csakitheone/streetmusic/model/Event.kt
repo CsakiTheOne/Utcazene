@@ -11,6 +11,6 @@ data class Event(
 ) {
     override fun equals(other: Any?): Boolean {
         if (other !is Event) return false
-        return musician == other.musician && day == other.day && time == other.time && place == other.place
+        return musician == other.musician && day == other.day && time == other.time
     }
 }

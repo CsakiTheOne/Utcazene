@@ -14,8 +14,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Utcazene"
-        tools:targetApi="s"
-        android:usesCleartextTraffic="true">
+        tools:targetApi="tiramisu"
+        android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MusicianActivity"
             android:exported="false" />
@@ -33,6 +34,9 @@
             android:exported="false" />
         <activity
             android:name=".SupportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TeremActivity"
             android:exported="false" />
         <activity
             android:name=".ExtrasActivity"

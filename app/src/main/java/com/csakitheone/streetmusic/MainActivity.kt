@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.NavigateNext
@@ -71,7 +72,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
-            setKeepOnScreenCondition { isBatterySaverPreferenceLoaded }
+            setKeepOnScreenCondition {
+                isBatterySaverPreferenceLoaded &&
+                        EventsProvider.state != EventsProvider.STATE_DOWNLOADING
+            }
         }
         setContent {
             MainScreen()
@@ -230,11 +234,11 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .heightIn(min = 80.dp, max = 180.dp),
+                                        .heightIn(min = 80.dp, max = 120.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        modifier = Modifier.padding(16.dp),
+                                        modifier = Modifier.padding(8.dp),
                                         text = it,
                                         textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.onBackground,
@@ -317,6 +321,37 @@ class MainActivity : ComponentActivity() {
                         }
                         MenuCard(
                             modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            onClick = {
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        TeremActivity::class.java
+                                    )
+                                )
+                            },
+                            painter = painterResource(id = R.drawable.terem_logo),
+                            title = "TEREM: UNLOCK FEST Vol.4",
+                        )
+                        MenuCard(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            onClick = {
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        ExtrasActivity::class.java
+                                    )
+                                )
+                            },
+                            imageVector = Icons.Default.VideogameAsset,
+                            title = stringResource(id = R.string.extras),
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        MenuCard(
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp),
                             onClick = { isWebsitesMenuVisible = true },
@@ -377,22 +412,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        MenuCard(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        ExtrasActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.VideogameAsset,
-                            title = stringResource(id = R.string.extras),
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
                         MenuCard(
                             modifier = Modifier
                                 .fillMaxWidth()

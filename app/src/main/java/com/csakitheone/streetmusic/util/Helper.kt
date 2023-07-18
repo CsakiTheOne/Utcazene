@@ -14,8 +14,8 @@ class Helper {
             if (!this.contains(":")) {
                 return LocalTime.of(0, 0)
             }
-            val h = this.substringBefore(":").toIntOrNull() ?: 0
-            val m = this.substringAfter(":").toIntOrNull() ?: 0
+            val h = this.substringBefore(":").toIntOrNull() ?: 23
+            val m = this.substringAfter(":").toIntOrNull() ?: 59
             return LocalTime.of(h, m)
         }
 

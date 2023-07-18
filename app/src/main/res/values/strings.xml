@@ -14,6 +14,7 @@
     <string name="events">Calendar</string>
     <string name="musicians">Musicians</string>
     <string name="places">Places</string>
+    <string name="open_map">Map</string>
     <string name="extras">Extras</string>
 
     <!-- MAIN ACTIVITY -->
@@ -21,21 +22,20 @@
     <string name="data_state_downloading">Downloading events…</string>
     <string name="data_state_downloaded">Events successfully downloaded!</string>
     <string name="data_state_download_error">Download failed.</string>
-    <string name="data_state_preferences">Offline mode. Events loaded from disk.</string>
+    <string name="data_state_preferences">Offline mode. Events loaded from storage.</string>
     <string name="data_state_app">Events loaded from app. Connect to an unmetered network and restart the app to get the latest information!</string>
     <string name="data_state_unknown" />
 
     <string name="battery_saver">Battery saver mode</string>
     <string name="battery_saver_description">If the battery\'s low, but the night is young, turn this on. The app will turn black and it will use less data.</string>
 
-    <string name="developer_warning">The app is still work in progress so it may has bugs. Check the Play Store regularly for updates!</string>
+    <string name="developer_warning">The app is still work in progress so it may have some bugs. Check the Play Store regularly for updates!</string>
     <string name="made_by_csaki">Unofficially created by Csáki</string>
 
     <string name="websites">Websites</string>
     <string name="open_website">Open official website</string>
     <string name="open_facebook">Open Facebook page</string>
     <string name="open_instagram">Open Instagram page</string>
-    <string name="open_map">Open map</string>
 
     <!-- EVENTS -->
     <string name="export_to_calendar">Export to calendar</string>
@@ -48,11 +48,13 @@
     <string name="day_saturday">Saturday</string>
 
     <!-- MUSICIANS -->
+    <string name="musician_description">Description</string>
     <string name="watch_on_youtube">Watch on YouTube</string>
     <string name="musician_performances">Performances</string>
     <string name="musician_tag_foreign">Foreign musician</string>
     <string name="musician_tag_friend">Csáki\'s friend</string>
     <string name="musician_tag_competing">Street musician competitor</string>
+    <string name="musician_tag_terem" translatable="false">TEREM UNLOCK FEST</string>
 
     <!-- Support the dev -->
     <string name="support_the_dev">Support the developer</string>
@@ -61,6 +63,7 @@
     <string name="support_methods">Other ways to support</string>
     <string name="show_account_number">Show account number for transfer</string>
     <string name="depressed_altgirl">I\'m a depressed altgirl</string>
+    <string name="financial_supporters">Financial supporters</string>
 
     <string name="account_number">Account number</string>
     <string name="easter_egg_account_number">Bro, I don\'t need money, I need someone to love me</string>

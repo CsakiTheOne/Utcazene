@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="motds">
+        <!-- TIPS -->
+        <item>Ha legalább egyszer megnyitottad az appot WiFi-vel, onnantól offline is működik. Ne aggódj a net miatt, jó bulizást!</item>
+        <!-- RANDOM SHIT -->
         <item>Szerencsétek Veszprém utcáin hever.</item>
         <item>Nem kell alkohol, hogy jól érezd magad. Jókedv sem kell, hogy alkoholt igyál. De az jó, ha van mindkettő.</item>
-        <item>Ha legalább egyszer megnyitottad az appot WiFi-vel, onnantól offline is működik. Ne aggódj a net miatt, jó bulizást!</item>
+        <item>Egy Whiskey, két Whiskey, kiviszki?</item>
+        <item>Baj van a részeg tengerésszel!</item>
+        <!-- COMMON -->
+        <item>"Pálinka for everyone!"\n- Alestorm</item>
 
-        <item>Gyuszi írj ide valamit!</item>
         <!--
         Expand this list here, above the comment!
         Just type <item>YOUR TEXT</item> and it will show up randomly on the main page.

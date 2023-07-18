@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -42,15 +41,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
-import com.csakitheone.streetmusic.util.BatterySaverManager
-import com.csakitheone.streetmusic.util.Helper
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -137,24 +133,6 @@ class EventActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (
-                            !BatterySaverManager.isBatterySaverEnabled &&
-                            Helper.isUnmeteredNetworkAvailable(context) &&
-                            !event?.musician?.imageUrl.isNullOrBlank()
-                        ) {
-                            OutlinedCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                            ) {
-                                AsyncImage(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    model = if (event != null && !event!!.musician.imageUrl.isNullOrBlank()) event!!.musician.imageUrl
-                                    else "https://http.cat/images/404.jpg",
-                                    contentDescription = null,
-                                )
-                            }
-                        }
                         MusicianCard(
                             modifier = Modifier.padding(8.dp),
                             musician = event?.musician ?: Musician.fromString("Előadó neve (Ország)"),

@@ -44,6 +44,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.data.EventsProvider
+import com.csakitheone.streetmusic.data.TeremEventProvider
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
@@ -62,38 +63,39 @@ class MusiciansActivity : ComponentActivity() {
     @Preview
     @Composable
     fun MusiciansScreen() {
-        val scroll = rememberLazyListState()
-
-        var posterId: Int? by remember { mutableStateOf(null) }
-
-        var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
-        var isOnlyPinned by remember { mutableStateOf(false) }
-        var filterTags by remember { mutableStateOf(listOf<Int>()) }
-
-        var musicians by remember { mutableStateOf(listOf<Musician>()) }
-        val visibleMusicians by remember(musicians, musiciansPinned, isOnlyPinned, filterTags) {
-            mutableStateOf(
-                musicians
-                    .filter { filterTags.isEmpty() || filterTags == it.tags }
-                    .filter { !isOnlyPinned || (isOnlyPinned && musiciansPinned.contains(it)) }
-                    .sortedBy { it.name }
-            )
-        }
-
-        LaunchedEffect(Unit) {
-            EventsProvider.getEvents(this@MusiciansActivity) { events ->
-                musicians = events.groupBy { it.musician }.keys.toList()
-            }
-        }
-
-        ListPreferenceHolder(
-            id = "authorsPinned",
-            value = musiciansPinned,
-            onValueChanged = { musiciansPinned = it.toList() },
-            type = object : TypeToken<Musician>() {}.type,
-        )
-
         UtcazeneTheme {
+            val scroll = rememberLazyListState()
+
+            var posterId: Int? by remember { mutableStateOf(null) }
+
+            var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
+            var isOnlyPinned by remember { mutableStateOf(false) }
+            var filterTags by remember { mutableStateOf(listOf<Int>()) }
+
+            var musicians by remember { mutableStateOf(listOf<Musician>()) }
+            val visibleMusicians by remember(musicians, musiciansPinned, isOnlyPinned, filterTags) {
+                mutableStateOf(
+                    musicians
+                        .filter { filterTags.isEmpty() || filterTags == it.tags }
+                        .filter { !isOnlyPinned || (isOnlyPinned && musiciansPinned.contains(it)) }
+                        .sortedBy { it.name }
+                )
+            }
+
+            LaunchedEffect(Unit) {
+                EventsProvider.getEvents(this@MusiciansActivity) { events ->
+                    musicians = events.groupBy { it.musician }.keys.toList() +
+                            TeremEventProvider.musicians.values.flatten()
+                }
+            }
+
+            ListPreferenceHolder(
+                id = "authorsPinned",
+                value = musiciansPinned,
+                onValueChanged = { musiciansPinned = it.toList() },
+                type = object : TypeToken<Musician>() {}.type,
+            )
+
             if (posterId != null) {
                 Dialog(
                     properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -160,8 +162,7 @@ class MusiciansActivity : ComponentActivity() {
                                         )
                                     },
                                 )
-                                musicians
-                                    .flatMap { it.tags ?: listOf() }
+                                musicians.flatMap { it.tags ?: listOf() }
                                     .distinct()
                                     .map { tag ->
                                         ElevatedFilterChip(

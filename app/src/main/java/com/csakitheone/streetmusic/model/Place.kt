@@ -33,14 +33,14 @@ data class Place(
         )
         val MAW = Place(
             name = "Man At Work színpad (a Vár Áruház előtt)",
-            geoLink = "Veszprém, Cserhát ltp. 6, 8200".addressToGeo(),
+            //geoLink = "Veszprém, Cserhát ltp. 6, 8200".addressToGeo(),
         )
         val HARIBO = Place(
             name = "Haribo színpad (a Kossuth utca közepén)",
         )
         val MD = Place(
             name = "Meló-diák színpad (a Kölcsey könyvesboltnál)",
-            geoLink = "47.0936528,17.9096424".latLngToGeo(),
+            //geoLink = "47.0936528,17.9096424".latLngToGeo(),
         )
         val KOSSUTH = Place(
             name = "Kossuth utca - utcazenész megálló",

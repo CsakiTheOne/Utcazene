@@ -7,10 +7,13 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,10 +56,10 @@ class SupportActivity : ComponentActivity() {
     @Preview
     @Composable
     fun SupportScreen() {
-        var isAccountNumberDialogVisible by remember { mutableStateOf(false) }
-        var isAccountNumberDialogAltText by remember { mutableStateOf(false) }
-
         UtcazeneTheme {
+            var isAccountNumberDialogVisible by remember { mutableStateOf(false) }
+            var isAccountNumberDialogAltText by remember { mutableStateOf(false) }
+
             if (isAccountNumberDialogVisible) {
                 AlertDialog(
                     title = { Text(text = stringResource(id = R.string.account_number)) },
@@ -237,6 +241,29 @@ class SupportActivity : ComponentActivity() {
                                 ) {
                                     Text(text = stringResource(id = R.string.depressed_altgirl))
                                 }
+                            }
+                        }
+                        UzCard(
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = stringResource(id = R.string.financial_supporters),
+                                )
+                                Image(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 64.dp)
+                                        .padding(8.dp)
+                                        .clickable {
+                                            CustomTabsManager.open(this@SupportActivity, "https://idealap.hu/")
+                                        },
+                                    painter = painterResource(id = R.drawable.idealap_logo_full),
+                                    contentDescription = null,
+                                )
                             }
                         }
                     }

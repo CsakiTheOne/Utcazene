@@ -42,6 +42,9 @@ class UzApi {
 
     companion object {
 
+        var client: OkHttpClient
+            private set
+
         const val PREF_KEY_API_RESPONSE_ARTISTS = "apiResponseArtists"
         const val PREF_KEY_API_LAST_DOWNLOAD_TIMESTAMP = "apiLastDownloadTimestamp"
 
@@ -51,37 +54,39 @@ class UzApi {
         private val endpointArtists = "/artists/"
         private val endpointTimeslots = "/timeslots/"
 
+        init {
+            val trustAllCerts = arrayOf(object: X509TrustManager {
+                override fun checkClientTrusted(
+                    p0: Array<out X509Certificate>?,
+                    p1: String?
+                ) {}
+                override fun checkServerTrusted(
+                    p0: Array<out X509Certificate>?,
+                    p1: String?
+                ) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> {
+                    return arrayOf()
+                }
+            })
+
+            val sslContext = SSLContext.getInstance("SSL")
+            sslContext.init(
+                null,
+                trustAllCerts,
+                SecureRandom(),
+            )
+
+            client = OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0])
+                .hostnameVerifier(HostnameVerifier { hostname, sslSession ->
+                    return@HostnameVerifier true//hostname.contains("utcazene")
+                })
+                .build()
+        }
+
         fun downloadEvents(context: Context, callback: (List<Event>) -> Unit) {
             Thread {
                 try {
-                    val trustAllCerts = arrayOf(object: X509TrustManager {
-                        override fun checkClientTrusted(
-                            p0: Array<out X509Certificate>?,
-                            p1: String?
-                        ) {}
-                        override fun checkServerTrusted(
-                            p0: Array<out X509Certificate>?,
-                            p1: String?
-                        ) {}
-                        override fun getAcceptedIssuers(): Array<X509Certificate> {
-                            return arrayOf()
-                        }
-                    })
-
-                    val sslContext = SSLContext.getInstance("SSL")
-                    sslContext.init(
-                        null,
-                        trustAllCerts,
-                        SecureRandom(),
-                    )
-
-                    val client = OkHttpClient.Builder()
-                        .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0])
-                        .hostnameVerifier(HostnameVerifier { hostname, sslSession ->
-                            return@HostnameVerifier hostname.contains("utcazene")
-                        })
-                        .build()
-
                     Log.i("UzApi", "Attempting to download events...")
                     val response = client
                         .newCall(

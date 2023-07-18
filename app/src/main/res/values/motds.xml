@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="motds">
-        <item>Your luck lies on the streets of Veszprém.</item>
-        <item>You don\'t need alcohol to be happy. You also don\'t need happiness to drink alcohol. But it\'s good if you have both.</item>
+        <!-- TIPS -->
         <item>If you have opened the app at least once with WiFi, it also works offline from then on. Don\'t worry about the internet, have fun!</item>
+        <!-- RANDOM SHIT -->
+        <item>Your luck lies on the streets of Veszprém.</item>
+        <item>You don\'t need alcohol to be happy. You also don\'t need happiness to drink alcohol. But it\'s good to have both.</item>
+ 	    <item>"One tequila, two tequila, three tequila, floor."\n- George Carlin</item>
+        <item>What will we do with a drunken sailor?</item>
+        <!-- COMMON -->
+        <item>"Pálinka for everyone!"\n- Alestorm</item>
 
-        <item>Gyuszi write something here!</item>
+        <item>I drink, and I don\'t know shit.</item>
         <!--
         Expand this list here, above the comment!
         Just type <item>YOUR TEXT</item> and it will show up randomly on the main page.

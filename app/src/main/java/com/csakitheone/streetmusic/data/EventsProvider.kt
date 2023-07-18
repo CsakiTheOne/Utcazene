@@ -158,7 +158,23 @@ class EventsProvider {
         private val customMusicians = listOf(
             Musician(
                 name = "Shántolók",
+                description = "Először a Lovassy Alma Mater rendezvényén hallottam " +
+                        "sea shanty-ket énekelni az urakat ahol is egyértelműen megnyerték a " +
+                        "közönséget. Ez abból is látszott, hogy egy daluk után két hölgy a " +
+                        "nézőtéren felállva egy nagy szivet mutatott a fiúknak. Egy amúgy is " +
+                        "szórakoztató műfajt adnak elő, néha hangszerkísérettel. Aki kedveli a " +
+                        "sea shanty-ket, mindenképp meg kell hallgatnia őket!",
+                /*
+                description = "Figyelem! Ennek a bandának a leírását a ChatGPT írta!\n" +
+                        "Ezt a csodálatos tengerészeti kórust mindenkinek látnia kell, aki a parton járva szívesen énekelne együtt a hullámokkal. A Lovassy László Gimnázium fiatal tehetségei különleges élményt nyújtanak a közönségnek a hagyományos tengerész dalok átélésével.\n" +
+                        "Ezek a zenei kalózok olyan dallamokat szövögetnek a hangok hálójában, hogy megállás nélkül dúdolni fogsz hajónak lenni, még akkor is, ha soha nem ültél egy fedélzeten sem. A hangzásuk egyszerre hívogató és megható, olyan, mintha a szelek maguk szabadították volna el a vitorlákat.\n" +
+                        "Együtt járják az óceánt a dalok, ahol mindenki tagja a történetnek. A fiatal tengeri farkasok fellelkesítik a közönséget a felhőtlen vidámsággal és lendülettel, amely átjárja előadásaikat. Énekük hullámzik az égen, és felrázza az emberek szíveit, mintha egy hatalmas vihar tombolna bennük.\n" +
+                        "A Lovassy Alma mater rendezvényén már felmutatták tehetségüket és elvarázsolták a közönséget. Most pedig itt vannak, hogy színre vigyenek egy igazi tengeri show-t, és elhívjanak mindenkit egy kalandos utazásra a zene hullámain.\n" +
+                        "Ne hagyd ki a lehetőséget, hogy együtt énekelj velük a tengeri költészet és a távoli tájak dallamaiban. Ez a kórussal való találkozás igazi élmény lesz, ami megdobogtatja a szíved, és elkápráztat a tengeri mágia varázslatával. Csatlakozz hozzájuk, és indulj velük a tengeri ének hajóján!",
+                */
                 country = "HU",
+                imageUrl = "https://i.ytimg.com/vi/grWgky_ZIJw/maxresdefault.jpg",
+                youtubeUrl = "https://youtu.be/grWgky_ZIJw",
                 tags = listOf(Musician.TAG_FRIEND),
             )
         )

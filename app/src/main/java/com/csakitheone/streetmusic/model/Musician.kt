@@ -27,14 +27,16 @@ data class Musician(
 
     companion object {
 
-        val TAG_FOREIGN = R.string.musician_tag_foreign // Külföldi előadó
-        val TAG_FRIEND = R.string.musician_tag_friend // Csáki haverja
-        val TAG_COMPETING = R.string.musician_tag_competing // Utcazenész versenyző
+        val TAG_FOREIGN = R.string.musician_tag_foreign
+        val TAG_FRIEND = R.string.musician_tag_friend
+        val TAG_COMPETING = R.string.musician_tag_competing
+        val TAG_TEREM = R.string.musician_tag_terem
 
         val countryFlags = mapOf(
             "A" to "🇦🇹",
             "AUS" to "🇦🇹",
             "B" to "🇧🇪",
+            "CZ" to "🇨🇿",
             "D" to "🇩🇪",
             "FR" to "🇫🇷",
             "IRE" to "🇮🇪",

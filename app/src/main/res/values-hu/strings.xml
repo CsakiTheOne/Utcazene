@@ -12,6 +12,7 @@
     <string name="events">Naptár</string>
     <string name="musicians">Zenészek</string>
     <string name="places">Helyek</string>
+    <string name="open_map">Térkép</string>
     <string name="extras">Extrák</string>
 
     <!-- MAIN ACTIVITY -->
@@ -33,7 +34,6 @@
     <string name="open_website">Hivatalos oldal megnyitása</string>
     <string name="open_facebook">Facebook oldal megnyitása</string>
     <string name="open_instagram">Instagram oldal megnyitása</string>
-    <string name="open_map">Térkép megnyitása</string>
 
     <!-- EVENTS -->
     <string name="export_to_calendar">Exportálás naptárba</string>
@@ -46,6 +46,7 @@
     <string name="day_saturday">Szombat</string>
 
     <!-- AUTHORS -->
+    <string name="musician_description">Leírás</string>
     <string name="watch_on_youtube">Megtekintés YouTube-on</string>
     <string name="musician_performances">Fellépések</string>
     <string name="musician_tag_foreign">Külföldi zenész</string>
@@ -59,6 +60,7 @@
     <string name="support_methods">További lehetőségek támogatásra</string>
     <string name="show_account_number">Számlaszám mutatása utaláshoz</string>
     <string name="depressed_altgirl">Egy depressziós alterlány vagyok</string>
+    <string name="financial_supporters">Anyagi támogatók</string>
 
     <string name="account_number">Számlaszám</string>
     <string name="easter_egg_account_number">Tesó, nekem nem kell pénz csak az hogy valaki szeressen</string>

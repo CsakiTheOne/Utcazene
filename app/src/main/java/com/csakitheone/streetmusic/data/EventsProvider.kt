@@ -72,7 +72,7 @@ class EventsProvider {
             Musician(name = "Daniel Docherty"),
         ).sortedBy { it.name }
 
-        private fun readEventsFromCsv(context: Context): List<Event> {
+        fun readEventsFromCsv(context: Context): List<Event> {
             fun String.cells(): List<String> = this.trim().split(',').map { it.trim() }
 
             val lines = context.resources.openRawResource(R.raw.events)
@@ -211,7 +211,7 @@ class EventsProvider {
         ) {
             state = STATE_UNKNOWN
             // 1.
-            val timeTillOld = 1000L * 60 * 10
+            val timeTillOld = 1000L * 60 * 30
             val isDataOld = PreferenceManager
                 .getDefaultSharedPreferences(context)
                 .getLong(

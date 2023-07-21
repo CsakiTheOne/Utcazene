@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
@@ -203,7 +204,6 @@ class MusicianActivity : ComponentActivity() {
                     ) {
                         if (
                             !BatterySaverManager.isBatterySaverEnabled &&
-                            Helper.isUnmeteredNetworkAvailable(context) &&
                             !musician?.imageUrl.isNullOrBlank()
                         ) {
                             OutlinedCard(
@@ -214,32 +214,14 @@ class MusicianActivity : ComponentActivity() {
                                     CustomTabsManager.open(context, musician!!.imageUrl!!)
                                 },
                             ) {
-                                SubcomposeAsyncImage(
+                                AsyncImage(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .heightIn(min = 64.dp, max = 400.dp),
                                     imageLoader = imageLoader,
                                     model = musician!!.imageUrl,
                                     contentDescription = null,
-                                ) {
-                                    when (painter.state) {
-                                        is AsyncImagePainter.State.Error -> {
-                                            Text(text = (painter.state as AsyncImagePainter.State.Error).result.throwable.message.toString())
-                                        }
-
-                                        is AsyncImagePainter.State.Loading -> {
-                                            Box(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                CircularProgressIndicator()
-                                            }
-                                        }
-
-                                        else -> SubcomposeAsyncImageContent()
-                                    }
-
-                                }
+                                )
                             }
                         }
                         if (!musician?.description.isNullOrBlank()) {

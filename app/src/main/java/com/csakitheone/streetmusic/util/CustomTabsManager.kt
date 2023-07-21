@@ -14,7 +14,7 @@ class CustomTabsManager {
             .setToolbarColor(Blue.toArgb())
             .build()
 
-        fun open(context: Context, url: String) {
+        fun open(context: Context, url: String?) {
             CustomTabsIntent.Builder()
                 .setDefaultColorSchemeParams(colorSchemeParams)
                 .build()

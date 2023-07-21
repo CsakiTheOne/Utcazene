@@ -11,8 +11,8 @@ android {
         applicationId = "com.csakitheone.streetmusic"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "1.3"
+        versionCode = 16
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -57,6 +57,8 @@ dependencies {
     implementation("androidx.browser:browser:1.5.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation("com.google.mlkit:translate:17.0.1")
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation("com.google.android.play:app-update-ktx:2.1.0")
 
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")

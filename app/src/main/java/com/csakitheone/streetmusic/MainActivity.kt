@@ -16,20 +16,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,29 +61,57 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.data.MotdProvider
+import com.csakitheone.streetmusic.model.Event
+import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.components.util.PreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.CustomTabsManager
+import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
+import com.csakitheone.streetmusic.util.InAppUpdater
+import java.time.LocalDate
+import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
     private var isBatterySaverPreferenceLoaded by mutableStateOf(false)
+    private var events by mutableStateOf(listOf<Event>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
             setKeepOnScreenCondition {
                 isBatterySaverPreferenceLoaded &&
-                        EventsProvider.state != EventsProvider.STATE_DOWNLOADING
+                        events.isNotEmpty()
             }
         }
+        InAppUpdater.init(this)
         setContent {
             MainScreen()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        InAppUpdater.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        InAppUpdater.onResume(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == InAppUpdater.UPDATE_FLOW_REQUEST_CODE) {
+            if (resultCode != RESULT_OK) {
+                return
+            }
         }
     }
 
@@ -99,6 +132,22 @@ class MainActivity : ComponentActivity() {
             var isBatterySaverDialogVisible by remember { mutableStateOf(false) }
             var isWebsitesMenuVisible by remember { mutableStateOf(false) }
 
+            var isNowPlayingDialogVisible by remember { mutableStateOf(false) }
+            val eventsNowPlaying by remember(events, isNowPlayingDialogVisible) {
+                val sortedEvents = events
+                    .filter { it.day == LocalDate.now().dayOfMonth }
+                    .sortedBy { it.time.toLocalTime() }
+                mutableStateOf(
+                    sortedEvents.filter { event ->
+                        val nextTime = sortedEvents.firstOrNull {
+                            it.time.toLocalTime() > event.time.toLocalTime().plusMinutes(20)
+                        }?.time?.toLocalTime()
+                        event.time.toLocalTime() < LocalTime.now().plusMinutes(5) &&
+                                (nextTime == null || nextTime > LocalTime.now().minusMinutes(5))
+                    }
+                )
+            }
+
             PreferenceHolder(
                 id = "batterySaver",
                 value = BatterySaverManager.isBatterySaverEnabled,
@@ -110,7 +159,12 @@ class MainActivity : ComponentActivity() {
             )
 
             LaunchedEffect(Unit) {
-                EventsProvider.getEvents(this@MainActivity)
+                EventsProvider.getEvents(this@MainActivity) {
+                    events = it
+                    if (intent.data.toString() == "now_playing") {
+                        isNowPlayingDialogVisible = true
+                    }
+                }
             }
 
             if (isBatterySaverDialogVisible) {
@@ -139,6 +193,35 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            if (isNowPlayingDialogVisible) {
+                AlertDialog(
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                    title = { Text(text = stringResource(id = R.string.now_playing)) },
+                    text = {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                        ) {
+                            eventsNowPlaying.map { event ->
+                                EventCard(
+                                    modifier = Modifier.padding(8.dp),
+                                    event = event,
+                                )
+                            }
+                        }
+                    },
+                    onDismissRequest = { isNowPlayingDialogVisible = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { isNowPlayingDialogVisible = false }
+                        ) {
+                            Text(text = stringResource(id = R.string.close))
+                        }
+                    },
+                )
+            }
+
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
@@ -151,7 +234,7 @@ class MainActivity : ComponentActivity() {
                         actions = {
                             AnimatedVisibility(
                                 visible = EventsProvider.state != EventsProvider.STATE_UNKNOWN &&
-                                    !isDataStateVisible
+                                        !isDataStateVisible
                             ) {
                                 IconButton(
                                     onClick = {
@@ -194,24 +277,23 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(8.dp),
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(8.dp),
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(
                                         modifier = Modifier
                                             .padding(8.dp)
-                                            .fillMaxWidth(),
+                                            .weight(1f),
                                         text = stringResource(id = EventsProvider.state),
                                     )
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End,
-                                ) {
                                     TextButton(
                                         enabled = EventsProvider.state != EventsProvider.STATE_DOWNLOADING,
                                         onClick = {
-                                            EventsProvider.getEvents(this@MainActivity, forceDownload = true)
+                                            EventsProvider.getEvents(
+                                                this@MainActivity,
+                                                forceDownload = true
+                                            )
                                         },
                                     ) {
                                         Text(text = stringResource(id = R.string.refresh_data))
@@ -224,9 +306,37 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        Column(
-                            horizontalAlignment = Alignment.End,
-                        ) {
+                        AnimatedVisibility(visible = InAppUpdater.isFlexibleUpdateReady) {
+                            Card(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(8.dp),
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(8.dp),
+                                        text = stringResource(id = R.string.update_available),
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                ) {
+                                    TextButton(
+                                        onClick = { InAppUpdater.completeFlexibleUpdate() },
+                                    ) {
+                                        Text(text = stringResource(id = R.string.install_update))
+                                    }
+                                }
+                            }
+                        }
+                        Column {
                             AnimatedContent(
                                 targetState = motd,
                                 label = "MotdChange",
@@ -245,16 +355,37 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }
-                            SmallFloatingActionButton(
-                                modifier = Modifier.padding(8.dp),
-                                onClick = {
-                                    motd = MotdProvider.getRandomMotd(this@MainActivity, motd)
-                                },
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.NavigateNext,
-                                    contentDescription = null,
-                                )
+                                Button(
+                                    modifier = Modifier.padding(8.dp),
+                                    onClick = {
+                                        isNowPlayingDialogVisible = true
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MusicNote,
+                                        contentDescription = null,
+                                    )
+                                    Text(
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        text = stringResource(id = R.string.now_playing),
+                                    )
+                                }
+                                Spacer(modifier = Modifier.weight(1f))
+                                SmallFloatingActionButton(
+                                    modifier = Modifier.padding(8.dp),
+                                    onClick = {
+                                        motd = MotdProvider.getRandomMotd(this@MainActivity, motd)
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.NavigateNext,
+                                        contentDescription = null,
+                                    )
+                                }
                             }
                         }
                         Row {
@@ -316,7 +447,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 imageVector = Icons.Default.Map,
-                                title = stringResource(id = R.string.open_map),
+                                title = stringResource(id = R.string.map),
                             )
                         }
                         MenuCard(

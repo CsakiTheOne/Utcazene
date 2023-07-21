@@ -42,4 +42,15 @@
             android:targetPackage="com.csakitheone.streetmusic"
             android:targetClass="com.csakitheone.streetmusic.PlacesActivity" />
     </shortcut>
+    <shortcut
+        android:shortcutId="now_playing"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_now_playing"
+        android:shortcutShortLabel="@string/now_playing">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity"
+            android:data="now_playing" />
+    </shortcut>
 </shortcuts>

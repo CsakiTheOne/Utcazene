@@ -7,22 +7,27 @@
     <string name="filter_pinned">Kedvencek</string>
     <string name="filter_upcoming">Következők</string>
     <string name="month_july">Július</string>
+    <string name="refresh_data">Frissítés</string>
+    <string name="install_update">Telepítés</string>
 
     <!-- MAIN FEATURES -->
     <string name="events">Naptár</string>
     <string name="musicians">Zenészek</string>
     <string name="places">Helyek</string>
-    <string name="open_map">Térkép</string>
-    <string name="extras">Extrák</string>
+    <string name="map">Térkép</string>
+    <string name="extras">Ivós játékok és időutazás</string>
 
     <!-- MAIN ACTIVITY -->
-    <string name="refresh_data">Frissítés</string>
     <string name="data_state_downloading">Események letöltése…</string>
     <string name="data_state_downloaded">Események sikeresen letöltve!</string>
     <string name="data_state_download_error">Nem sikerült letölteni az eseményeket.</string>
     <string name="data_state_preferences">Offline mód. Események betöltve tárhelyről.</string>
     <string name="data_state_app">Események betöltve alkalmazásból. Csatlakozz nem forgalmidíjas hálózathoz, hogy a legfrissebb infókat kapd!</string>
     <string name="data_state_unknown" />
+
+    <string name="update_available">A frissítés készen áll a telepítésre.</string>
+
+    <string name="now_playing">Most játszott</string>
 
     <string name="battery_saver">Energiatakarékos mód</string>
     <string name="battery_saver_description">Ha merül a telefon, de még hosszú az éjszaka, kapcsold be ezt. Az alkalmazás fekete témára vált és kevesebb netet fog használni.</string>
@@ -45,13 +50,24 @@
     <string name="day_friday">Péntek</string>
     <string name="day_saturday">Szombat</string>
 
-    <!-- AUTHORS -->
+    <!-- MUSICIANS -->
     <string name="musician_description">Leírás</string>
     <string name="watch_on_youtube">Megtekintés YouTube-on</string>
     <string name="musician_performances">Fellépések</string>
     <string name="musician_tag_foreign">Külföldi zenész</string>
     <string name="musician_tag_friend">Csáki haverja</string>
     <string name="musician_tag_competing">Utcazenész versenyző</string>
+
+    <!-- EXTRAS -->
+    <string name="drinking_game_props">Ivós játék kellékek</string>
+    <string name="ideas">Ötletek</string>
+    <string name="playing_cards">Francia kártya</string>
+    <string name="dice">Dobókocka</string>
+    <string name="time_travel">Időutazás - görgess vissza az időben</string>
+    <string-array name="drinking_game_ideas">
+        <item>Az egyszerűek: Felelsz vagy iszol, igyál ha káromkodsz, én még soha… Még kombinálhatod is ezeket más játékokkal.</item>
+        <item>Around the world / Ride the bus / Barkas (első rész): Egy pakli francia kártyára lesz szükséged. A játék két körből áll.\n\nElső kör:\nMinden játékosnak meg kell jósolnia valamit a következő kártyáról a pakliban. Az osztó minden játékosnak 4 lapot oszt, de kiosztás előtt kérdez a kártyával kapcsolatban. Ha a játékos jól tippel, kioszthat egy italt, ha nem akkor neki kell innia egyet.\nKérdések:\nPiros vagy fekete? / Odd or even?\nHigher or lower (than first card)?\nBetween or not (the previous two cards)?\nSame of different suit (then previous three cards)?</item>
+    </string-array>
 
     <!-- Support the dev -->
     <string name="support_the_dev">Fejlesztő támogatása</string>

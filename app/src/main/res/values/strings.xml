@@ -9,22 +9,28 @@
     <string name="filter_pinned">Favorites</string>
     <string name="filter_upcoming">Upcoming</string>
     <string name="month_july">July</string>
+    <string name="refresh_data">Refresh</string>
+    <string name="install_update">Install</string>
+    <string name="beta_badge" translatable="false">BETA</string>
 
     <!-- MAIN FEATURES -->
     <string name="events">Calendar</string>
     <string name="musicians">Musicians</string>
     <string name="places">Places</string>
-    <string name="open_map">Map</string>
-    <string name="extras">Extras</string>
+    <string name="map">Map</string>
+    <string name="extras">Drinking games and time travel</string>
 
     <!-- MAIN ACTIVITY -->
-    <string name="refresh_data">Refresh</string>
     <string name="data_state_downloading">Downloading events…</string>
     <string name="data_state_downloaded">Events successfully downloaded!</string>
     <string name="data_state_download_error">Download failed.</string>
     <string name="data_state_preferences">Offline mode. Events loaded from storage.</string>
     <string name="data_state_app">Events loaded from app. Connect to an unmetered network and restart the app to get the latest information!</string>
     <string name="data_state_unknown" />
+
+    <string name="update_available">The update is ready to install.</string>
+
+    <string name="now_playing">Now playing</string>
 
     <string name="battery_saver">Battery saver mode</string>
     <string name="battery_saver_description">If the battery\'s low, but the night is young, turn this on. The app will turn black and it will use less data.</string>
@@ -55,6 +61,17 @@
     <string name="musician_tag_friend">Csáki\'s friend</string>
     <string name="musician_tag_competing">Street musician competitor</string>
     <string name="musician_tag_terem" translatable="false">TEREM UNLOCK FEST</string>
+
+    <!-- EXTRAS -->
+    <string name="drinking_game_props">Drinking game props</string>
+    <string name="ideas">Ideas</string>
+    <string name="playing_cards">Playing cards</string>
+    <string name="dice">Dice</string>
+    <string name="time_travel">Time travel - scroll back in time</string>
+    <string-array name="drinking_game_ideas">
+        <item>The simple ones: Truth of drink, drink if you swore, never have I ever, most likely… You can even combine these with other games.</item>
+        <item>Around the world / Ride the bus / Barkas (part one): You need a deck of playing cards for this one. The game is divided into two rounds.\n\nRound one:\nEach player must make a prediction about the card to be drawn on their turn. The dealer deals each player 4 cards face up but before dealing each card, the dealer asks the player a question about the card. If the player guesses correctly, they may give a drink. If their guess is incorrect they must instead "take" a drink.\nQuestions:\nRed or black? / Odd or even?\nHigher or lower (than first card)?\nBetween or not (the previous two cards)?\nSame of different suit (then previous three cards)?</item>
+    </string-array>
 
     <!-- Support the dev -->
     <string name="support_the_dev">Support the developer</string>

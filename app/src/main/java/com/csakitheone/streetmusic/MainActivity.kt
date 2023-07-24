@@ -94,6 +94,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainScreen()
         }
+
+        startActivity(Intent(this, HubActivity::class.java))
+        finish()
     }
 
     override fun onDestroy() {

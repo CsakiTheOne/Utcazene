@@ -11,6 +11,7 @@ data class Musician(
     val imageUrl: String? = null,
     val youtubeUrl: String? = null,
     val tags: List<Int>? = null,
+    val year: Int? = null,
 ) {
     fun getFlag(): String {
         return countryFlags[country] ?: ""

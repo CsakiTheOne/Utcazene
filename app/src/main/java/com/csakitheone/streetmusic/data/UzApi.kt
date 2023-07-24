@@ -2,6 +2,7 @@ package com.csakitheone.streetmusic.data
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.Keep
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.csakitheone.streetmusic.model.Event
@@ -19,6 +20,7 @@ import javax.net.ssl.X509TrustManager
 
 
 class UzApi {
+    @Keep
     data class ApiTimeslot(
         val start_time: String,
         val end_time: String,
@@ -28,6 +30,7 @@ class UzApi {
         val event__venue__name: String,
     )
 
+    @Keep
     data class ApiArtist(
         val id: Int,
         val name: String,

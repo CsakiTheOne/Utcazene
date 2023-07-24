@@ -11,8 +11,8 @@ android {
         applicationId = "com.csakitheone.streetmusic"
         minSdk = 26
         targetSdk = 34
-        versionCode = 17
-        versionName = "2023.1"
+        versionCode = 18
+        versionName = "2023.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -79,6 +79,12 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
+    companion object {
+
+        const val EXTRA_IGNORE_EVENT_ENDED = "ignore_event_ended"
+
+    }
+
     private var isBatterySaverPreferenceLoaded by mutableStateOf(false)
     private var events by mutableStateOf(listOf<Event>())
 
@@ -95,8 +101,10 @@ class MainActivity : ComponentActivity() {
             MainScreen()
         }
 
-        startActivity(Intent(this, HubActivity::class.java))
-        finish()
+        if (!intent.getBooleanExtra(EXTRA_IGNORE_EVENT_ENDED, false)) {
+            startActivity(Intent(this, HubActivity::class.java))
+            finish()
+        }
     }
 
     override fun onDestroy() {

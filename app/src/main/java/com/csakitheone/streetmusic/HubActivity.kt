@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -69,14 +70,18 @@ class HubActivity: ComponentActivity() {
                         ),
                     )
                     Text(
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         text = "Thank you for being with us!",
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.displayMedium,
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         text = "Keep the app and stay tuned for content all year round. " +
                                 "You'll be able to check out all musicians who previously " +
                                 "performed at Utcazene.",
@@ -175,6 +180,19 @@ class HubActivity: ComponentActivity() {
                         imageVector = Icons.Default.Code,
                         title = stringResource(id = R.string.made_by_csaki),
                     )
+                    TextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        onClick = {
+                            startActivity(
+                                Intent(this@HubActivity, MainActivity::class.java)
+                                    .putExtra(MainActivity.EXTRA_IGNORE_EVENT_ENDED, true)
+                            )
+                        },
+                    ) {
+                        Text(text = "Go back to the home screen")
+                    }
                 }
             }
         }

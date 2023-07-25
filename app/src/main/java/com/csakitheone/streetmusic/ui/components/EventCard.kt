@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.EventActivity
+import com.csakitheone.streetmusic.ui.activities.EventActivity
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Place

@@ -8,11 +8,11 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.MainActivity" />
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.CalendarActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.CalendarActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="authors"
@@ -22,11 +22,11 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.MainActivity" />
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.MusiciansActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.MusiciansActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="places"
@@ -36,11 +36,11 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.MainActivity" />
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.PlacesActivity" />
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.PlacesActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="now_playing"
@@ -50,7 +50,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.MainActivity"
+            android:targetClass="com.csakitheone.streetmusic.ui.activities.MainActivity"
             android:data="now_playing" />
     </shortcut-->
 </shortcuts>

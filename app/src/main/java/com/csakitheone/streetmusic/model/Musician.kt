@@ -5,13 +5,13 @@ import com.csakitheone.streetmusic.R
 
 @Keep
 data class Musician(
-    val name: String,
+    val name: String = "",
     val description: String? = null,
     val country: String? = null,
     val imageUrl: String? = null,
     val youtubeUrl: String? = null,
     val tags: List<Int>? = null,
-    val year: Int? = null,
+    val years: List<Int>? = null,
 ) {
     fun getFlag(): String {
         return countryFlags[country] ?: ""

@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.data.TeremEventProvider
 import com.csakitheone.streetmusic.model.Musician

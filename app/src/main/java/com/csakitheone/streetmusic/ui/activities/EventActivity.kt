@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.provider.CalendarContract
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,11 +20,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,9 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.UzApi
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
@@ -59,9 +54,7 @@ import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
-import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.CustomTabsManager
-import com.csakitheone.streetmusic.util.Helper
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -166,10 +159,7 @@ class EventActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (
-                            !BatterySaverManager.isBatterySaverEnabled &&
-                            !event?.musician?.imageUrl.isNullOrBlank()
-                        ) {
+                        if (!event?.musician?.imageUrl.isNullOrBlank()) {
                             OutlinedCard(
                                 modifier = Modifier
                                     .fillMaxWidth()

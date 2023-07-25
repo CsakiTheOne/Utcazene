@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +23,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -51,9 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.data.UzApi
 import com.csakitheone.streetmusic.model.Event
@@ -63,9 +59,7 @@ import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
-import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.CustomTabsManager
-import com.csakitheone.streetmusic.util.Helper
 import com.csakitheone.streetmusic.util.TranslatorManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -202,10 +196,7 @@ class MusicianActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (
-                            !BatterySaverManager.isBatterySaverEnabled &&
-                            !musician?.imageUrl.isNullOrBlank()
-                        ) {
+                        if (!musician?.imageUrl.isNullOrBlank()) {
                             OutlinedCard(
                                 modifier = Modifier
                                     .fillMaxWidth()

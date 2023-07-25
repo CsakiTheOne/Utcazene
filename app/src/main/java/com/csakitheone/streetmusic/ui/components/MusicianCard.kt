@@ -5,6 +5,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.MusicianActivity
-import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.ui.activities.MusicianActivity
 import com.csakitheone.streetmusic.model.Musician
 import com.google.gson.Gson
 
@@ -39,6 +39,7 @@ fun MusicianCard(
     ),
     isPinned: Boolean? = null,
     onPinnedChangeRequest: (Boolean) -> Unit = {},
+    showYears: Boolean = false,
 ) {
     val context = LocalContext.current
 
@@ -58,12 +59,18 @@ fun MusicianCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .weight(1f),
+                    modifier = Modifier.padding(8.dp),
                     text = musician.name,
                     style = MaterialTheme.typography.titleSmall,
                 )
+                if (showYears && musician.years != null) {
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = "(${musician.years.joinToString()})",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 if (isPinned != null) {
                     IconButton(
                         modifier = Modifier.padding(start = 8.dp),

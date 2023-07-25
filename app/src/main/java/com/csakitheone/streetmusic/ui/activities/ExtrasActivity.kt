@@ -1,8 +1,7 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.horizontalScroll
@@ -46,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme

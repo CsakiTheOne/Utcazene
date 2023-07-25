@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Feed
@@ -63,15 +62,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.data.MotdProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
-import com.csakitheone.streetmusic.ui.components.util.PreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
-import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.csakitheone.streetmusic.util.InAppUpdater
@@ -85,16 +83,12 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    private var isBatterySaverPreferenceLoaded by mutableStateOf(false)
     private var events by mutableStateOf(listOf<Event>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
-            setKeepOnScreenCondition {
-                isBatterySaverPreferenceLoaded &&
-                        events.isNotEmpty()
-            }
+            setKeepOnScreenCondition { events.isNotEmpty() }
         }
         InAppUpdater.init(this)
         setContent {
@@ -140,7 +134,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
             var motd by remember { mutableStateOf(MotdProvider.getRandomMotd(context)) }
-            var isBatterySaverDialogVisible by remember { mutableStateOf(false) }
             var isWebsitesMenuVisible by remember { mutableStateOf(false) }
 
             var isNowPlayingDialogVisible by remember { mutableStateOf(false) }
@@ -159,16 +152,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            PreferenceHolder(
-                id = "batterySaver",
-                value = BatterySaverManager.isBatterySaverEnabled,
-                isValueChanged = {
-                    BatterySaverManager.isBatterySaverEnabled = it
-                    isBatterySaverPreferenceLoaded = true
-                },
-                defaultValue = false,
-            )
-
             LaunchedEffect(Unit) {
                 EventsProvider.getEvents(this@MainActivity) {
                     events = it
@@ -176,32 +159,6 @@ class MainActivity : ComponentActivity() {
                         isNowPlayingDialogVisible = true
                     }
                 }
-            }
-
-            if (isBatterySaverDialogVisible) {
-                AlertDialog(
-                    title = { Text(text = stringResource(id = R.string.battery_saver)) },
-                    text = { Text(text = stringResource(id = R.string.battery_saver_description)) },
-                    onDismissRequest = { isBatterySaverDialogVisible = false },
-                    dismissButton = {
-                        TextButton(
-                            onClick = { isBatterySaverDialogVisible = false }
-                        ) {
-                            Text(text = stringResource(id = R.string.close))
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                BatterySaverManager.isBatterySaverEnabled =
-                                    !BatterySaverManager.isBatterySaverEnabled
-                                isBatterySaverDialogVisible = false
-                            }
-                        ) {
-                            Text(text = stringResource(id = if (BatterySaverManager.isBatterySaverEnabled) R.string.turn_off else R.string.turn_on))
-                        }
-                    },
-                )
             }
 
             if (isNowPlayingDialogVisible) {
@@ -257,16 +214,6 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = null
                                     )
                                 }
-                            }
-                            IconButton(
-                                onClick = {
-                                    isBatterySaverDialogVisible = true
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.BatterySaver,
-                                    contentDescription = null
-                                )
                             }
                         },
                         colors = TopAppBarDefaults.smallTopAppBarColors(

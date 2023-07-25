@@ -18,40 +18,40 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true">
         <activity
-            android:name=".MusicianActivity"
+            android:name=".ui.activities.MusicianActivity"
             android:exported="false" />
         <activity
-            android:name=".EventActivity"
+            android:name=".ui.activities.EventActivity"
             android:exported="false" />
         <activity
-            android:name=".MusiciansActivity"
+            android:name=".ui.activities.MusiciansActivity"
             android:exported="false" />
         <activity
-            android:name=".CalendarActivity"
+            android:name=".ui.activities.CalendarActivity"
             android:exported="false" />
         <activity
-            android:name=".PlacesActivity"
+            android:name=".ui.activities.PlacesActivity"
             android:exported="false" />
         <activity
-            android:name=".SupportActivity"
+            android:name=".ui.activities.SupportActivity"
             android:exported="false" />
         <activity
-            android:name=".TeremActivity"
+            android:name=".ui.activities.TeremActivity"
             android:exported="false" />
         <activity
-            android:name=".ExtrasActivity"
+            android:name=".ui.activities.ExtrasActivity"
             android:exported="false" />
         <activity
-            android:name=".DiceActivity"
+            android:name=".ui.activities.DiceActivity"
             android:exported="false" />
         <activity
-            android:name=".PlayingCardsActivity"
+            android:name=".ui.activities.PlayingCardsActivity"
             android:exported="false" />
         <activity
-            android:name=".HubActivity"
+            android:name=".ui.activities.HubActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:exported="true"
             android:theme="@style/SplashScreen">
             <meta-data

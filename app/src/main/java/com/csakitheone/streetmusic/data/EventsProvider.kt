@@ -10,7 +10,6 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Place
-import com.csakitheone.streetmusic.util.BatterySaverManager
 import com.csakitheone.streetmusic.util.Helper
 
 class EventsProvider {
@@ -223,7 +222,6 @@ class EventsProvider {
                 (
                         isDataOld &&
                                 Helper.isUnmeteredNetworkAvailable(context) &&
-                                !BatterySaverManager.isBatterySaverEnabled &&
                                 !skipDownload
                         )
             ) {

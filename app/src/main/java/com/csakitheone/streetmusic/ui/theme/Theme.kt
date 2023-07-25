@@ -54,14 +54,6 @@ private val LightColorScheme = lightColorScheme(
     onBackground = BlueDark,
 )
 
-private val BatterySaverColorScheme = darkColorScheme(
-    primary = Yellow,
-    secondary = Cyan,
-    tertiary = Blue,
-    surfaceVariant = Cyan,
-    background = Color.Black,
-)
-
 @Composable
 fun UtcazeneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -70,17 +62,7 @@ fun UtcazeneTheme(
     isTintingNavbar: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    var isBatterySaverOn by remember { mutableStateOf(false) }
-
-    PreferenceHolder(
-        id = "batterySaver",
-        value = isBatterySaverOn,
-        isValueChanged = { isBatterySaverOn = it },
-        defaultValue = false,
-    )
-    
     val colorScheme = when {
-        isBatterySaverOn -> BatterySaverColorScheme
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -93,7 +75,7 @@ fun UtcazeneTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme && !isBatterySaverOn
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             if (isTintingNavbar) {
                 window.navigationBarColor = colorScheme.background.toArgb()
             }

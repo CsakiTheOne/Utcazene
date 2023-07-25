@@ -1,4 +1,4 @@
-package com.csakitheone.streetmusic
+package com.csakitheone.streetmusic.ui.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -37,11 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.TeremEventProvider
 import com.csakitheone.streetmusic.ui.components.DaySelectorRow
-import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MusicianCard
-import com.csakitheone.streetmusic.ui.components.NowIndicator
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager

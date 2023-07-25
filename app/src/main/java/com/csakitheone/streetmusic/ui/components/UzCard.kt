@@ -8,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.csakitheone.streetmusic.util.BatterySaverManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -21,15 +20,10 @@ fun UzCard(
     Card(
         modifier = modifier,
         onClick = onClick,
-        colors = if (!BatterySaverManager.isBatterySaverEnabled) CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
-        )
-        else CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.background,
         ),
-        border = if (!BatterySaverManager.isBatterySaverEnabled) null
-        else CardDefaults.outlinedCardBorder(),
         content = content,
     )
 }

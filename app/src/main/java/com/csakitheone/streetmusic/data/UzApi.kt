@@ -113,7 +113,6 @@ class UzApi {
                             commit()
                         }
                     }
-
                     callback(artistsJsonToEvents(responseString))
                 }
                 catch (ex: Exception) {

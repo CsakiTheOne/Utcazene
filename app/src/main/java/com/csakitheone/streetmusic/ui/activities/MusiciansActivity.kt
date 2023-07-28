@@ -71,7 +71,7 @@ class MusiciansActivity : ComponentActivity() {
 
             var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
             var isOnlyPinned by remember { mutableStateOf(false) }
-            var filterTags by remember { mutableStateOf(listOf<Int>()) }
+            var filterTags by remember { mutableStateOf(listOf<String>()) }
 
             var musicians by remember { mutableStateOf(listOf<Musician>()) }
             val visibleMusicians by remember(musicians, musiciansPinned, isOnlyPinned, filterTags) {
@@ -174,7 +174,7 @@ class MusiciansActivity : ComponentActivity() {
                                                     if (filterTags.contains(tag)) filterTags.filter { it != tag }
                                                     else filterTags + tag
                                             },
-                                            label = { Text(text = stringResource(id = tag)) },
+                                            label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
                                             leadingIcon = {
                                                 Icon(
                                                     imageVector = if (filterTags.contains(tag)) Icons.Filled.Label

@@ -59,18 +59,10 @@ fun MusicianCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(8.dp).weight(1f),
                     text = musician.name,
                     style = MaterialTheme.typography.titleSmall,
                 )
-                if (showYears && musician.years != null) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "(${musician.years.joinToString()})",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
                 if (isPinned != null) {
                     IconButton(
                         modifier = Modifier.padding(start = 8.dp),
@@ -101,9 +93,20 @@ fun MusicianCard(
                 }
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = musician.tags?.joinToString { context.getString(it) } ?: "",
+                    text = musician.tags?.joinToString {
+                        if (Musician.tagStrings[it] == null) ""
+                        else context.getString(Musician.tagStrings[it]!!)
+                    } ?: "",
                     style = MaterialTheme.typography.bodySmall,
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                if (showYears && musician.years != null) {
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = musician.years.joinToString(),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
             }
         }
     }

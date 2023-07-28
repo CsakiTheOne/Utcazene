@@ -43,6 +43,10 @@
     <string name="open_facebook">Open Facebook page</string>
     <string name="open_instagram">Open Instagram page</string>
 
+    <!-- HUB -->
+    <string name="search_by_name">Search by name</string>
+    <string name="hub_list_expand_info">This list will be continuously expanded with all the musicians who have ever performed at Utcazene.</string>
+
     <!-- EVENTS -->
     <string name="export_to_calendar">Export to calendar</string>
     <string name="exported_event_description">Added from Utcazene app. https://utcazene.hu</string>

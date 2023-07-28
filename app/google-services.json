@@ -14,7 +14,23 @@
       },
       "oauth_client": [
         {
-          "client_id": "911588427998-36tq5sg8k3dk755s05lfestbm6lcuss4.apps.googleusercontent.com",
+          "client_id": "911588427998-bsum825b5d7qc5cjnua8d12q871l5tp9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.csakitheone.streetmusic",
+            "certificate_hash": "05c898a44e78a22ad83bf783514f4ce49804364e"
+          }
+        },
+        {
+          "client_id": "911588427998-o19u78gpr0il542vpc5rd14daud3perl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.csakitheone.streetmusic",
+            "certificate_hash": "273666be55c9d9fa44488e70489ea0d36e9b0553"
+          }
+        },
+        {
+          "client_id": "911588427998-rkbse45ggcbboahjlqi0im16nekb3m2i.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

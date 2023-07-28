@@ -209,6 +209,8 @@ class EventsProvider {
             callback: (List<Event>) -> Unit = {}
         ) {
             state = STATE_UNKNOWN
+            callback(listOf())
+            return
             // 1.
             val timeTillOld = 1000L * 60 * 30
             val isDataOld = PreferenceManager

@@ -40,6 +40,10 @@
     <string name="open_facebook">Facebook oldal megnyitása</string>
     <string name="open_instagram">Instagram oldal megnyitása</string>
 
+    <!-- HUB -->
+    <string name="search_by_name">Keresés név alapján</string>
+    <string name="hub_list_expand_info">Ez a lista folyamatosan bővülni fog az összes zenésszel, akik valaha felléptek Utcazenén.</string>
+
     <!-- EVENTS -->
     <string name="export_to_calendar">Exportálás naptárba</string>
     <string name="exported_event_description">Hozzáadva az Utcazene alkalmazásból. https://utcazene.hu</string>

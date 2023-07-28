@@ -287,7 +287,7 @@ class MusicianActivity : ComponentActivity() {
                                     modifier = Modifier.padding(8.dp),
                                     selected = false,
                                     onClick = {},
-                                    label = { Text(text = stringResource(id = tag)) },
+                                    label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
                                 )
                             }
                         }

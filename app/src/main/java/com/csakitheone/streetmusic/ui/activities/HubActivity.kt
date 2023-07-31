@@ -2,6 +2,7 @@ package com.csakitheone.streetmusic.ui.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Code
@@ -87,7 +90,7 @@ class HubActivity : ComponentActivity() {
     @Composable
     fun HubScreen() {
         UtcazeneTheme {
-            val scroll = rememberScrollState()
+            val scroll = rememberLazyListState()
 
             var is2023ended by remember { mutableStateOf(false) }
 
@@ -118,7 +121,7 @@ class HubActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                Firestore.getAllMusicians { 
+                Firestore.Musicians.getAll {
                     musicians = it
                 }
                 is2023ended = PreferenceManager.getDefaultSharedPreferences(this@HubActivity)
@@ -193,6 +196,22 @@ class HubActivity : ComponentActivity() {
                                             DropdownMenuItem(
                                                 text = { Text(text = "Admin dashboard") },
                                                 onClick = {
+                                                    Firestore.Users.isSelfAdmin {
+                                                        if (!it) {
+                                                            Toast.makeText(
+                                                                this@HubActivity,
+                                                                "Access denied",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                            return@isSelfAdmin
+                                                        }
+                                                        startActivity(
+                                                            Intent(
+                                                                this@HubActivity,
+                                                                AdminActivity::class.java
+                                                            )
+                                                        )
+                                                    }
                                                     isMenuVisible = false
                                                 }
                                             )
@@ -224,232 +243,234 @@ class HubActivity : ComponentActivity() {
                             ),
                         )
                     }
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
-                            .padding(8.dp)
-                            .verticalScroll(scroll),
+                            .padding(8.dp),
+                        state = scroll,
                     ) {
-                        MenuCard(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@HubActivity,
-                                        ExtrasActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.VideogameAsset,
-                            title = stringResource(id = R.string.extras),
-                        )
-                        MenuCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = { isWebsitesMenuVisible = true },
-                            imageVector = Icons.Default.Language,
-                            title = stringResource(id = R.string.websites),
-                        ) {
-                            DropdownMenu(
-                                expanded = isWebsitesMenuVisible,
-                                onDismissRequest = { isWebsitesMenuVisible = false }
-                            ) {
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Feed,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_website)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@HubActivity,
-                                            "https://utcazene.hu/"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_facebook),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_facebook)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@HubActivity,
-                                            "https://facebook.com/utcazene"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_instagram),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_instagram)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@HubActivity,
-                                            "https://instagram.com/utcazene"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
-                                )
-                            }
-                        }
-                        MenuCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@HubActivity,
-                                        SupportActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.Code,
-                            title = stringResource(id = R.string.made_by_csaki),
-                        )
-                        AnimatedVisibility(visible = musiciansPinned.isNotEmpty()) {
-                            Column {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.filter_pinned),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                ) {
-                                    musiciansPinned.map { musician ->
-                                        MusicianCard(
-                                            modifier = Modifier
-                                                .padding(8.dp)
-                                                .widthIn(max = 256.dp),
-                                            musician = musician,
-                                            isPinned = musiciansPinned.contains(musician),
-                                            onPinnedChangeRequest = {
-                                                musiciansPinned = if (it) musiciansPinned + musician
-                                                else musiciansPinned - musician
-                                            },
-                                            showYears = true,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.musicians),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        TextField(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            value = musiciansQuery,
-                            onValueChange = { musiciansQuery = it },
-                            placeholder = {
-                                Text(text = stringResource(id = R.string.search_by_name))
-                            },
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Default.Search, contentDescription = null)
-                            },
-                            trailingIcon = {
-                                AnimatedVisibility(visible = musiciansQuery.isNotEmpty()) {
-                                    IconButton(
-                                        onClick = { musiciansQuery = "" },
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Clear,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                        Row(
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            musicians.flatMap { it.tags ?: listOf() }
-                                .distinct()
-                                .map { tag ->
-                                    ElevatedFilterChip(
-                                        modifier = Modifier.padding(8.dp),
-                                        selected = filterTags.contains(tag),
-                                        onClick = {
-                                            filterTags =
-                                                if (filterTags.contains(tag)) filterTags - tag
-                                                else filterTags + tag
-                                        },
-                                        label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
-                                                else Icons.Outlined.Label,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    )
-                                }
-                            musicians.flatMap { it.years ?: listOf() }
-                                .distinct()
-                                .map { year ->
-                                    ElevatedFilterChip(
-                                        modifier = Modifier.padding(8.dp),
-                                        selected = filterYears.contains(year),
-                                        onClick = {
-                                            filterYears =
-                                                if (filterYears.contains(year)) filterYears - year
-                                                else filterYears + year
-                                        },
-                                        label = { Text(text = "$year") },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = if (filterYears.contains(year)) Icons.Filled.DateRange
-                                                else Icons.Outlined.DateRange,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    )
-                                }
-                            musicians.map { it.country ?: "" }
-                                .distinct()
-                                .map { country ->
-                                    ElevatedFilterChip(
-                                        modifier = Modifier.padding(8.dp),
-                                        selected = filterCountries.contains(country),
-                                        onClick = {
-                                            filterCountries =
-                                                if (filterCountries.contains(country)) filterCountries - country
-                                                else filterCountries + country
-                                        },
-                                        label = { Text(text = "${Musician.countryFlags[country] ?: ""} $country") },
-                                    )
-                                }
-                        }
-                        AnimatedVisibility(visible = musicians.isEmpty()) {
-                            Box(
+                        item {
+                            MenuCard(
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .fillMaxWidth(),
-                                contentAlignment = Alignment.Center,
+                                onClick = {
+                                    startActivity(
+                                        Intent(
+                                            this@HubActivity,
+                                            ExtrasActivity::class.java
+                                        )
+                                    )
+                                },
+                                imageVector = Icons.Default.VideogameAsset,
+                                title = stringResource(id = R.string.extras),
+                            )
+                            MenuCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                onClick = { isWebsitesMenuVisible = true },
+                                imageVector = Icons.Default.Language,
+                                title = stringResource(id = R.string.websites),
                             ) {
-                                CircularProgressIndicator()
+                                DropdownMenu(
+                                    expanded = isWebsitesMenuVisible,
+                                    onDismissRequest = { isWebsitesMenuVisible = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Feed,
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        text = { Text(text = stringResource(id = R.string.open_website)) },
+                                        onClick = {
+                                            CustomTabsManager.open(
+                                                this@HubActivity,
+                                                "https://utcazene.hu/"
+                                            )
+                                            isWebsitesMenuVisible = false
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        leadingIcon = {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_facebook),
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        text = { Text(text = stringResource(id = R.string.open_facebook)) },
+                                        onClick = {
+                                            CustomTabsManager.open(
+                                                this@HubActivity,
+                                                "https://facebook.com/utcazene"
+                                            )
+                                            isWebsitesMenuVisible = false
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        leadingIcon = {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_instagram),
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        text = { Text(text = stringResource(id = R.string.open_instagram)) },
+                                        onClick = {
+                                            CustomTabsManager.open(
+                                                this@HubActivity,
+                                                "https://instagram.com/utcazene"
+                                            )
+                                            isWebsitesMenuVisible = false
+                                        },
+                                    )
+                                }
+                            }
+                            MenuCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                onClick = {
+                                    startActivity(
+                                        Intent(
+                                            this@HubActivity,
+                                            SupportActivity::class.java
+                                        )
+                                    )
+                                },
+                                imageVector = Icons.Default.Code,
+                                title = stringResource(id = R.string.made_by_csaki),
+                            )
+                            AnimatedVisibility(visible = musiciansPinned.isNotEmpty()) {
+                                Column {
+                                    Text(
+                                        modifier = Modifier.padding(8.dp),
+                                        text = stringResource(id = R.string.filter_pinned),
+                                        style = MaterialTheme.typography.titleMedium,
+                                    )
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    ) {
+                                        musiciansPinned.map { musician ->
+                                            MusicianCard(
+                                                modifier = Modifier
+                                                    .padding(8.dp)
+                                                    .widthIn(max = 300.dp),
+                                                musician = musician,
+                                                isPinned = musiciansPinned.contains(musician),
+                                                onPinnedChangeRequest = {
+                                                    musiciansPinned = if (it) musiciansPinned + musician
+                                                    else musiciansPinned - musician
+                                                },
+                                                showYears = true,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = stringResource(id = R.string.musicians),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            TextField(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                value = musiciansQuery,
+                                onValueChange = { musiciansQuery = it },
+                                placeholder = {
+                                    Text(text = stringResource(id = R.string.search_by_name))
+                                },
+                                leadingIcon = {
+                                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                                },
+                                trailingIcon = {
+                                    AnimatedVisibility(visible = musiciansQuery.isNotEmpty()) {
+                                        IconButton(
+                                            onClick = { musiciansQuery = "" },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    }
+                                },
+                            )
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                musicians.flatMap { it.tags ?: listOf() }
+                                    .distinct()
+                                    .map { tag ->
+                                        ElevatedFilterChip(
+                                            modifier = Modifier.padding(8.dp),
+                                            selected = filterTags.contains(tag),
+                                            onClick = {
+                                                filterTags =
+                                                    if (filterTags.contains(tag)) filterTags - tag
+                                                    else filterTags + tag
+                                            },
+                                            label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
+                                                    else Icons.Outlined.Label,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        )
+                                    }
+                                musicians.flatMap { it.years ?: listOf() }
+                                    .distinct()
+                                    .map { year ->
+                                        ElevatedFilterChip(
+                                            modifier = Modifier.padding(8.dp),
+                                            selected = filterYears.contains(year),
+                                            onClick = {
+                                                filterYears =
+                                                    if (filterYears.contains(year)) filterYears - year
+                                                    else filterYears + year
+                                            },
+                                            label = { Text(text = "$year") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = if (filterYears.contains(year)) Icons.Filled.DateRange
+                                                    else Icons.Outlined.DateRange,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        )
+                                    }
+                                musicians.map { it.country ?: "" }
+                                    .distinct()
+                                    .map { country ->
+                                        ElevatedFilterChip(
+                                            modifier = Modifier.padding(8.dp),
+                                            selected = filterCountries.contains(country),
+                                            onClick = {
+                                                filterCountries =
+                                                    if (filterCountries.contains(country)) filterCountries - country
+                                                    else filterCountries + country
+                                            },
+                                            label = { Text(text = "${Musician.countryFlags[country] ?: ""} $country") },
+                                        )
+                                    }
+                            }
+                            AnimatedVisibility(visible = musicians.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
                         }
-                        visibleMusicians.map { musician ->
+                        items(items = visibleMusicians, key = { it.name }) { musician ->
                             MusicianCard(
                                 modifier = Modifier.padding(8.dp),
                                 musician = musician,
@@ -461,13 +482,15 @@ class HubActivity : ComponentActivity() {
                                 showYears = true,
                             )
                         }
-                        Text(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            text = stringResource(id = R.string.hub_list_expand_info),
-                            textAlign = TextAlign.Center,
-                        )
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                text = stringResource(id = R.string.hub_list_expand_info),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
                 }
             }

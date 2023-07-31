@@ -18,6 +18,9 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true">
         <activity
+            android:name=".ui.activities.AdminActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.activities.MusicianActivity"
             android:exported="false" />
         <activity

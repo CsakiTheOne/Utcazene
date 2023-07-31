@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import com.csakitheone.streetmusic.R
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -22,6 +23,9 @@ class Auth {
         val isSignedIn: Boolean
             get() = Firebase.auth.currentUser != null
 
+        val user: FirebaseUser?
+            get() = Firebase.auth.currentUser
+
         var isSignedInState by mutableStateOf(isSignedIn)
             private set
 
@@ -32,14 +36,13 @@ class Auth {
                     BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                         .setSupported(true)
                         .setServerClientId(activity.getString(R.string.web_client_id))
-                        .setFilterByAuthorizedAccounts(true)
+                        .setFilterByAuthorizedAccounts(false)
                         .build()
                 )
-                .setAutoSelectEnabled(false)
                 .build()
             oneTapClient.beginSignIn(signInRequest)
                 .addOnFailureListener {
-                    Toast.makeText(activity, "Sign in failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, "Sign in failed ${it.message}", Toast.LENGTH_SHORT).show()
                     Log.e("Auth", it.message ?: "")
                 }
                 .addOnSuccessListener {

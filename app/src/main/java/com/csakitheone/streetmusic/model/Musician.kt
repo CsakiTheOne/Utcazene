@@ -2,6 +2,7 @@ package com.csakitheone.streetmusic.model
 
 import androidx.annotation.Keep
 import com.csakitheone.streetmusic.R
+import com.google.firebase.firestore.Exclude
 
 @Keep
 data class Musician(
@@ -13,8 +14,17 @@ data class Musician(
     val tags: List<String>? = null,
     val years: List<Int>? = null,
 ) {
+    @Exclude
     fun getFlag(): String {
         return countryFlags[country] ?: ""
+    }
+
+    fun isIncomplete(): Boolean {
+        return description.isNullOrBlank() ||
+                country.isNullOrBlank() ||
+                imageUrl.isNullOrBlank() ||
+                youtubeUrl.isNullOrBlank() ||
+                years.isNullOrEmpty()
     }
 
     fun merge(other: Musician?): Musician {
@@ -40,14 +50,14 @@ data class Musician(
         )
     }
 
-    override fun equals(other: Any?): Boolean {
+    /*override fun equals(other: Any?): Boolean {
         if (other !is Musician) return false
         return name.equals(other.name, true)
     }
 
     override fun hashCode(): Int {
         return name.hashCode()
-    }
+    }*/
 
     companion object {
 

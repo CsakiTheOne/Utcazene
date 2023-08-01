@@ -60,7 +60,7 @@ class Firestore {
                 callback: () -> Unit = {},
             ) {
                 getAll { musicians ->
-                    val groupsByName = musicians.groupBy { it.name.toLowerCase().trim() }
+                    val groupsByName = musicians.groupBy { it.name.lowercase().trim() }
                     val allMerged = groupsByName.flatMap {
                         var merged = it.value
                         while (merged.size > 1) {

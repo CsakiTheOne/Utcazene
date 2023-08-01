@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -115,6 +116,7 @@ class AdminActivity : ComponentActivity() {
             var selectedMusician: Musician? by remember { mutableStateOf(null) }
             var isMassAddDialogVisible by remember { mutableStateOf(false) }
             var massAddNames by remember(isMassAddDialogVisible) { mutableStateOf("") }
+            var massAddTags by remember(isMassAddDialogVisible) { mutableStateOf(listOf<String>()) }
             var massAddYear by remember(isMassAddDialogVisible) { mutableStateOf(LocalDate.now().year) }
 
             LaunchedEffect(Unit) {
@@ -149,20 +151,41 @@ class AdminActivity : ComponentActivity() {
                     title = { Text(text = "Mass-add musicians") },
                     text = {
                         Column(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
                         ) {
                             Text(
                                 modifier = Modifier.padding(8.dp),
                                 text = "Write down the names of every musician you'd like to add. " +
-                                        "One name per comma. Don't worry if you write someone " +
+                                        "You can also write countries in parentheses. " +
+                                        "One name per line. Don't worry if you write someone " +
                                         "who's already in the database, you can check for " +
                                         "duplicates and merge later.",
                             )
                             TextField(
-                                modifier = Modifier.padding(8.dp),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
                                 value = massAddNames,
                                 onValueChange = { massAddNames = it },
                             )
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            ) {
+                                Musician.tagStrings.map {
+                                    FilterChip(
+                                        modifier = Modifier.padding(8.dp),
+                                        selected = massAddTags.contains(it.key),
+                                        onClick = {
+                                            massAddTags =
+                                                if (massAddTags.contains(it.key)) massAddTags - it.key
+                                                else massAddTags + it.key
+                                        },
+                                        label = { Text(text = stringResource(id = it.value)) },
+                                    )
+                                }
+                            }
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                             ) {
@@ -177,7 +200,7 @@ class AdminActivity : ComponentActivity() {
                             }
                             Text(
                                 modifier = Modifier.padding(8.dp),
-                                text = "${massAddNames.split(',').size} musicians will be added.",
+                                text = "${massAddNames.split('\n').size} musicians will be added.",
                             )
                         }
                     },
@@ -192,8 +215,18 @@ class AdminActivity : ComponentActivity() {
                             onClick = {
                                 Firestore.Musicians.addAll(
                                     massAddNames
-                                        .split(',')
-                                        .map { Musician(name = it.trim(), years = listOf(massAddYear)) }
+                                        .split('\n')
+                                        .map {
+                                            Musician(
+                                                name = it.substringBefore('(').trim(),
+                                                country = if (it.contains('(')) it
+                                                    .substringAfter('(')
+                                                    .substringBefore(')')
+                                                else null,
+                                                tags = massAddTags,
+                                                years = listOf(massAddYear),
+                                            )
+                                        }
                                 ) {
                                     musicians = listOf()
                                     isMassAddDialogVisible = false
@@ -418,7 +451,7 @@ class AdminActivity : ComponentActivity() {
                                         )
                                     }
                                 }
-                                items(items = visibleMusicians, key = { it.name }) { musician ->
+                                items(items = visibleMusicians, key = { it.name + it.years }) { musician ->
                                     CompactAdminMusicianCard(
                                         modifier = Modifier.padding(8.dp),
                                         musician = musician,
@@ -519,6 +552,12 @@ class AdminActivity : ComponentActivity() {
                                 )
                             }
                         },
+                        supportingText = {
+                            if (currentMusician.imageUrl?.contains("https://utcazene.hu/") == true) {
+                                Text(text = "The official website is not a sustainable source!")
+                            }
+                        },
+                        isError = currentMusician.imageUrl?.contains("https://utcazene.hu/") == true,
                     )
                     TextField(
                         modifier = Modifier
@@ -548,6 +587,24 @@ class AdminActivity : ComponentActivity() {
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                     ) {
+                        Musician.tagStrings.map {
+                            FilterChip(
+                                modifier = Modifier.padding(8.dp),
+                                selected = currentMusician.tags?.contains(it.key) == true,
+                                onClick = {
+                                    currentMusician = currentMusician.copy(
+                                        tags = if (currentMusician.tags?.contains(it.key) == true) (currentMusician.tags
+                                            ?: listOf()) - it.key
+                                        else (currentMusician.tags ?: listOf()) + it.key
+                                    )
+                                },
+                                label = { Text(text = stringResource(id = it.value)) },
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    ) {
                         (2004..LocalDate.now().year).reversed().map { year ->
                             FilterChip(
                                 modifier = Modifier.padding(8.dp),
@@ -563,13 +620,14 @@ class AdminActivity : ComponentActivity() {
                             )
                         }
                     }
-                    TextButton(
+                    Button(
                         modifier = Modifier
                             .padding(8.dp)
                             .fillMaxWidth(),
                         onClick = { onSaveRequest(null) },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
                         )
                     ) {
                         Text(text = "Delete")

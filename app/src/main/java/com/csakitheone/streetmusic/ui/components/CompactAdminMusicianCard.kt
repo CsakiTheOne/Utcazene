@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.OndemandVideo
 import androidx.compose.material3.Icon
@@ -69,6 +70,14 @@ fun CompactAdminMusicianCard(
                 Icon(
                     modifier = Modifier.padding(8.dp),
                     imageVector = Icons.Default.OndemandVideo,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+            if (musician.tags.isNullOrEmpty()) {
+                Icon(
+                    modifier = Modifier.padding(8.dp),
+                    imageVector = Icons.Default.Label,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,
                 )

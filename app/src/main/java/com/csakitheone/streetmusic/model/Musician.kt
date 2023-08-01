@@ -24,15 +24,17 @@ data class Musician(
                 country.isNullOrBlank() ||
                 imageUrl.isNullOrBlank() ||
                 youtubeUrl.isNullOrBlank() ||
+                tags.isNullOrEmpty() ||
                 years.isNullOrEmpty()
     }
 
     fun merge(other: Musician?): Musician {
         if (other == null) return this
-        if (name != other.name || country != other.country) {
-            throw Exception("Can't merge musicians with different name or country!")
+        if (!name.trim().equals(other.name.trim(), ignoreCase = true)) {
+            throw Exception("Can't merge musicians with different name! $name != ${other.name}")
         }
         if (
+            (!country.isNullOrBlank() && !other.country.isNullOrBlank() && country != other.country) ||
             (!description.isNullOrBlank() && !other.description.isNullOrBlank() && description != other.description) ||
             (!imageUrl.isNullOrBlank() && !other.imageUrl.isNullOrBlank() && imageUrl != other.imageUrl) ||
             (!youtubeUrl.isNullOrBlank() && !other.youtubeUrl.isNullOrBlank() && youtubeUrl != other.youtubeUrl)

@@ -21,11 +21,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material.icons.outlined.DateRange
@@ -103,7 +107,13 @@ class HubActivity : ComponentActivity() {
             var filterTags by remember { mutableStateOf(listOf<String>()) }
             var filterYears by remember { mutableStateOf(listOf<Int>()) }
             var filterCountries by remember { mutableStateOf(listOf<String>()) }
-            val visibleMusicians by remember(musicians, filterTags, filterYears, filterCountries, musiciansQuery) {
+            val visibleMusicians by remember(
+                musicians,
+                filterTags,
+                filterYears,
+                filterCountries,
+                musiciansQuery
+            ) {
                 mutableStateOf(
                     musicians
                         .filter { filterTags.isEmpty() || it.tags?.containsAll(filterTags) == true }
@@ -131,7 +141,11 @@ class HubActivity : ComponentActivity() {
             ListPreferenceHolder(
                 id = "authorsPinned",
                 value = musiciansPinned,
-                onValueChanged = { musiciansPinned = it.toList().sortedBy { m -> m.name } },
+                onValueChanged = { newPinned ->
+                    musiciansPinned = musicians.filter { musician ->
+                        newPinned.any { musician.name == it.name }
+                    }
+                },
                 type = object : TypeToken<Musician>() {}.type,
             )
 
@@ -153,12 +167,13 @@ class HubActivity : ComponentActivity() {
                     confirmButton = {
                         TextButton(
                             onClick = {
-                                PreferenceManager.getDefaultSharedPreferences(this@HubActivity).edit {
-                                    clear()
-                                    putBoolean("is2023ended", true)
-                                    commit()
-                                    finishAffinity()
-                                }
+                                PreferenceManager.getDefaultSharedPreferences(this@HubActivity)
+                                    .edit {
+                                        clear()
+                                        putBoolean("is2023ended", true)
+                                        commit()
+                                        finishAffinity()
+                                    }
                             },
                         ) {
                             Text(text = "Clean up and continue")
@@ -192,6 +207,22 @@ class HubActivity : ComponentActivity() {
                                         expanded = isMenuVisible,
                                         onDismissRequest = { isMenuVisible = false },
                                     ) {
+                                        DropdownMenuItem(
+                                            text = { Text(text = "Refresh") },
+                                            onClick = {
+                                                musicians = listOf()
+                                                Firestore.Musicians.getAll {
+                                                    musicians = it
+                                                }
+                                                isMenuVisible = false
+                                            },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Refresh,
+                                                    contentDescription = null,
+                                                )
+                                            },
+                                        )
                                         if (Auth.isSignedInState) {
                                             DropdownMenuItem(
                                                 text = { Text(text = "Admin dashboard") },
@@ -213,23 +244,40 @@ class HubActivity : ComponentActivity() {
                                                         )
                                                     }
                                                     isMenuVisible = false
-                                                }
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Dashboard,
+                                                        contentDescription = null,
+                                                    )
+                                                },
                                             )
                                             DropdownMenuItem(
                                                 text = { Text(text = "Sign out") },
                                                 onClick = {
                                                     Auth.signOut()
                                                     isMenuVisible = false
-                                                }
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Logout,
+                                                        contentDescription = null,
+                                                    )
+                                                },
                                             )
-                                        }
-                                        else {
+                                        } else {
                                             DropdownMenuItem(
                                                 text = { Text(text = "Sign in with Google") },
                                                 onClick = {
                                                     Auth.signInBegin(this@HubActivity)
                                                     isMenuVisible = false
-                                                }
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Login,
+                                                        contentDescription = null,
+                                                    )
+                                                },
                                             )
                                         }
                                     }
@@ -359,8 +407,9 @@ class HubActivity : ComponentActivity() {
                                                 musician = musician,
                                                 isPinned = musiciansPinned.contains(musician),
                                                 onPinnedChangeRequest = {
-                                                    musiciansPinned = if (it) musiciansPinned + musician
-                                                    else musiciansPinned - musician
+                                                    musiciansPinned =
+                                                        if (it) musiciansPinned + musician
+                                                        else musiciansPinned - musician
                                                 },
                                                 showYears = true,
                                             )
@@ -383,7 +432,10 @@ class HubActivity : ComponentActivity() {
                                     Text(text = stringResource(id = R.string.search_by_name))
                                 },
                                 leadingIcon = {
-                                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = null
+                                    )
                                 },
                                 trailingIcon = {
                                     AnimatedVisibility(visible = musiciansQuery.isNotEmpty()) {
@@ -400,7 +452,6 @@ class HubActivity : ComponentActivity() {
                             )
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 musicians.flatMap { it.tags ?: listOf() }
                                     .distinct()
@@ -423,6 +474,10 @@ class HubActivity : ComponentActivity() {
                                             }
                                         )
                                     }
+                            }
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            ) {
                                 musicians.flatMap { it.years ?: listOf() }
                                     .distinct()
                                     .map { year ->
@@ -444,6 +499,10 @@ class HubActivity : ComponentActivity() {
                                             }
                                         )
                                     }
+                            }
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            ) {
                                 musicians.map { it.country ?: "" }
                                     .distinct()
                                     .map { country ->

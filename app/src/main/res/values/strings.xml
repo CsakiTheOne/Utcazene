@@ -45,7 +45,15 @@
 
     <!-- HUB -->
     <string name="search_by_name">Search by name</string>
+    <string name="random_musician_of_day">Random musician of the day</string>
+    <string name="watch_something">Watch something on YouTube</string>
+    <string name="filters">Filters</string>
+    <string name="clear_all_filters">Clear all</string>
     <string name="hub_list_expand_info">This list will be continuously expanded with all the musicians who have ever performed at Utcazene.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="admin_dashboard">Admin dashboard</string>
+    <string name="export_database">Export database</string>
+    <string name="sign_out">Sign out</string>
 
     <!-- EVENTS -->
     <string name="export_to_calendar">Export to calendar</string>

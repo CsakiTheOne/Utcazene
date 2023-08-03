@@ -42,7 +42,15 @@
 
     <!-- HUB -->
     <string name="search_by_name">Keresés név alapján</string>
+    <string name="random_musician_of_day">Napi random zenész</string>
+    <string name="watch_something">Mutass valamit YouTube-on</string>
+    <string name="filters">Szűrők</string>
+    <string name="clear_all_filters">Törlése</string>
     <string name="hub_list_expand_info">Ez a lista folyamatosan bővülni fog az összes zenésszel, akik valaha felléptek Utcazenén.</string>
+    <string name="sign_in_with_google">Bejelentkezés Google fiókkal</string>
+    <string name="admin_dashboard">Admin felület</string>
+    <string name="export_database">Adatbázis exportálása</string>
+    <string name="sign_out">Kijelentkezés</string>
 
     <!-- EVENTS -->
     <string name="export_to_calendar">Exportálás naptárba</string>

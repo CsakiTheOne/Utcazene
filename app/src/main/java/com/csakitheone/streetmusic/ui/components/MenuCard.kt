@@ -38,21 +38,21 @@ fun MenuCard(
             if (imageVector != null) {
                 Icon(
                     modifier = Modifier
-                        .width(48.dp)
+                        .width(64.dp)
                         .aspectRatio(1f),
                     imageVector = imageVector,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = MaterialTheme.colorScheme.secondary,
                 )
             }
             else if (painter != null) {
                 Icon(
                     modifier = Modifier
-                        .width(48.dp)
+                        .width(64.dp)
                         .aspectRatio(1f),
                     painter = painter,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = MaterialTheme.colorScheme.secondary,
                 )
             }
             Text(

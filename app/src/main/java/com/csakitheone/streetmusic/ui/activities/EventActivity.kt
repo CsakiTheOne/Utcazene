@@ -19,10 +19,10 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -141,8 +141,8 @@ class EventActivity : ComponentActivity() {
                                 },
                             ) {
                                 Icon(
-                                    imageVector = if (isPinned) Icons.Default.Star
-                                    else Icons.Default.StarBorder,
+                                    imageVector = if (isPinned) Icons.Default.Favorite
+                                    else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
                                 )
                             }

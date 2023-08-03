@@ -3,6 +3,8 @@ package com.csakitheone.streetmusic.ui.activities
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
@@ -25,12 +27,14 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Merge
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -68,7 +72,10 @@ import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.Firestore
 import com.csakitheone.streetmusic.model.Musician
+import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.CompactAdminMusicianCard
+import com.csakitheone.streetmusic.ui.components.MenuCard
+import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import java.time.LocalDate
@@ -92,16 +99,27 @@ class AdminActivity : ComponentActivity() {
 
             var musicians by remember { mutableStateOf(listOf<Musician>()) }
             var musiciansQuery by remember { mutableStateOf("") }
+            var filterTags by remember { mutableStateOf(listOf<String>()) }
+            var filterYears by remember { mutableStateOf(listOf<Int>()) }
             var showOnlyPartial by remember { mutableStateOf(false) }
-            val visibleMusicians by remember(musicians, musiciansQuery, showOnlyPartial) {
+            val visibleMusicians by remember(
+                musicians,
+                filterTags,
+                filterYears,
+                showOnlyPartial,
+                musiciansQuery,
+            ) {
                 mutableStateOf(
                     musicians
+                        .asSequence()
+                        .filter { filterTags.isEmpty() || it.tags?.containsAll(filterTags) == true }
+                        .filter { filterYears.isEmpty() || it.years?.containsAll(filterYears) == true }
                         .filter { !showOnlyPartial || it.isIncomplete() }
                         .filter {
                             musiciansQuery.length < 3 ||
-                                    it.name.toLowerCase()
+                                    it.name.lowercase()
                                         .contains(
-                                            musiciansQuery.toLowerCase()
+                                            musiciansQuery.lowercase()
                                         )
                         }
                         .sortedBy { it.name }
@@ -118,6 +136,11 @@ class AdminActivity : ComponentActivity() {
             var massAddNames by remember(isMassAddDialogVisible) { mutableStateOf("") }
             var massAddTags by remember(isMassAddDialogVisible) { mutableStateOf(listOf<String>()) }
             var massAddYear by remember(isMassAddDialogVisible) { mutableStateOf(LocalDate.now().year) }
+
+            BackHandler(syncState != SYNC_STATE_SYNC) {
+                Toast.makeText(this, "There are unsaved changes!", Toast.LENGTH_SHORT).show()
+                isMenuVisible = true
+            }
 
             LaunchedEffect(Unit) {
                 Firestore.Users.isSelfAdmin {
@@ -213,6 +236,7 @@ class AdminActivity : ComponentActivity() {
                     confirmButton = {
                         TextButton(
                             onClick = {
+                                musicians = listOf()
                                 Firestore.Musicians.addAll(
                                     massAddNames
                                         .split('\n')
@@ -228,7 +252,6 @@ class AdminActivity : ComponentActivity() {
                                             )
                                         }
                                 ) {
-                                    musicians = listOf()
                                     isMassAddDialogVisible = false
                                     Firestore.Musicians.getAll {
                                         musicians = it
@@ -267,11 +290,13 @@ class AdminActivity : ComponentActivity() {
                                 }
                             },
                             navigationIcon = {
-                                IconButton(onClick = { finish() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = null,
-                                    )
+                                AnimatedVisibility(visible = syncState == SYNC_STATE_SYNC) {
+                                    IconButton(onClick = { finish() }) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = null,
+                                        )
+                                    }
                                 }
                             },
                             actions = {
@@ -285,68 +310,23 @@ class AdminActivity : ComponentActivity() {
                                         onDismissRequest = { isMenuVisible = false },
                                     ) {
                                         DropdownMenuItem(
-                                            text = { Text(text = "Mass-add musicians") },
+                                            text = { Text(text = "Dismiss / Refresh") },
                                             onClick = {
-                                                isMassAddDialogVisible = true
                                                 isMenuVisible = false
-                                            },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = Icons.Default.GroupAdd,
-                                                    contentDescription = null,
-                                                )
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(text = "Merge years") },
-                                            onClick = {
-                                                syncState = SYNC_STATE_LOCAL_CHANGES
-                                                try {
-                                                    musicians = listOf()
-                                                    Firestore.Musicians.mergeYears {
-                                                        Firestore.Musicians.getAll {
-                                                            musicians = it
-                                                            syncState = SYNC_STATE_SYNC
-                                                        }
-                                                    }
-                                                } catch (ex: Exception) {
-                                                    Toast.makeText(
-                                                        this@AdminActivity,
-                                                        "${ex.message}",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    Firestore.Musicians.getAll {
-                                                        musicians = it
-                                                        syncState = SYNC_STATE_SYNC
-                                                    }
+                                                musicians = listOf()
+                                                Firestore.Musicians.getAll {
+                                                    musicians = it
+                                                    syncState = SYNC_STATE_SYNC
                                                 }
-                                                isMenuVisible = false
                                             },
                                             leadingIcon = {
                                                 Icon(
-                                                    imageVector = Icons.Default.Merge,
+                                                    imageVector = Icons.Default.Close,
                                                     contentDescription = null,
                                                 )
                                             },
                                         )
                                         if (syncState == SYNC_STATE_LOCAL_CHANGES) {
-                                            DropdownMenuItem(
-                                                text = { Text(text = "Dismiss") },
-                                                onClick = {
-                                                    isMenuVisible = false
-                                                    musicians = listOf()
-                                                    Firestore.Musicians.getAll {
-                                                        musicians = it
-                                                        syncState = SYNC_STATE_SYNC
-                                                    }
-                                                },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Close,
-                                                        contentDescription = null,
-                                                    )
-                                                },
-                                            )
                                             DropdownMenuItem(
                                                 text = { Text(text = "Save") },
                                                 onClick = {
@@ -370,12 +350,6 @@ class AdminActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            colors = TopAppBarDefaults.smallTopAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                                actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                            ),
                         )
                     }
                     if (!isSelfAdmin || musicians.isEmpty()) {
@@ -391,15 +365,44 @@ class AdminActivity : ComponentActivity() {
                         Box(
                             contentAlignment = Alignment.BottomEnd,
                         ) {
-                            LazyColumn(
-                                modifier = Modifier
-                                    .padding(8.dp),
-                                state = scroll,
-                            ) {
+                            LazyColumn(state = scroll) {
                                 item {
+                                    MenuCard(
+                                        modifier = Modifier.padding(8.dp),
+                                        onClick = { isMassAddDialogVisible = true },
+                                        imageVector = Icons.Default.GroupAdd,
+                                        title = "Mass-add musicians",
+                                    )
+                                    MenuCard(
+                                        modifier = Modifier.padding(8.dp),
+                                        onClick = {
+                                            syncState = SYNC_STATE_LOCAL_CHANGES
+                                            try {
+                                                musicians = listOf()
+                                                Firestore.Musicians.mergeYears {
+                                                    Firestore.Musicians.getAll {
+                                                        musicians = it
+                                                        syncState = SYNC_STATE_SYNC
+                                                    }
+                                                }
+                                            } catch (ex: Exception) {
+                                                Toast.makeText(
+                                                    this@AdminActivity,
+                                                    "${ex.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                Firestore.Musicians.getAll {
+                                                    musicians = it
+                                                    syncState = SYNC_STATE_SYNC
+                                                }
+                                            }
+                                        },
+                                        imageVector = Icons.Default.Merge,
+                                        title = "Merge",
+                                    )
                                     Text(
                                         modifier = Modifier.padding(8.dp),
-                                        text = "Musicians",
+                                        text = "Musicians (${musicians.size})",
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                     TextField(
@@ -440,7 +443,9 @@ class AdminActivity : ComponentActivity() {
                                             modifier = Modifier.padding(8.dp),
                                             selected = showOnlyPartial,
                                             onClick = { showOnlyPartial = !showOnlyPartial },
-                                            label = { Text(text = "Has missing info") },
+                                            label = {
+                                                Text(text = "Has missing info (${musicians.count { it.isIncomplete() }})")
+                                            },
                                             leadingIcon = {
                                                 Icon(
                                                     imageVector = if (showOnlyPartial) Icons.Filled.Label
@@ -449,9 +454,64 @@ class AdminActivity : ComponentActivity() {
                                                 )
                                             }
                                         )
+                                        musicians.flatMap { it.tags ?: listOf() }
+                                            .distinct()
+                                            .map { tag ->
+                                                ElevatedFilterChip(
+                                                    modifier = Modifier.padding(8.dp),
+                                                    selected = filterTags.contains(tag),
+                                                    onClick = {
+                                                        filterTags =
+                                                            if (filterTags.contains(tag)) filterTags - tag
+                                                            else filterTags + tag
+                                                    },
+                                                    label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
+                                                            else Icons.Outlined.Label,
+                                                            contentDescription = null,
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        musicians.flatMap { it.years ?: listOf() }
+                                            .distinct()
+                                            .sortedDescending()
+                                            .map { year ->
+                                                ElevatedFilterChip(
+                                                    modifier = Modifier.padding(8.dp),
+                                                    selected = filterYears.contains(year),
+                                                    onClick = {
+                                                        filterYears =
+                                                            if (filterYears.contains(year)) filterYears - year
+                                                            else filterYears + year
+                                                    },
+                                                    label = { Text(text = "$year") },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            imageVector = if (filterYears.contains(year)) Icons.Filled.DateRange
+                                                            else Icons.Outlined.DateRange,
+                                                            contentDescription = null,
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                    }
+                                    if (visibleMusicians.toList().isNotEmpty()) {
+                                        MusicianCard(
+                                            modifier = Modifier.padding(8.dp),
+                                            musician = visibleMusicians.first(),
+                                        )
+                                        BigMusicianCard(
+                                            modifier = Modifier.padding(8.dp),
+                                            musician = visibleMusicians.first(),
+                                        )
                                     }
                                 }
-                                items(items = visibleMusicians, key = { it.name + it.years }) { musician ->
+                                items(
+                                    items = visibleMusicians.toList(),
+                                    key = { it.name + it.years }) { musician ->
                                     CompactAdminMusicianCard(
                                         modifier = Modifier.padding(8.dp),
                                         musician = musician,
@@ -553,11 +613,13 @@ class AdminActivity : ComponentActivity() {
                             }
                         },
                         supportingText = {
-                            if (currentMusician.imageUrl?.contains("https://utcazene.hu/") == true) {
+                            if (currentMusician.imageUrl?.startsWith("https://utcazene.hu/") == true) {
                                 Text(text = "The official website is not a sustainable source!")
+                            } else if (currentMusician.imageUrl?.startsWith("https://web.archive.org") == true) {
+                                Text(text = "Reliable but slow source.")
                             }
                         },
-                        isError = currentMusician.imageUrl?.contains("https://utcazene.hu/") == true,
+                        isError = currentMusician.imageUrl?.startsWith("https://utcazene.hu/") == true,
                     )
                     TextField(
                         modifier = Modifier

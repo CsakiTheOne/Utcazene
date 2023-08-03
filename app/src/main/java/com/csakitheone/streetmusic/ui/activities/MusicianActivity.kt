@@ -19,6 +19,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Translate
@@ -85,12 +87,10 @@ class MusicianActivity : ComponentActivity() {
 
             var musician: Musician? by remember { mutableStateOf(null) }
 
-            val imageLoader by remember {
-                mutableStateOf(
-                    ImageLoader.Builder(context)
-                        .okHttpClient(UzApi.client)
-                        .build()
-                )
+            val imageLoader = remember {
+                ImageLoader.Builder(context)
+                    .okHttpClient(UzApi.client)
+                    .build()
             }
 
             var isDescriptionExpanded by remember { mutableStateOf(false) }
@@ -178,8 +178,8 @@ class MusicianActivity : ComponentActivity() {
                                 },
                             ) {
                                 Icon(
-                                    imageVector = if (isPinned) Icons.Default.Star
-                                    else Icons.Default.StarBorder,
+                                    imageVector = if (isPinned) Icons.Default.Favorite
+                                    else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
                                 )
                             }

@@ -5,6 +5,7 @@ import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.util.Auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 
 class Firestore {
     companion object {
@@ -14,6 +15,12 @@ class Firestore {
 
     class Musicians {
         companion object {
+            fun export(callback: (String) -> Unit) {
+                getAll { musicians ->
+                    callback(Gson().toJson(musicians))
+                }
+            }
+
             fun getAll(callback: (List<Musician>) -> Unit) {
                 Firebase.firestore.collection(COLLECTION_MUSICIANS).get()
                     .addOnFailureListener { callback(listOf()) }

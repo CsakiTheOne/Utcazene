@@ -3,10 +3,12 @@ package com.csakitheone.streetmusic.ui.components
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,57 +77,36 @@ fun BigMusicianCard(
         },
     ) {
         Box(
-            contentAlignment = Alignment.BottomStart,
+            modifier = Modifier
+                .heightIn(min = 64.dp, max = 256.dp),
         ) {
             AsyncImage(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 64.dp, max = 256.dp),
+                    .fillMaxSize(),
                 imageLoader = imageLoader,
                 model = musician.imageUrl,
                 contentScale = ContentScale.Crop,
                 contentDescription = null,
             )
-            Box(
-                modifier = Modifier
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                            ),
-                        )
-                    ),
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .weight(1f),
-                            text = musician.name,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        if (isPinned != null) {
-                            IconButton(
-                                modifier = Modifier.padding(start = 8.dp),
-                                onClick = {
-                                    onPinnedChangeRequest(!isPinned)
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = if (isPinned) Icons.Default.Favorite
-                                    else Icons.Default.FavoriteBorder,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                    }
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                    MaterialTheme.colorScheme.background.copy(alpha = .6f),
+                                    Color.Transparent,
+                                ),
+                            )
+                        ),
+                ) {
                     Row(
                         modifier = Modifier
+                            .padding(8.dp)
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
                         verticalAlignment = Alignment.CenterVertically,
@@ -151,6 +133,46 @@ fun BigMusicianCard(
                                 text = musician.years.joinToString(),
                                 style = MaterialTheme.typography.bodySmall,
                             )
+                        }
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                ),
+                            )
+                        ),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .weight(1f),
+                            text = musician.name,
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        if (isPinned != null) {
+                            FilledIconButton(
+                                modifier = Modifier.padding(start = 8.dp),
+                                onClick = {
+                                    onPinnedChangeRequest(!isPinned)
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = if (isPinned) Icons.Default.Favorite
+                                    else Icons.Default.FavoriteBorder,
+                                    contentDescription = null,
+                                )
+                            }
                         }
                     }
                 }

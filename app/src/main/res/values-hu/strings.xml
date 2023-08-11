@@ -42,8 +42,10 @@
 
     <!-- HUB -->
     <string name="search_by_name">Keresés név alapján</string>
-    <string name="random_musician_of_day">Napi random zenész</string>
     <string name="watch_something">Mutass valamit YouTube-on</string>
+    <string name="random_musicians_of_day">Napi random zenészek</string>
+    <string name="returning_musicians">Visszatérő zenészek</string>
+    <string name="top_countries">Top országok</string>
     <string name="filters">Szűrők</string>
     <string name="clear_all_filters">Törlése</string>
     <string name="hub_list_expand_info">Ez a lista folyamatosan bővülni fog az összes zenésszel, akik valaha felléptek Utcazenén.</string>

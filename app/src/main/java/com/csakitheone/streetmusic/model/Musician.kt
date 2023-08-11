@@ -28,10 +28,11 @@ data class Musician(
                 years.isNullOrEmpty()
     }
 
-    fun merge(other: Musician?): Musician {
+    fun merge(other: Musician?, onError: (String) -> Unit = {}): Musician? {
         if (other == null) return this
         if (!name.trim().equals(other.name.trim(), ignoreCase = true)) {
-            throw Exception("Can't merge musicians with different name! $name != ${other.name}")
+            onError("Can't merge musicians with different name! $name != ${other.name}")
+            return null
         }
         if (
             (!country.isNullOrBlank() && !other.country.isNullOrBlank() && country != other.country) ||
@@ -39,7 +40,8 @@ data class Musician(
             (!imageUrl.isNullOrBlank() && !other.imageUrl.isNullOrBlank() && imageUrl != other.imageUrl) ||
             (!youtubeUrl.isNullOrBlank() && !other.youtubeUrl.isNullOrBlank() && youtubeUrl != other.youtubeUrl)
         ) {
-            throw Exception("Merge conflict: can't decide which value to use at $name")
+            onError("Merge conflict: can't decide which value to use at $name")
+            return null
         }
         return Musician(
             name = name,

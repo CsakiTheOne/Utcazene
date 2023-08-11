@@ -64,27 +64,33 @@ class Firestore {
             }
 
             fun mergeYears(
-                callback: () -> Unit = {},
+                callback: (String) -> Unit = {},
             ) {
                 getAll { musicians ->
                     val groupsByName = musicians.groupBy { it.name.lowercase().trim() }
                     val allMerged = groupsByName.flatMap {
                         var merged = it.value
                         while (merged.size > 1) {
-                            merged = listOf(it.value.first().merge(it.value.last()))
+                            merged = listOf(
+                                it.value.first().merge(
+                                    it.value.last()
+                                ) {
+                                    callback(it)
+                                } ?: return@getAll
+                            )
                         }
                         merged
                     }.sortedBy { it.name }
                     Log.i("Firestore", allMerged.joinToString("\n"))
                     Firebase.firestore.collection(COLLECTION_MUSICIANS).get()
-                        .addOnFailureListener { callback() }
+                        .addOnFailureListener { callback("Network error") }
                         .addOnSuccessListener { querySnapshot ->
                             Firebase.firestore.runTransaction { transaction ->
                                 querySnapshot.forEach { documentSnapshot ->
                                     transaction.delete(documentSnapshot.reference)
                                 }
                             }
-                                .addOnFailureListener { callback() }
+                                .addOnFailureListener { callback("Network error") }
                                 .addOnSuccessListener {
                                     Firebase.firestore.runTransaction { transaction ->
                                         allMerged.forEach { musician ->
@@ -94,7 +100,7 @@ class Firestore {
                                                 musician
                                             )
                                         }
-                                    }.addOnCompleteListener { callback() }
+                                    }.addOnCompleteListener { callback("SUCCESS!") }
                                 }
                         }
                 }

@@ -11,33 +11,39 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ImportExport
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Mic
@@ -50,6 +56,7 @@ import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -73,6 +80,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
@@ -381,27 +389,30 @@ class HubActivity : ComponentActivity() {
                             AnimatedContent(targetState = selectedTab, label = "TabChange") { tab ->
                                 when (tab) {
                                     TAB_MAIN -> TabMain(
-                                        state = scroll,
+                                        scrollState = scroll,
                                         musicians = musicians,
                                         musiciansPinned = musiciansPinned,
                                         onMusiciansPinnedChange = { musiciansPinned = it },
                                     )
 
                                     TAB_BROWSE -> TabBrowse(
-                                        state = scroll,
+                                        scrollState = scroll,
                                         musicians = musicians,
                                         musiciansQuery = musiciansQuery,
                                         musiciansPinned = musiciansPinned,
                                         onMusiciansPinnedChange = { musiciansPinned = it },
                                     )
 
-                                    TAB_DATA -> TabData()
+                                    TAB_DATA -> TabData(
+                                        scrollState = scroll,
+                                    )
                                 }
                             }
                         }
                     }
                     NavigationBar(
                         modifier = Modifier.heightIn(max = 72.dp),
+                        tonalElevation = if (scroll.canScrollForward) 2.dp else 0.dp,
                     ) {
                         NavigationBarItem(
                             selected = selectedTab == TAB_MAIN,
@@ -414,7 +425,7 @@ class HubActivity : ComponentActivity() {
                             selected = selectedTab == TAB_BROWSE,
                             onClick = { selectedTab = TAB_BROWSE },
                             icon = {
-                                Icon(imageVector = Icons.Default.ListAlt, contentDescription = null)
+                                Icon(imageVector = Icons.Default.List, contentDescription = null)
                             },
                         )
                         NavigationBarItem(
@@ -422,7 +433,7 @@ class HubActivity : ComponentActivity() {
                             onClick = { selectedTab = TAB_DATA },
                             icon = {
                                 Icon(
-                                    imageVector = Icons.Default.DataUsage,
+                                    imageVector = Icons.Default.Info,
                                     contentDescription = null
                                 )
                             },
@@ -433,17 +444,18 @@ class HubActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun TabMain(
-        state: LazyListState,
+        scrollState: LazyListState,
         musicians: List<Musician>,
         musiciansPinned: List<Musician>,
         onMusiciansPinnedChange: (List<Musician>) -> Unit,
     ) {
-        val musicianOfDay = remember { musicians.random(Random(LocalDate.now().dayOfYear)) }
+        val musiciansOfDay = remember { musicians.shuffled(Random(LocalDate.now().dayOfYear)).take(3) }
 
         LazyColumn(
-            state = state,
+            state = scrollState,
         ) {
             item {
                 MenuCard(
@@ -477,19 +489,40 @@ class HubActivity : ComponentActivity() {
                 )
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = stringResource(id = R.string.random_musician_of_day),
+                    text = stringResource(id = R.string.random_musicians_of_day),
                 )
-                BigMusicianCard(
-                    modifier = Modifier.padding(8.dp),
-                    musician = musicianOfDay,
-                    isPinned = musiciansPinned.contains(musicianOfDay),
-                    onPinnedChangeRequest = {
-                        onMusiciansPinnedChange(
-                            if (it) musiciansPinned + musicianOfDay
-                            else musiciansPinned - musicianOfDay
+                HorizontalPager(
+                    pageCount = musiciansOfDay.size,
+                ) {
+                    Box(contentAlignment = Alignment.BottomCenter) {
+                        BigMusicianCard(
+                            modifier = Modifier.padding(8.dp),
+                            musician = musiciansOfDay[it],
+                            isPinned = musiciansPinned.contains(musiciansOfDay[it]),
+                            onPinnedChangeRequest = { pinRequest ->
+                                onMusiciansPinnedChange(
+                                    if (pinRequest) musiciansPinned + musiciansOfDay[it]
+                                    else musiciansPinned - musiciansOfDay[it]
+                                )
+                            },
                         )
-                    },
-                )
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            repeat(musiciansOfDay.size) { dotIndex ->
+                                Box(
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .width(if (dotIndex == it) 6.dp else 4.dp)
+                                        .aspectRatio(1f)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.onBackground)
+                                )
+                            }
+                        }
+                    }
+                }
                 AnimatedVisibility(visible = musiciansPinned.isNotEmpty()) {
                     Row(
                         modifier = Modifier.padding(8.dp),
@@ -534,7 +567,7 @@ class HubActivity : ComponentActivity() {
                     )
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = "Returning musicians", //TODO translate
+                        text = stringResource(id = R.string.returning_musicians),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -569,7 +602,7 @@ class HubActivity : ComponentActivity() {
                     )
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = "Top countries", //TODO translate
+                        text = stringResource(id = R.string.top_countries),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
@@ -607,59 +640,13 @@ class HubActivity : ComponentActivity() {
                     }
                 }
             }
-            item {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(8.dp),
-                        imageVector = Icons.Default.Language,
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "Representatives", //TODO translate
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-            }
-            items(
-                items = musicians
-                    .groupBy { it.country }
-                    .filter { !it.key.isNullOrBlank() && !it.key!!.contains('/') && it.value.size < 3 }
-                    .toList(),
-                key = { it.first!! },
-            ) { countryGroup ->
-                UzCard(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        clearFilters()
-                        filterCountries = listOf(countryGroup.first!!)
-                        selectedTab = TAB_BROWSE
-                    },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = "${countryGroup.second.first().getFlag()} ${countryGroup.first}",
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                    }
-                }
-            }
         }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TabBrowse(
-        state: LazyListState,
+        scrollState: LazyListState,
         musicians: List<Musician>,
         musiciansQuery: String,
         musiciansPinned: List<Musician>,
@@ -691,7 +678,7 @@ class HubActivity : ComponentActivity() {
         }
 
         LazyColumn(
-            state = state,
+            state = scrollState,
         ) {
             item {
                 Row(
@@ -711,7 +698,8 @@ class HubActivity : ComponentActivity() {
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     AnimatedVisibility(visible = filterTags.isNotEmpty() || filterYears.isNotEmpty() || filterCountries.isNotEmpty()) {
-                        TextButton(
+                        Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
                             onClick = {
                                 clearFilters()
                             },
@@ -842,81 +830,85 @@ class HubActivity : ComponentActivity() {
     }
 
     @Composable
-    fun TabData() {
-        Column {
-            if (!Auth.isSignedInState) {
-                MenuCard(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        Auth.signInBegin(this@HubActivity)
-                    },
-                    imageVector = Icons.Default.Login,
-                    title = stringResource(id = R.string.sign_in_with_google),
-                )
-            } else {
-                MenuCard(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        Firestore.Users.isSelfAdmin {
-                            if (!it) {
+    fun TabData(
+        scrollState: LazyListState,
+    ) {
+        LazyColumn(state = scrollState) {
+            item {
+                if (!Auth.isSignedInState) {
+                    MenuCard(
+                        modifier = Modifier.padding(8.dp),
+                        onClick = {
+                            Auth.signInBegin(this@HubActivity)
+                        },
+                        imageVector = Icons.Default.Login,
+                        title = stringResource(id = R.string.sign_in_with_google),
+                    )
+                } else {
+                    MenuCard(
+                        modifier = Modifier.padding(8.dp),
+                        onClick = {
+                            Firestore.Users.isSelfAdmin {
+                                if (!it) {
+                                    Toast.makeText(
+                                        this@HubActivity,
+                                        "Access denied",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    return@isSelfAdmin
+                                }
+                                startActivity(
+                                    Intent(
+                                        this@HubActivity,
+                                        AdminActivity::class.java
+                                    )
+                                )
+                            }
+                        },
+                        imageVector = Icons.Default.Dashboard,
+                        title = stringResource(id = R.string.admin_dashboard),
+                    )
+                    MenuCard(
+                        modifier = Modifier.padding(8.dp),
+                        onClick = {
+                            Firestore.Musicians.export {
+                                val clipboardManager = getSystemService(ClipboardManager::class.java)
+                                clipboardManager.setPrimaryClip(ClipData.newPlainText("Musicians", it))
                                 Toast.makeText(
                                     this@HubActivity,
-                                    "Access denied",
+                                    "Copied to clipboard",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                return@isSelfAdmin
                             }
-                            startActivity(
-                                Intent(
-                                    this@HubActivity,
-                                    AdminActivity::class.java
-                                )
-                            )
-                        }
-                    },
-                    imageVector = Icons.Default.Dashboard,
-                    title = stringResource(id = R.string.admin_dashboard),
-                )
+                        },
+                        imageVector = Icons.Default.ImportExport,
+                        title = stringResource(id = R.string.export_database),
+                    )
+                    MenuCard(
+                        modifier = Modifier.padding(8.dp),
+                        onClick = {
+                            Auth.signOut()
+                        },
+                        imageVector = Icons.Default.Logout,
+                        title = stringResource(id = R.string.sign_out),
+                    )
+                }
                 MenuCard(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     onClick = {
-                        Firestore.Musicians.export {
-                            val clipboardManager = getSystemService(ClipboardManager::class.java)
-                            clipboardManager.setPrimaryClip(ClipData.newPlainText("Musicians", it))
-                            Toast.makeText(
+                        startActivity(
+                            Intent(
                                 this@HubActivity,
-                                "Copied to clipboard",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                                SupportActivity::class.java
+                            )
+                        )
                     },
-                    imageVector = Icons.Default.ImportExport,
-                    title = stringResource(id = R.string.export_database),
-                )
-                MenuCard(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        Auth.signOut()
-                    },
-                    imageVector = Icons.Default.Logout,
-                    title = stringResource(id = R.string.sign_out),
+                    imageVector = Icons.Default.Code,
+                    title = stringResource(id = R.string.made_by_csaki),
                 )
             }
-            MenuCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                onClick = {
-                    startActivity(
-                        Intent(
-                            this@HubActivity,
-                            SupportActivity::class.java
-                        )
-                    )
-                },
-                imageVector = Icons.Default.Code,
-                title = stringResource(id = R.string.made_by_csaki),
-            )
         }
     }
 }

@@ -1,9 +1,16 @@
 package com.csakitheone.streetmusic.util
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
+import com.csakitheone.streetmusic.data.UzApi
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -38,5 +45,29 @@ class Helper {
             return false
         }
 
+        fun imageUrlToBitmapUri(context: Context, imageUrl: String?, callback: (Uri?) -> Unit) {
+            if (imageUrl == null) {
+                callback(null)
+                return
+            }
+            Thread {
+                try {
+                    val url = URL(imageUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.doInput = true
+                    connection.connect()
+                    val input: InputStream = connection.inputStream
+                    val imgBitmap = BitmapFactory.decodeStream(input)
+                    val imgBitmapPath = MediaStore.Images.Media.insertImage(
+                        context.contentResolver, imgBitmap,
+                        "img", null
+                    )
+                    callback(Uri.parse(imgBitmapPath))
+                }
+                catch (ex: Exception) {
+                    callback(null)
+                }
+            }.start()
+        }
     }
 }

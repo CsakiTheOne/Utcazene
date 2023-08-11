@@ -45,8 +45,10 @@
 
     <!-- HUB -->
     <string name="search_by_name">Search by name</string>
-    <string name="random_musician_of_day">Random musician of the day</string>
     <string name="watch_something">Watch something on YouTube</string>
+    <string name="random_musicians_of_day">Random musicians of the day</string>
+    <string name="returning_musicians">Returning musicians</string>
+    <string name="top_countries">Top countries</string>
     <string name="filters">Filters</string>
     <string name="clear_all_filters">Clear all</string>
     <string name="hub_list_expand_info">This list will be continuously expanded with all the musicians who have ever performed at Utcazene.</string>

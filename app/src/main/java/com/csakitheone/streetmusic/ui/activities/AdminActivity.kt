@@ -101,11 +101,13 @@ class AdminActivity : ComponentActivity() {
             var musiciansQuery by remember { mutableStateOf("") }
             var filterTags by remember { mutableStateOf(listOf<String>()) }
             var filterYears by remember { mutableStateOf(listOf<Int>()) }
+            var filterCountries by remember(musicians) { mutableStateOf(listOf<String>()) }
             var showOnlyPartial by remember { mutableStateOf(false) }
             val visibleMusicians by remember(
                 musicians,
                 filterTags,
                 filterYears,
+                filterCountries,
                 showOnlyPartial,
                 musiciansQuery,
             ) {
@@ -114,6 +116,7 @@ class AdminActivity : ComponentActivity() {
                         .asSequence()
                         .filter { filterTags.isEmpty() || it.tags?.containsAll(filterTags) == true }
                         .filter { filterYears.isEmpty() || it.years?.containsAll(filterYears) == true }
+                        .filter { filterCountries.isEmpty() || filterCountries.contains(it.country) }
                         .filter { !showOnlyPartial || it.isIncomplete() }
                         .filter {
                             musiciansQuery.length < 3 ||
@@ -377,22 +380,15 @@ class AdminActivity : ComponentActivity() {
                                         modifier = Modifier.padding(8.dp),
                                         onClick = {
                                             syncState = SYNC_STATE_LOCAL_CHANGES
-                                            try {
-                                                musicians = listOf()
-                                                Firestore.Musicians.mergeYears {
-                                                    Firestore.Musicians.getAll {
-                                                        musicians = it
-                                                        syncState = SYNC_STATE_SYNC
-                                                    }
-                                                }
-                                            } catch (ex: Exception) {
+                                            musicians = listOf()
+                                            Firestore.Musicians.mergeYears { mergeResult ->
                                                 Toast.makeText(
                                                     this@AdminActivity,
-                                                    "${ex.message}",
+                                                    mergeResult,
                                                     Toast.LENGTH_SHORT
                                                 ).show()
-                                                Firestore.Musicians.getAll {
-                                                    musicians = it
+                                                Firestore.Musicians.getAll { newMusicians ->
+                                                    musicians = newMusicians
                                                     syncState = SYNC_STATE_SYNC
                                                 }
                                             }
@@ -468,7 +464,10 @@ class AdminActivity : ComponentActivity() {
                                                     label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
                                                     leadingIcon = {
                                                         Icon(
-                                                            imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
+                                                            imageVector = if (filterTags.contains(
+                                                                    tag
+                                                                )
+                                                            ) Icons.Filled.Label
                                                             else Icons.Outlined.Label,
                                                             contentDescription = null,
                                                         )
@@ -490,11 +489,28 @@ class AdminActivity : ComponentActivity() {
                                                     label = { Text(text = "$year") },
                                                     leadingIcon = {
                                                         Icon(
-                                                            imageVector = if (filterYears.contains(year)) Icons.Filled.DateRange
+                                                            imageVector = if (filterYears.contains(
+                                                                    year
+                                                                )
+                                                            ) Icons.Filled.DateRange
                                                             else Icons.Outlined.DateRange,
                                                             contentDescription = null,
                                                         )
                                                     }
+                                                )
+                                            }
+                                        musicians.mapNotNull { it.country }
+                                            .distinct()
+                                            .map { country ->
+                                                ElevatedFilterChip(
+                                                    modifier = Modifier.padding(8.dp),
+                                                    selected = filterCountries.contains(country),
+                                                    onClick = {
+                                                        filterCountries =
+                                                            if (filterCountries.contains(country)) filterCountries - country
+                                                            else filterCountries + country
+                                                    },
+                                                    label = { Text(text = "${Musician.countryFlags[country] ?: ""} $country") },
                                                 )
                                             }
                                     }

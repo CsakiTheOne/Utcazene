@@ -21,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Translate
@@ -29,7 +31,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,6 +66,7 @@ import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
+import com.csakitheone.streetmusic.util.Helper
 import com.csakitheone.streetmusic.util.TranslatorManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -149,10 +154,13 @@ class MusicianActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.background
             ) {
                 Column {
-                    TopAppBar(
+                    LargeTopAppBar(
                         title = {
                             Column {
-                                Text(text = musician?.name ?: "Zenész neve")
+                                Text(
+                                    text = musician?.name ?: "Zenész neve",
+                                    style = MaterialTheme.typography.titleLarge,
+                                )
                                 if (musician?.country != null) {
                                     Text(
                                         text = "${musician!!.getFlag()} ${musician!!.country}",
@@ -171,7 +179,38 @@ class MusicianActivity : ComponentActivity() {
                         },
                         actions = {
                             IconButton(
-                                modifier = Modifier.padding(start = 8.dp),
+                                onClick = {
+                                    Helper.imageUrlToBitmapUri(this@MusicianActivity, musician?.imageUrl) {
+                                        startActivity(
+                                            Intent.createChooser(
+                                                Intent(Intent.ACTION_SEND)
+                                                    .putExtra(Intent.EXTRA_STREAM, it)
+                                                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                    .setType("image/*"),
+                                                musician?.name ?: ""
+                                            )
+                                        )
+                                    }
+                                },
+                            ) {
+                                Icon(imageVector = Icons.Default.Image, contentDescription = null)
+                            }
+                            IconButton(
+                                onClick = {
+                                    startActivity(
+                                        Intent.createChooser(
+                                            Intent(Intent.ACTION_SEND)
+                                                .putExtra(Intent.EXTRA_SUBJECT, musician?.name)
+                                                .putExtra(Intent.EXTRA_TEXT, "${musician?.name}\n${musician?.youtubeUrl}")
+                                                .setType("text/plain"),
+                                            musician?.name ?: ""
+                                        )
+                                    )
+                                },
+                            ) {
+                                Icon(imageVector = Icons.Default.Share, contentDescription = null)
+                            }
+                            IconButton(
                                 onClick = {
                                     musiciansPinned = if (!isPinned) musiciansPinned + musician!!
                                     else musiciansPinned.filter { it != musician }
@@ -184,12 +223,6 @@ class MusicianActivity : ComponentActivity() {
                                 )
                             }
                         },
-                        colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
-                            titleContentColor = MaterialTheme.colorScheme.onBackground,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                        ),
                     )
                     Column(
                         modifier = Modifier

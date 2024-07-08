@@ -69,8 +69,8 @@ class CalendarActivity : ComponentActivity() {
 
             var selectedDay by remember {
                 mutableStateOf(
-                    if ((19..22).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
-                    else 19
+                    if ((24..27).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
+                    else 24
                 )
             }
 
@@ -109,7 +109,7 @@ class CalendarActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                EventsProvider.getEvents(this@CalendarActivity) {
+                EventsProvider.getEventsThisYear(this@CalendarActivity) {
                     events = it
                 }
             }

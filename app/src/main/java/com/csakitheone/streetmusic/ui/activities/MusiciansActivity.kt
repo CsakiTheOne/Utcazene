@@ -45,7 +45,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
-import com.csakitheone.streetmusic.data.TeremEventProvider
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
@@ -84,9 +83,8 @@ class MusiciansActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                EventsProvider.getEvents(this@MusiciansActivity) { events ->
-                    musicians = events.groupBy { it.musician }.keys.toList() +
-                            TeremEventProvider.musicians.values.flatten()
+                EventsProvider.getEventsThisYear(this@MusiciansActivity) { events ->
+                    musicians = events.groupBy { it.musician }.keys.distinct()
                 }
             }
 

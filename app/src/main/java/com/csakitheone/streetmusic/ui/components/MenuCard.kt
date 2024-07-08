@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.components
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,21 +39,19 @@ fun MenuCard(
             if (imageVector != null) {
                 Icon(
                     modifier = Modifier
-                        .width(64.dp)
-                        .aspectRatio(1f),
+                        .size(48.dp),
                     imageVector = imageVector,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = MaterialTheme.colorScheme.tertiary,
                 )
             }
             else if (painter != null) {
                 Icon(
                     modifier = Modifier
-                        .width(64.dp)
-                        .aspectRatio(1f),
+                        .size(48.dp),
                     painter = painter,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = MaterialTheme.colorScheme.tertiary,
                 )
             }
             Text(

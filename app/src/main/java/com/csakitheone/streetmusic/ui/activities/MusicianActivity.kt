@@ -5,8 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,8 +23,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,13 +31,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -113,7 +108,7 @@ class MusicianActivity : ComponentActivity() {
                     intent.getStringExtra(EXTRA_MUSICIAN_JSON),
                     Musician::class.java
                 )
-                EventsProvider.getEvents(this@MusicianActivity) { events ->
+                EventsProvider.getEventsThisYear(this@MusicianActivity) { events ->
                     performances = events
                         .filter { it.musician == musician }
                         .sortedBy { it.time }
@@ -252,7 +247,8 @@ class MusicianActivity : ComponentActivity() {
                             UzCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
+                                    .padding(8.dp)
+                                    .animateContentSize(),
                                 onClick = {
                                     isDescriptionExpanded = !isDescriptionExpanded
                                 }
@@ -282,17 +278,12 @@ class MusicianActivity : ComponentActivity() {
                                             )
                                         }
                                     }
-                                    AnimatedContent(
-                                        targetState = isDescriptionExpanded,
-                                        label = "DescriptionExpand",
-                                    ) {
-                                        SelectionContainer {
-                                            Text(
-                                                modifier = Modifier.padding(8.dp),
-                                                text = if (it || musician!!.description!!.length < 150) musician!!.description!!
-                                                else musician!!.description!!.take(120) + "...",
-                                            )
-                                        }
+                                    SelectionContainer {
+                                        Text(
+                                            modifier = Modifier.padding(8.dp),
+                                            text = if (isDescriptionExpanded || musician!!.description!!.length < 150) musician!!.description!!
+                                            else musician!!.description!!.take(120) + "...",
+                                        )
                                     }
                                 }
                             }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -55,7 +56,6 @@ import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Label
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -69,7 +69,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -90,8 +89,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.Firestore
 import com.csakitheone.streetmusic.model.Musician
@@ -145,8 +142,6 @@ class HubActivity : ComponentActivity() {
             val colorScheme = MaterialTheme.colorScheme
             val scroll = rememberLazyListState()
 
-            var is2023ended by remember { mutableStateOf(false) }
-
             var isWebsitesMenuVisible by remember { mutableStateOf(false) }
             val searchFocusRequester = remember { FocusRequester() }
             var isSearchVisible by remember { mutableStateOf(false) }
@@ -159,8 +154,6 @@ class HubActivity : ComponentActivity() {
                 Firestore.Musicians.getAll {
                     musicians = it
                 }
-                is2023ended = PreferenceManager.getDefaultSharedPreferences(this@HubActivity)
-                    .getBoolean("is2023ended", false)
                 window.navigationBarColor = colorScheme.surface.toArgb()
             }
 
@@ -191,39 +184,6 @@ class HubActivity : ComponentActivity() {
                         }
                     },
                     type = object : TypeToken<Musician>() {}.type,
-                )
-            }
-
-            if (!is2023ended) {
-                AlertDialog(
-                    title = { Text(text = "Thank you for joining Utcazene 2023") },
-                    text = {
-                        Text(
-                            text = "The party ended, but the fun is not over! Here you will be " +
-                                    "able to check out all musicians who ever performed at " +
-                                    "Utcazene. But first we have to clean up some things. I " +
-                                    "plan to rewrite this app so we never have to delete your " +
-                                    "favorite musicians or any other user data, but now let's " +
-                                    "start with a clean slate. You may need to restart the app " +
-                                    "to apply all changes."
-                        )
-                    },
-                    onDismissRequest = {},
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                PreferenceManager.getDefaultSharedPreferences(this@HubActivity)
-                                    .edit {
-                                        clear()
-                                        putBoolean("is2023ended", true)
-                                        commit()
-                                        finishAffinity()
-                                    }
-                            },
-                        ) {
-                            Text(text = "Clean up and continue")
-                        }
-                    },
                 )
             }
 
@@ -492,7 +452,7 @@ class HubActivity : ComponentActivity() {
                     text = stringResource(id = R.string.random_musicians_of_day),
                 )
                 HorizontalPager(
-                    pageCount = musiciansOfDay.size,
+                    state = rememberPagerState(pageCount = { musiciansOfDay.size })
                 ) {
                     Box(contentAlignment = Alignment.BottomCenter) {
                         BigMusicianCard(

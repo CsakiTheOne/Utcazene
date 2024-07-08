@@ -6,12 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -21,26 +19,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.VideogameAsset
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -55,12 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
@@ -77,12 +61,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
-    companion object {
-
-        const val EXTRA_IGNORE_EVENT_ENDED = "ignore_event_ended"
-
-    }
-
     private var events by mutableStateOf(listOf<Event>())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,11 +71,6 @@ class MainActivity : ComponentActivity() {
         InAppUpdater.init(this)
         setContent {
             MainScreen()
-        }
-
-        if (!intent.getBooleanExtra(EXTRA_IGNORE_EVENT_ENDED, false)) {
-            startActivity(Intent(this, HubActivity::class.java))
-            finish()
         }
     }
 
@@ -120,7 +93,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Preview
     @Composable
     fun MainScreen() {
@@ -134,10 +107,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
             var motd by remember { mutableStateOf(MotdProvider.getRandomMotd(context)) }
-            var isWebsitesMenuVisible by remember { mutableStateOf(false) }
 
-            var isNowPlayingDialogVisible by remember { mutableStateOf(false) }
-            val eventsNowPlaying by remember(events, isNowPlayingDialogVisible) {
+            val eventsNowPlaying by remember(events) {
                 val sortedEvents = events
                     .filter { it.day == LocalDate.now().dayOfMonth }
                     .sortedBy { it.time.toLocalTime() }
@@ -153,41 +124,9 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                EventsProvider.getEvents(this@MainActivity) {
+                EventsProvider.getEventsThisYear(this@MainActivity) {
                     events = it
-                    if (intent.data.toString() == "now_playing") {
-                        isNowPlayingDialogVisible = true
-                    }
                 }
-            }
-
-            if (isNowPlayingDialogVisible) {
-                AlertDialog(
-                    properties = DialogProperties(usePlatformDefaultWidth = false),
-                    title = { Text(text = stringResource(id = R.string.now_playing)) },
-                    text = {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState()),
-                        ) {
-                            eventsNowPlaying.map { event ->
-                                EventCard(
-                                    modifier = Modifier.padding(8.dp),
-                                    event = event,
-                                )
-                            }
-                        }
-                    },
-                    onDismissRequest = { isNowPlayingDialogVisible = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = { isNowPlayingDialogVisible = false }
-                        ) {
-                            Text(text = stringResource(id = R.string.close))
-                        }
-                    },
-                )
             }
 
             Surface(
@@ -199,23 +138,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     TopAppBar(
                         title = { Text(text = stringResource(id = R.string.app_name)) },
-                        actions = {
-                            AnimatedVisibility(
-                                visible = EventsProvider.state != EventsProvider.STATE_UNKNOWN &&
-                                        !isDataStateVisible
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        isDataStateVisible = true
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Storage,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        },
                         colors = TopAppBarDefaults.smallTopAppBarColors(
                             containerColor = MaterialTheme.colorScheme.background,
                             titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -248,7 +170,7 @@ class MainActivity : ComponentActivity() {
                                     TextButton(
                                         enabled = EventsProvider.state != EventsProvider.STATE_DOWNLOADING,
                                         onClick = {
-                                            EventsProvider.getEvents(
+                                            EventsProvider.getEventsThisYear(
                                                 this@MainActivity,
                                                 forceDownload = true
                                             )
@@ -302,7 +224,7 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .heightIn(min = 80.dp, max = 120.dp),
+                                        .heightIn(min = 92.dp, max = 128.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
@@ -310,38 +232,6 @@ class MainActivity : ComponentActivity() {
                                         text = it,
                                         textAlign = TextAlign.Center,
                                         color = MaterialTheme.colorScheme.onBackground,
-                                    )
-                                }
-                            }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Button(
-                                    modifier = Modifier.padding(8.dp),
-                                    onClick = {
-                                        isNowPlayingDialogVisible = true
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MusicNote,
-                                        contentDescription = null,
-                                    )
-                                    Text(
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        text = stringResource(id = R.string.now_playing),
-                                    )
-                                }
-                                Spacer(modifier = Modifier.weight(1f))
-                                SmallFloatingActionButton(
-                                    modifier = Modifier.padding(8.dp),
-                                    onClick = {
-                                        motd = MotdProvider.getRandomMotd(this@MainActivity, motd)
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.NavigateNext,
-                                        contentDescription = null,
                                     )
                                 }
                             }
@@ -408,7 +298,7 @@ class MainActivity : ComponentActivity() {
                                 title = stringResource(id = R.string.map),
                             )
                         }
-                        MenuCard(
+                        /*MenuCard(
                             modifier = Modifier
                                 .padding(8.dp)
                                 .fillMaxWidth(),
@@ -422,7 +312,7 @@ class MainActivity : ComponentActivity() {
                             },
                             painter = painterResource(id = R.drawable.terem_logo),
                             title = "TEREM: UNLOCK FEST Vol.4",
-                        )
+                        )*/
                         MenuCard(
                             modifier = Modifier
                                 .padding(8.dp)
@@ -431,74 +321,30 @@ class MainActivity : ComponentActivity() {
                                 startActivity(
                                     Intent(
                                         this@MainActivity,
-                                        ExtrasActivity::class.java
+                                        HubActivity::class.java
                                     )
                                 )
                             },
-                            imageVector = Icons.Default.VideogameAsset,
-                            title = stringResource(id = R.string.extras),
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        MenuCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = { isWebsitesMenuVisible = true },
                             imageVector = Icons.Default.Language,
-                            title = stringResource(id = R.string.websites),
+                            title = "Uz HUB",
+                        )
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .verticalScroll(rememberScrollState()),
                         ) {
-                            DropdownMenu(
-                                expanded = isWebsitesMenuVisible,
-                                onDismissRequest = { isWebsitesMenuVisible = false }
-                            ) {
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Feed,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_website)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@MainActivity,
-                                            "https://utcazene.hu/"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
+                            if (eventsNowPlaying.isNotEmpty()) {
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = stringResource(id = R.string.now_playing),
+                                    style = MaterialTheme.typography.titleMedium,
                                 )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_facebook),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_facebook)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@MainActivity,
-                                            "https://facebook.com/utcazene"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_instagram),
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = { Text(text = stringResource(id = R.string.open_instagram)) },
-                                    onClick = {
-                                        CustomTabsManager.open(
-                                            this@MainActivity,
-                                            "https://instagram.com/utcazene"
-                                        )
-                                        isWebsitesMenuVisible = false
-                                    },
-                                )
+                                eventsNowPlaying.map { event ->
+                                    EventCard(
+                                        modifier = Modifier.padding(8.dp),
+                                        event = event,
+                                    )
+                                }
                             }
                         }
                         MenuCard(

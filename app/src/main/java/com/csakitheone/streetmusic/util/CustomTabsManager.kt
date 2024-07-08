@@ -5,13 +5,13 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.toArgb
-import com.csakitheone.streetmusic.ui.theme.md_theme_light_primary
+import com.csakitheone.streetmusic.ui.theme.primaryContainerLight
 
 class CustomTabsManager {
     companion object {
 
         private val colorSchemeParams = CustomTabColorSchemeParams.Builder()
-            .setToolbarColor(md_theme_light_primary.toArgb())
+            .setToolbarColor(primaryContainerLight.toArgb())
             .build()
 
         fun open(context: Context, url: String?) {

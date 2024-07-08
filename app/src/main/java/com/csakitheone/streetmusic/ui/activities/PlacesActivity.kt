@@ -76,8 +76,8 @@ class PlacesActivity : ComponentActivity() {
 
             var selectedDay by remember {
                 mutableStateOf(
-                    if ((19..22).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
-                    else 19
+                    if ((24..27).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
+                    else 24
                 )
             }
 
@@ -88,7 +88,7 @@ class PlacesActivity : ComponentActivity() {
             var eventsGrouped by remember { mutableStateOf(listOf<Map.Entry<Place, List<Event>>>()) }
 
             LaunchedEffect(selectedDay, eventsPinned, isOnlyPinned, isOnlyUpcoming) {
-                EventsProvider.getEvents(this@PlacesActivity) { events ->
+                EventsProvider.getEventsThisYear(this@PlacesActivity) { events ->
                     eventsGrouped = events
                         .filter { it.day == selectedDay }
                         .filter { !isOnlyPinned || eventsPinned.contains(it) }

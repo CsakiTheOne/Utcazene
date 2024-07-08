@@ -1,7 +1,6 @@
 package com.csakitheone.streetmusic.data
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +10,7 @@ import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.util.Helper
+import java.time.LocalDate
 
 class EventsProvider {
     companion object {
@@ -25,8 +25,8 @@ class EventsProvider {
                         "szórakoztató műfajt adnak elő, néha hangszerkísérettel. Aki kedveli a " +
                         "sea shanty-ket, mindenképp meg kell hallgatnia őket!",
                 country = "HU",
-                imageUrl = "https://i.ytimg.com/vi/grWgky_ZIJw/maxresdefault.jpg",
-                youtubeUrl = "https://youtu.be/grWgky_ZIJw",
+                imageUrl = "https://instagram.fbud7-3.fna.fbcdn.net/v/t51.29350-15/450180903_360967316773483_6634244899063806694_n.jpg?stp=dst-jpg_e35&efg=eyJ2ZW5jb2RlX3RhZyI6ImltYWdlX3VybGdlbi4xNDQweDEwODAuc2RyLmYyOTM1MCJ9&_nc_ht=instagram.fbud7-3.fna.fbcdn.net&_nc_cat=107&_nc_ohc=P47cy-NccC4Q7kNvgH7b75M&edm=AEhyXUkBAAAA&ccb=7-5&ig_cache_key=MzQwNzc2MDAxNDkzMDQ2MzA5Nw%3D%3D.2-ccb7-5&oh=00_AYBovnMzKp-yXkONESlqYyCa5ObPIMOaE3KFR0IjWNOLwg&oe=6692315D&_nc_sid=8f1549",
+                youtubeUrl = "https://www.youtube.com/@shantolok_band",
                 tags = listOf(Musician.TAG_FRIEND),
             )
         )
@@ -43,8 +43,9 @@ class EventsProvider {
         val customEvents = listOf(
             Event(
                 musician = customMusicians[0],
-                day = 19,
-                time = "17:00",
+                year = 2024,
+                day = 24,
+                time = "17:15",
                 place = Place("Óváros tér"),
             )
         )
@@ -55,7 +56,7 @@ class EventsProvider {
          * 2. If there is no network, but events were downloaded once, reads it from preferences.
          * 3. If there are no events in the preferences, reads it from the CSV.
          */
-        fun getEvents(
+        fun getEventsThisYear(
             context: Context,
             forceDownload: Boolean = false,
             skipDownload: Boolean = false,
@@ -63,7 +64,6 @@ class EventsProvider {
         ) {
             state = STATE_UNKNOWN
             callback(listOf())
-            return
             // 1.
             val timeTillOld = 1000L * 60 * 30
             val isDataOld = PreferenceManager
@@ -81,13 +81,14 @@ class EventsProvider {
                         )
             ) {
                 state = STATE_DOWNLOADING
-                UzApi.downloadEvents(context) {
-                    if (it.isNotEmpty()) {
-                        callback(it + customEvents)
+                UzApi.downloadEvents(context) { events ->
+                    val eventsThisYear = events.filter { it.year == LocalDate.now().year }
+                    if (eventsThisYear.isNotEmpty()) {
+                        callback(eventsThisYear + customEvents)
                         state = STATE_DOWNLOADED
                     } else {
                         state = STATE_DOWNLOAD_ERROR
-                        getEvents(context, skipDownload = true, callback = callback)
+                        getEventsThisYear(context, skipDownload = true, callback = callback)
                     }
                 }
                 return
@@ -96,7 +97,9 @@ class EventsProvider {
             val json = PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(UzApi.PREF_KEY_API_RESPONSE_ARTISTS, "")
             if (!json.isNullOrBlank()) {
-                callback(UzApi.artistsJsonToEvents(json) + customEvents)
+                val eventsThisYear =
+                    UzApi.artistsJsonToEvents(json).filter { it.year == LocalDate.now().year }
+                callback(eventsThisYear + customEvents)
                 state = STATE_PREFERENCES
                 return
             }

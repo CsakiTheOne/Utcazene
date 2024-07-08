@@ -17,7 +17,7 @@ import com.csakitheone.streetmusic.R
 @Preview
 @Composable
 fun DaySelectorRow(
-    selectedDay: Int = 19,
+    selectedDay: Int = 24,
     onChange: (Int) -> Unit = {},
 ) {
     Row(
@@ -26,10 +26,10 @@ fun DaySelectorRow(
             .heightIn(max = 80.dp),
     ) {
         mapOf(
-            19 to stringResource(id = R.string.day_wednesday),
-            20 to stringResource(id = R.string.day_thursday),
-            21 to stringResource(id = R.string.day_friday),
-            22 to stringResource(id = R.string.day_saturday),
+            24 to stringResource(id = R.string.day_wednesday),
+            25 to stringResource(id = R.string.day_thursday),
+            26 to stringResource(id = R.string.day_friday),
+            27 to stringResource(id = R.string.day_saturday),
         ).map {
             NavigationBarItem(
                 selected = selectedDay == it.key,

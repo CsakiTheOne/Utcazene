@@ -162,6 +162,7 @@ class UzApi {
                     events.add(
                         Event(
                             musician = musician,
+                            year = timeslot.event__start_time.substringBefore('-').toInt(),
                             day = timeslot.event__start_time.substringAfterLast('-').toInt(),
                             time = timeslot.start_time.substringBeforeLast(':'),
                             place = place,

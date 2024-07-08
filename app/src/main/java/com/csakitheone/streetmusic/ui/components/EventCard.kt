@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -21,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.ui.activities.EventActivity
-import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Event
+import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Place
+import com.csakitheone.streetmusic.ui.activities.EventActivity
 import com.google.gson.Gson
 
 @Preview
@@ -33,7 +31,8 @@ fun EventCard(
     modifier: Modifier = Modifier,
     event: Event = Event(
         musician = Musician(name = "JAN TERLOUW JUNIOR & THE NIGHTCLUB"),
-        day = 19,
+        year = 2024,
+        day = 24,
         time = "19:30",
         place = Place("Nagyon Balaton nagyszínpad (a Hangvilla előtt)"),
     ),

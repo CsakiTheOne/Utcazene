@@ -46,7 +46,7 @@ import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Musician
-import com.csakitheone.streetmusic.ui.components.MusicianCard
+import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.google.gson.reflect.TypeToken
@@ -185,7 +185,7 @@ class MusiciansActivity : ComponentActivity() {
                             }
                         }
                         items(items = visibleMusicians, key = { it.id }) { musician ->
-                            MusicianCard(
+                            BigMusicianCard(
                                 modifier = Modifier.padding(8.dp),
                                 musician = musician,
                                 isPinned = musiciansPinned.contains(musician),

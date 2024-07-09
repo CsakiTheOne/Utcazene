@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -45,13 +43,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.UzApi
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
+import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
-import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
@@ -159,26 +156,7 @@ class EventActivity : ComponentActivity() {
                             .padding(8.dp)
                             .verticalScroll(rememberScrollState()),
                     ) {
-                        if (!event?.musician?.imageUrl.isNullOrBlank()) {
-                            OutlinedCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                onClick = {
-                                    CustomTabsManager.open(context, event?.musician?.imageUrl)
-                                },
-                            ) {
-                                AsyncImage(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(min = 64.dp, max = 400.dp),
-                                    imageLoader = imageLoader,
-                                    model = event!!.musician.imageUrl,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                        MusicianCard(
+                        BigMusicianCard(
                             modifier = Modifier.padding(8.dp),
                             musician = event?.musician ?: Musician.fromString("Előadó neve (Ország)"),
                         )

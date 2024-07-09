@@ -184,7 +184,7 @@ class MusiciansActivity : ComponentActivity() {
                                     }
                             }
                         }
-                        items(items = visibleMusicians, key = { it.name }) { musician ->
+                        items(items = visibleMusicians, key = { it.id }) { musician ->
                             MusicianCard(
                                 modifier = Modifier.padding(8.dp),
                                 musician = musician,

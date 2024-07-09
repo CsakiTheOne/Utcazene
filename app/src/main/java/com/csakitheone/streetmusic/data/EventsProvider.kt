@@ -42,11 +42,12 @@ class EventsProvider {
 
         val customEvents = listOf(
             Event(
+                id = 10_000,
                 musician = customMusicians[0],
                 year = 2024,
                 day = 24,
                 time = "17:15",
-                place = Place("Óváros tér"),
+                place = Place("Íródeák Művészeti Udvar"),
             )
         )
 

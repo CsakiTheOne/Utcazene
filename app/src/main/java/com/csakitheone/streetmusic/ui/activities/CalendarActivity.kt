@@ -194,7 +194,7 @@ class CalendarActivity : ComponentActivity() {
                         }
                         items(
                             items = eventsToday,
-                            key = { "${it.musician.name} ${it.day} ${it.time}" }) { event ->
+                            key = { "${it.id} ${it.musician.name} ${it.day} ${it.time}" }) { event ->
                             if (event == nextEvent) {
                                 NowIndicator(modifier = Modifier.padding(8.dp))
                             }

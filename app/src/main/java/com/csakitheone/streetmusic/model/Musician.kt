@@ -6,6 +6,7 @@ import com.google.firebase.firestore.Exclude
 
 @Keep
 data class Musician(
+    val id: Int = -1,
     val name: String = "",
     val description: String? = null,
     val country: String? = null,

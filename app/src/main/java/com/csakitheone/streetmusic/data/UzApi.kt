@@ -135,6 +135,7 @@ class UzApi {
 
             apiArtists.map { artist ->
                 val musician = Musician(
+                    id = artist.id,
                     name = artist.name,
                     description = artist.description
                         .replace(Regex("""<[br/ ]{2,4}>"""), "\n"),
@@ -161,6 +162,7 @@ class UzApi {
 
                     events.add(
                         Event(
+                            id = timeslot.event,
                             musician = musician,
                             year = timeslot.event__start_time.substringBefore('-').toInt(),
                             day = timeslot.event__start_time.substringAfterLast('-').toInt(),

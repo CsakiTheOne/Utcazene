@@ -17,25 +17,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.model.Musician
-import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.ui.activities.EventActivity
 import com.google.gson.Gson
 
-@Preview
 @Composable
 fun EventCard(
     modifier: Modifier = Modifier,
-    event: Event = Event(
-        musician = Musician(name = "JAN TERLOUW JUNIOR & THE NIGHTCLUB"),
-        year = 2024,
-        day = 24,
-        time = "19:30",
-        place = Place("Nagyon Balaton nagyszínpad (a Hangvilla előtt)"),
-    ),
+    event: Event,
     isPinned: Boolean? = null,
     onPinnedChangeRequest: (Boolean) -> Unit = {},
     showPlace: Boolean = true,

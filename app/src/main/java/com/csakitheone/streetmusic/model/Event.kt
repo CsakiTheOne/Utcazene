@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 
 @Keep
 data class Event(
+    val id: Int,
     val musician: Musician,
     val year: Int,
     val day: Int,

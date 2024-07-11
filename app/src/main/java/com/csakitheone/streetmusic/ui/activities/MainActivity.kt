@@ -4,25 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,8 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,14 +42,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
-import com.csakitheone.streetmusic.data.MotdProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
@@ -72,6 +74,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainScreen()
         }
+        enableEdgeToEdge()
     }
 
     override fun onDestroy() {
@@ -106,7 +109,6 @@ class MainActivity : ComponentActivity() {
                             EventsProvider.state != EventsProvider.STATE_PREFERENCES
                 )
             }
-            var motd by remember { mutableStateOf(MotdProvider.getRandomMotd(context)) }
 
             val eventsNowPlaying by remember(events) {
                 val sortedEvents = events
@@ -123,6 +125,8 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+            val eventsNowPlayingScrollState = rememberScrollState()
+
             LaunchedEffect(Unit) {
                 EventsProvider.getEventsThisYear(this@MainActivity) {
                     events = it
@@ -136,17 +140,32 @@ class MainActivity : ComponentActivity() {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    TopAppBar(
-                        title = { Text(text = stringResource(id = R.string.app_name)) },
-                        colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
-                            titleContentColor = MaterialTheme.colorScheme.onBackground,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                        ),
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding(),
+                        painter = painterResource(id = R.drawable.header),
+                        contentDescription = null,
+                    )
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        SupportActivity::class.java
+                                    )
+                                )
+                            },
+                        text = stringResource(id = R.string.made_by_csaki),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.secondary,
+                        textDecoration = TextDecoration.Underline,
                     )
                     Column(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp),
                     ) {
                         AnimatedVisibility(
                             visible = EventsProvider.state != EventsProvider.STATE_UNKNOWN &&
@@ -216,26 +235,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        Column {
-                            AnimatedContent(
-                                targetState = motd,
-                                label = "MotdChange",
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(min = 92.dp, max = 128.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        modifier = Modifier.padding(8.dp),
-                                        text = it,
-                                        textAlign = TextAlign.Center,
-                                        color = MaterialTheme.colorScheme.onBackground,
-                                    )
-                                }
-                            }
-                        }
                         Row {
                             MenuCard(
                                 modifier = Modifier
@@ -251,6 +250,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.CalendarMonth,
                                 title = stringResource(id = R.string.events),
+                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                             )
                             MenuCard(
                                 modifier = Modifier
@@ -266,6 +266,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Mic,
                                 title = stringResource(id = R.string.musicians),
+                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                             )
                         }
                         Row {
@@ -283,6 +284,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Place,
                                 title = stringResource(id = R.string.places),
+                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                             )
                             MenuCard(
                                 modifier = Modifier
@@ -296,6 +298,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Map,
                                 title = stringResource(id = R.string.map),
+                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                             )
                         }
                         /*MenuCard(
@@ -314,9 +317,21 @@ class MainActivity : ComponentActivity() {
                             title = "TEREM: UNLOCK FEST Vol.4",
                         )*/
                         MenuCard(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
+                            modifier = Modifier.padding(8.dp),
+                            onClick = {
+                                startActivity(
+                                    Intent(
+                                        this@MainActivity,
+                                        ExtrasActivity::class.java
+                                    )
+                                )
+                            },
+                            imageVector = Icons.Default.VideogameAsset,
+                            title = stringResource(id = R.string.extras),
+                            isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                        )
+                        MenuCard(
+                            modifier = Modifier.padding(8.dp),
                             onClick = {
                                 startActivity(
                                     Intent(
@@ -327,41 +342,33 @@ class MainActivity : ComponentActivity() {
                             },
                             imageVector = Icons.Default.Language,
                             title = "Uz HUB",
+                            isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                         )
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .verticalScroll(rememberScrollState()),
-                        ) {
-                            if (eventsNowPlaying.isNotEmpty()) {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.now_playing),
-                                    style = MaterialTheme.typography.titleMedium,
-                                )
-                                eventsNowPlaying.map { event ->
-                                    EventCard(
-                                        modifier = Modifier.padding(8.dp),
-                                        event = event,
-                                    )
-                                }
-                            }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(eventsNowPlayingScrollState),
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            text = stringResource(id = R.string.now_playing),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        eventsNowPlaying.map { event ->
+                            EventCard(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                event = event,
+                            )
                         }
-                        MenuCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        SupportActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.Code,
-                            title = stringResource(id = R.string.made_by_csaki),
-                        )
+                        if (eventsNowPlaying.isEmpty()) {
+                            Text(
+                                modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                                text = "😴",
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                        Spacer(modifier = Modifier.navigationBarsPadding())
                     }
                 }
             }

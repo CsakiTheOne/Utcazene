@@ -3,11 +3,14 @@ package com.csakitheone.streetmusic.ui.activities
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -57,6 +60,7 @@ class MusiciansActivity : ComponentActivity() {
         setContent {
             MusiciansScreen()
         }
+        enableEdgeToEdge()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -194,6 +198,9 @@ class MusiciansActivity : ComponentActivity() {
                                     else musiciansPinned.filter { a -> a != musician }
                                 },
                             )
+                        }
+                        item {
+                            Spacer(modifier = Modifier.navigationBarsPadding())
                         }
                     }
                 }

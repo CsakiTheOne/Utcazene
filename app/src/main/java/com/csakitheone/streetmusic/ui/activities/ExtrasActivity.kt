@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -57,6 +59,7 @@ class ExtrasActivity : ComponentActivity() {
         setContent {
             ExtrasScreen()
         }
+        enableEdgeToEdge()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -147,7 +150,8 @@ class ExtrasActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .padding(8.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState())
+                            .navigationBarsPadding(),
                     ) {
                         Text(
                             modifier = Modifier.padding(8.dp),

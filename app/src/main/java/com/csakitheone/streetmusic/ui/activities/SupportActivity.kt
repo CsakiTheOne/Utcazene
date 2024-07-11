@@ -7,18 +7,17 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +49,7 @@ class SupportActivity : ComponentActivity() {
         setContent {
             SupportScreen()
         }
+        enableEdgeToEdge()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -162,7 +161,7 @@ class SupportActivity : ComponentActivity() {
                                     modifier = Modifier.padding(8.dp),
                                     text = stringResource(id = R.string.other_apps_by_csaki),
                                 )
-                                TextButton(
+                                Button(
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .fillMaxWidth(),
@@ -177,7 +176,7 @@ class SupportActivity : ComponentActivity() {
                                 ) {
                                     Text(text = "Fröccs")
                                 }
-                                TextButton(
+                                Button(
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .fillMaxWidth(),
@@ -192,7 +191,7 @@ class SupportActivity : ComponentActivity() {
                                 ) {
                                     Text(text = "Distant Hug")
                                 }
-                                TextButton(
+                                Button(
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .fillMaxWidth(),
@@ -200,7 +199,7 @@ class SupportActivity : ComponentActivity() {
                                         startActivity(
                                             Intent(
                                                 Intent.ACTION_VIEW,
-                                                Uri.parse("https://play.google.com/store/apps/dev?id=5554124272482096869")
+                                                Uri.parse("https://play.google.com/store/apps/dev?id=8177011913013516936")
                                             )
                                         )
                                     },
@@ -219,7 +218,7 @@ class SupportActivity : ComponentActivity() {
                                     modifier = Modifier.padding(8.dp),
                                     text = stringResource(id = R.string.support_methods),
                                 )
-                                TextButton(
+                                Button(
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .fillMaxWidth(),
@@ -229,7 +228,7 @@ class SupportActivity : ComponentActivity() {
                                 ) {
                                     Text(text = stringResource(id = R.string.show_account_number))
                                 }
-                                TextButton(
+                                Button(
                                     modifier = Modifier
                                         .padding(8.dp)
                                         .fillMaxWidth(),
@@ -242,29 +241,6 @@ class SupportActivity : ComponentActivity() {
                                 ) {
                                     Text(text = stringResource(id = R.string.depressed_altgirl))
                                 }
-                            }
-                        }
-                        UzCard(
-                            modifier = Modifier.padding(8.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(8.dp),
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(8.dp),
-                                    text = stringResource(id = R.string.financial_supporters),
-                                )
-                                Image(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(max = 64.dp)
-                                        .padding(8.dp)
-                                        .clickable {
-                                            CustomTabsManager.open(this@SupportActivity, "https://idealap.hu/")
-                                        },
-                                    painter = painterResource(id = R.drawable.idealap_logo_full),
-                                    contentDescription = null,
-                                )
                             }
                         }
                     }

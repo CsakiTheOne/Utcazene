@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -21,8 +22,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -119,6 +120,7 @@ class HubActivity : ComponentActivity() {
         setContent {
             HubScreen()
         }
+        enableEdgeToEdge()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -207,6 +209,7 @@ class HubActivity : ComponentActivity() {
                             if (targetState) {
                                 TextField(
                                     modifier = Modifier
+                                        .statusBarsPadding()
                                         .padding(16.dp)
                                         .fillMaxWidth()
                                         .focusRequester(searchFocusRequester),
@@ -371,7 +374,6 @@ class HubActivity : ComponentActivity() {
                         }
                     }
                     NavigationBar(
-                        modifier = Modifier.heightIn(max = 72.dp),
                         tonalElevation = if (scroll.canScrollForward) 2.dp else 0.dp,
                     ) {
                         NavigationBarItem(

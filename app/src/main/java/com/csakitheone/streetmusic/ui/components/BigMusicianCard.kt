@@ -17,10 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,6 +75,9 @@ fun BigMusicianCard(
                     .putExtra(MusicianActivity.EXTRA_MUSICIAN_JSON, Gson().toJson(musician))
             )
         },
+        colors = CardDefaults.cardColors(
+            contentColor = Color.White,
+        ),
     ) {
         Box(
             modifier = Modifier
@@ -97,8 +100,7 @@ fun BigMusicianCard(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
-                                    MaterialTheme.colorScheme.background.copy(alpha = .6f),
+                                    Color.Black.copy(alpha = .8f),
                                     Color.Transparent,
                                 ),
                             )
@@ -142,7 +144,7 @@ fun BigMusicianCard(
                             Brush.verticalGradient(
                                 listOf(
                                     Color.Transparent,
-                                    MaterialTheme.colorScheme.background.copy(alpha = .8f),
+                                    Color.Black.copy(alpha = .8f),
                                 ),
                             )
                         ),

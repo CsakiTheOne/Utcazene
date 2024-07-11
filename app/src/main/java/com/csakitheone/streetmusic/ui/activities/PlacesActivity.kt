@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -65,6 +67,7 @@ class PlacesActivity : ComponentActivity() {
         setContent {
             PlacesScreen()
         }
+        enableEdgeToEdge()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -149,14 +152,12 @@ class PlacesActivity : ComponentActivity() {
                         )
                     }
                     LazyColumn(
-                        modifier = Modifier.padding(horizontal = 8.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
                         state = scroll,
                     ) {
                         item {
-                            DaySelectorRow(
-                                selectedDay = selectedDay,
-                                onChange = { selectedDay = it },
-                            )
                             Row(
                                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                                 verticalAlignment = Alignment.CenterVertically,
@@ -217,7 +218,9 @@ class PlacesActivity : ComponentActivity() {
                                 ) {
                                     entry.value.map { event ->
                                         EventCard(
-                                            modifier = Modifier.padding(8.dp).width(300.dp),
+                                            modifier = Modifier
+                                                .padding(8.dp)
+                                                .width(300.dp),
                                             event = event,
                                             isPinned = eventsPinned.contains(event),
                                             onPinnedChangeRequest = {
@@ -230,6 +233,12 @@ class PlacesActivity : ComponentActivity() {
                                 }
                             }
                         }
+                    }
+                    NavigationBar {
+                        DaySelectorRow(
+                            selectedDay = selectedDay,
+                            onChange = { selectedDay = it },
+                        )
                     }
                 }
             }

@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.provider.CalendarContract
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -42,9 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.ImageLoader
 import com.csakitheone.streetmusic.R
-import com.csakitheone.streetmusic.data.UzApi
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.BigMusicianCard
@@ -70,6 +70,7 @@ class EventActivity : ComponentActivity() {
         setContent {
             EventScreen()
         }
+        enableEdgeToEdge()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -77,14 +78,6 @@ class EventActivity : ComponentActivity() {
     @Composable
     fun EventScreen() {
         val context = LocalContext.current
-
-        val imageLoader by remember {
-            mutableStateOf(
-                ImageLoader.Builder(context)
-                    .okHttpClient(UzApi.client)
-                    .build()
-            )
-        }
 
         var event: Event? by remember { mutableStateOf(null) }
         var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
@@ -154,7 +147,8 @@ class EventActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .padding(8.dp)
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState())
+                            .navigationBarsPadding(),
                     ) {
                         BigMusicianCard(
                             modifier = Modifier.padding(8.dp),

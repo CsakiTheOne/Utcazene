@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.components
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -17,13 +18,13 @@ import com.csakitheone.streetmusic.R
 @Preview
 @Composable
 fun DaySelectorRow(
+    modifier: Modifier = Modifier,
     selectedDay: Int = 24,
     onChange: (Int) -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 80.dp),
+        modifier = modifier
+            .fillMaxWidth(),
     ) {
         mapOf(
             24 to stringResource(id = R.string.day_wednesday),

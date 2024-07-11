@@ -1,10 +1,15 @@
 package com.csakitheone.streetmusic.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalAnimationApi::class)
 @Preview
 @Composable
 fun MenuCard(
@@ -24,43 +31,86 @@ fun MenuCard(
     onClick: () -> Unit = {},
     imageVector: ImageVector? = null,
     painter: Painter? = null,
-    title: String? = "",
-    contentOrientationHorizontal: Boolean = false,
+    title: String? = null,
+    isCompressed: Boolean = false,
     content: @Composable () -> Unit = {},
 ) {
-    UzCard(
+    AnimatedContent(
         modifier = modifier,
-        onClick = onClick,
+        targetState = isCompressed,
+        transitionSpec = {
+            if (targetState) {
+                fadeIn() togetherWith fadeOut()
+            } else {
+                fadeIn() togetherWith fadeOut()
+            }
+        },
     ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            if (imageVector != null) {
-                Icon(
-                    modifier = Modifier
-                        .size(48.dp),
-                    imageVector = imageVector,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
+        if (it) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onClick,
+            ) {
+                if (imageVector != null) {
+                    Icon(
+                        modifier = Modifier
+                            .size(24.dp),
+                        imageVector = imageVector,
+                        contentDescription = null,
+                    )
+                } else if (painter != null) {
+                    Icon(
+                        modifier = Modifier
+                            .size(24.dp),
+                        painter = painter,
+                        contentDescription = null,
+                    )
+                }
+                Text(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = title ?: "",
                 )
+                content()
             }
-            else if (painter != null) {
-                Icon(
-                    modifier = Modifier
-                        .size(48.dp),
-                    painter = painter,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
-                )
+        } else {
+            UzCard(
+                modifier = Modifier,
+                onClick = onClick,
+            ) {
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    if (imageVector != null) {
+                        Icon(
+                            modifier = Modifier
+                                .size(48.dp),
+                            imageVector = imageVector,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                    } else if (painter != null) {
+                        Icon(
+                            modifier = Modifier
+                                .size(48.dp),
+                            painter = painter,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.secondaryContainer,
+                        )
+                    }
+                    Text(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 4.dp),
+                        text = title ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    content()
+                }
             }
-            Text(
-                modifier = Modifier.weight(1f).padding(4.dp),
-                text = title ?: "",
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center,
-            )
-            content()
         }
     }
 }

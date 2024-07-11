@@ -36,7 +36,7 @@ fun NowIndicator(
                 .width(16.dp)
                 .aspectRatio(1f)
                 .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.primary),
+                .background(MaterialTheme.colorScheme.tertiary),
         )
         Box(
             modifier = Modifier
@@ -44,7 +44,7 @@ fun NowIndicator(
                 .height(4.dp)
                 .offset(x = -(1).dp)
                 .clip(RoundedCornerShape(topEnd = 2.dp, bottomEnd = 2.dp))
-                .background(MaterialTheme.colorScheme.primary),
+                .background(MaterialTheme.colorScheme.tertiary),
         )
         Text(
             modifier = Modifier.padding(start = 8.dp),

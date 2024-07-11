@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.csakitheone.streetmusic"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.csakitheone.streetmusic"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 27
-        versionName = "2024.2"
+        targetSdk = 35
+        versionCode = 28
+        versionName = "2024.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -21,7 +21,7 @@ import javax.net.ssl.X509TrustManager
 
 class UzApi {
     @Keep
-    data class ApiTimeslot(
+    data class ApiArtistTimeslot(
         val start_time: String,
         val end_time: String,
         val event: Int,
@@ -40,7 +40,14 @@ class UzApi {
         val slug: String,
         val headliner: Boolean,
         val youtube_embed: String,
-        val timeslots: List<ApiTimeslot>,
+        val timeslots: List<ApiArtistTimeslot>,
+    )
+
+    @Keep
+    data class ApiVenue(
+        val id: Int,
+        val name: String,
+        val address: String,
     )
 
     companion object {
@@ -155,7 +162,7 @@ class UzApi {
                                     .replace(Regex("""[ -]"""), ""),
                                 true
                             )
-                    } ?: Place.MISSING
+                    } ?: Place(name = timeslot.event__venue__name)
                     if (place == Place.MISSING) {
                         Log.w("UzApi", "Couldn't find place: ${timeslot.event__venue__name}")
                     }

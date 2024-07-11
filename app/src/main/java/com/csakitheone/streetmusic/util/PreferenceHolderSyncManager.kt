@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.util
 
+@Deprecated("Use DataStore instead")
 class PreferenceHolderSyncManager {
     companion object {
 

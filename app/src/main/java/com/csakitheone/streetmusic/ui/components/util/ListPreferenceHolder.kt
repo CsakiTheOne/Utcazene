@@ -24,6 +24,7 @@ import java.lang.reflect.Type
  * @param onValueChanged A callback function invoked when the value is loaded or changed.
  */
 @Composable
+@Deprecated("Use DataStore instead")
 fun <T> ListPreferenceHolder(
     id: String,
     value: Collection<T>,

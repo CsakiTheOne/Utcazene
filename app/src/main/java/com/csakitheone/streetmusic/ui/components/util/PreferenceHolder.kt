@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken
  * @param defaultValue The default value of the preference.
  */
 @Composable
+@Deprecated("Use DataStore instead")
 fun <T> PreferenceHolder(
     id: String,
     value: T,

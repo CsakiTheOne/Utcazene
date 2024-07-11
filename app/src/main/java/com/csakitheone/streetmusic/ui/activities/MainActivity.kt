@@ -7,8 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,11 +24,16 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -103,6 +107,8 @@ class MainActivity : ComponentActivity() {
         UtcazeneTheme {
             val context = LocalContext.current
 
+            var isMenuOpen by remember { mutableStateOf(false) }
+
             var isDataStateVisible by remember(EventsProvider.state) {
                 mutableStateOf(
                     EventsProvider.state != EventsProvider.STATE_DOWNLOADED &&
@@ -140,30 +146,61 @@ class MainActivity : ComponentActivity() {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    Image(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .statusBarsPadding(),
-                        painter = painterResource(id = R.drawable.header),
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .clickable {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        SupportActivity::class.java
-                                    )
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            painter = painterResource(id = R.drawable.header),
+                            contentDescription = null,
+                        )
+                        FilledIconButton(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.TopEnd),
+                            onClick = { isMenuOpen = true },
+                        ) {
+                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                            DropdownMenu(
+                                expanded = isMenuOpen,
+                                onDismissRequest = { isMenuOpen = false },
+                            ) {
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Language,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    text = { Text(text = "Uz HUB") },
+                                    onClick = {
+                                        startActivity(
+                                            Intent(
+                                                this@MainActivity,
+                                                HubActivity::class.java
+                                            )
+                                        )
+                                        isMenuOpen = false
+                                    },
                                 )
-                            },
-                        text = stringResource(id = R.string.made_by_csaki),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.secondary,
-                        textDecoration = TextDecoration.Underline,
-                    )
+                                DropdownMenuItem(
+                                    text = { Text(text = stringResource(id = R.string.made_by_csaki)) },
+                                    onClick = {
+                                        startActivity(
+                                            Intent(
+                                                this@MainActivity,
+                                                SupportActivity::class.java
+                                            )
+                                        )
+                                        isMenuOpen = false
+                                    },
+                                )
+                            }
+                        }
+                    }
                     Column(
                         modifier = Modifier.padding(horizontal = 8.dp),
                     ) {
@@ -330,20 +367,6 @@ class MainActivity : ComponentActivity() {
                             title = stringResource(id = R.string.extras),
                             isCompressed = eventsNowPlayingScrollState.canScrollBackward,
                         )
-                        MenuCard(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        HubActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.Language,
-                            title = "Uz HUB",
-                            isCompressed = eventsNowPlayingScrollState.canScrollBackward,
-                        )
                     }
                     Column(
                         modifier = Modifier
@@ -363,7 +386,9 @@ class MainActivity : ComponentActivity() {
                         }
                         if (eventsNowPlaying.isEmpty()) {
                             Text(
-                                modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
                                 text = "😴",
                                 textAlign = TextAlign.Center,
                             )

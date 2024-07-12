@@ -31,6 +31,8 @@
     <string name="update_available">The update is ready to install.</string>
 
     <string name="now_playing">Now playing</string>
+    <string name="tonight_on_utcazene">Tonight on Utcazene</string>
+    <string name="this_year_on_utcazene">This year on Utcazene</string>
 
     <string name="battery_saver">Battery saver mode</string>
     <string name="battery_saver_description">If the battery\'s low, but the night is young, turn this on. The app will turn black and it will use less data.</string>

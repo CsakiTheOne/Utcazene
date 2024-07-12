@@ -84,7 +84,7 @@ fun MenuCard(
                     if (imageVector != null) {
                         Icon(
                             modifier = Modifier
-                                .size(48.dp),
+                                .size(52.dp),
                             imageVector = imageVector,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondaryContainer,
@@ -92,7 +92,7 @@ fun MenuCard(
                     } else if (painter != null) {
                         Icon(
                             modifier = Modifier
-                                .size(48.dp),
+                                .size(52.dp),
                             painter = painter,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondaryContainer,

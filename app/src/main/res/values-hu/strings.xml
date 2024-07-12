@@ -28,6 +28,8 @@
     <string name="update_available">A frissítés készen áll a telepítésre.</string>
 
     <string name="now_playing">Most játszott</string>
+    <string name="tonight_on_utcazene">Ma este az Utcazenén</string>
+    <string name="this_year_on_utcazene">Idén az Utcazenén</string>
 
     <string name="battery_saver">Energiatakarékos mód</string>
     <string name="battery_saver_description">Ha merül a telefon, de még hosszú az éjszaka, kapcsold be ezt. Az alkalmazás fekete témára vált és kevesebb netet fog használni.</string>

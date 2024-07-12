@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Language
@@ -49,22 +47,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.ui.components.EventCard
+import com.csakitheone.streetmusic.ui.components.AdaptiveFeed
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
-import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.csakitheone.streetmusic.util.InAppUpdater
-import java.time.LocalDate
-import java.time.LocalTime
 
 class MainActivity : ComponentActivity() {
     private var events by mutableStateOf(listOf<Event>())
@@ -116,22 +110,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            val eventsNowPlaying by remember(events) {
-                val sortedEvents = events
-                    .filter { it.day == LocalDate.now().dayOfMonth }
-                    .sortedBy { it.time.toLocalTime() }
-                mutableStateOf(
-                    sortedEvents.filter { event ->
-                        val nextTime = sortedEvents.firstOrNull {
-                            it.time.toLocalTime() > event.time.toLocalTime().plusMinutes(20)
-                        }?.time?.toLocalTime()
-                        event.time.toLocalTime() < LocalTime.now().plusMinutes(5) &&
-                                (nextTime == null || nextTime > LocalTime.now().minusMinutes(5))
-                    }
-                )
-            }
-
-            val eventsNowPlayingScrollState = rememberScrollState()
+            val adaptiveFeedState = rememberLazyListState()
 
             LaunchedEffect(Unit) {
                 EventsProvider.getEventsThisYear(this@MainActivity) {
@@ -287,7 +266,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.CalendarMonth,
                                 title = stringResource(id = R.string.events),
-                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                                isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                             MenuCard(
                                 modifier = Modifier
@@ -303,7 +282,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Mic,
                                 title = stringResource(id = R.string.musicians),
-                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                                isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                         }
                         Row {
@@ -321,7 +300,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Place,
                                 title = stringResource(id = R.string.places),
-                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                                isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                             MenuCard(
                                 modifier = Modifier
@@ -335,7 +314,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 imageVector = Icons.Default.Map,
                                 title = stringResource(id = R.string.map),
-                                isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                                isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                         }
                         /*MenuCard(
@@ -365,36 +344,16 @@ class MainActivity : ComponentActivity() {
                             },
                             imageVector = Icons.Default.VideogameAsset,
                             title = stringResource(id = R.string.extras),
-                            isCompressed = eventsNowPlayingScrollState.canScrollBackward,
+                            isCompressed = adaptiveFeedState.canScrollBackward,
                         )
                     }
-                    Column(
+                    AdaptiveFeed(
                         modifier = Modifier
+                            .padding(horizontal = 8.dp)
                             .weight(1f)
-                            .verticalScroll(eventsNowPlayingScrollState),
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            text = stringResource(id = R.string.now_playing),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        eventsNowPlaying.map { event ->
-                            EventCard(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                event = event,
-                            )
-                        }
-                        if (eventsNowPlaying.isEmpty()) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .fillMaxWidth(),
-                                text = "😴",
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                        Spacer(modifier = Modifier.navigationBarsPadding())
-                    }
+                            .navigationBarsPadding(),
+                        lazyListState = adaptiveFeedState,
+                    )
                 }
             }
         }

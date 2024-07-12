@@ -52,7 +52,6 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.DateRange
@@ -97,11 +96,9 @@ import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.MusicianCard
 import com.csakitheone.streetmusic.ui.components.UzCard
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.Auth
 import com.csakitheone.streetmusic.util.CustomTabsManager
-import com.google.gson.reflect.TypeToken
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -149,7 +146,6 @@ class HubActivity : ComponentActivity() {
             var isSearchVisible by remember { mutableStateOf(false) }
 
             var musicians by remember { mutableStateOf(listOf<Musician>()) }
-            var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
             var musiciansQuery by remember(isSearchVisible) { mutableStateOf("") }
 
             LaunchedEffect(Unit) {
@@ -174,19 +170,6 @@ class HubActivity : ComponentActivity() {
                 clearFilters()
                 Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show()
                 //TODO translate
-            }
-
-            if (musicians.isNotEmpty()) {
-                ListPreferenceHolder(
-                    id = "authorsPinned",
-                    value = musiciansPinned,
-                    onValueChanged = { newPinned ->
-                        musiciansPinned = musicians.filter { musician ->
-                            newPinned.any { musician.name == it.name }
-                        }
-                    },
-                    type = object : TypeToken<Musician>() {}.type,
-                )
             }
 
             Surface(
@@ -354,16 +337,12 @@ class HubActivity : ComponentActivity() {
                                     TAB_MAIN -> TabMain(
                                         scrollState = scroll,
                                         musicians = musicians,
-                                        musiciansPinned = musiciansPinned,
-                                        onMusiciansPinnedChange = { musiciansPinned = it },
                                     )
 
                                     TAB_BROWSE -> TabBrowse(
                                         scrollState = scroll,
                                         musicians = musicians,
                                         musiciansQuery = musiciansQuery,
-                                        musiciansPinned = musiciansPinned,
-                                        onMusiciansPinnedChange = { musiciansPinned = it },
                                     )
 
                                     TAB_DATA -> TabData(
@@ -411,8 +390,6 @@ class HubActivity : ComponentActivity() {
     fun TabMain(
         scrollState: LazyListState,
         musicians: List<Musician>,
-        musiciansPinned: List<Musician>,
-        onMusiciansPinnedChange: (List<Musician>) -> Unit,
     ) {
         val musiciansOfDay = remember { musicians.shuffled(Random(LocalDate.now().dayOfYear)).take(3) }
 
@@ -460,13 +437,6 @@ class HubActivity : ComponentActivity() {
                         BigMusicianCard(
                             modifier = Modifier.padding(8.dp),
                             musician = musiciansOfDay[it],
-                            isPinned = musiciansPinned.contains(musiciansOfDay[it]),
-                            onPinnedChangeRequest = { pinRequest ->
-                                onMusiciansPinnedChange(
-                                    if (pinRequest) musiciansPinned + musiciansOfDay[it]
-                                    else musiciansPinned - musiciansOfDay[it]
-                                )
-                            },
                         )
                         Row(
                             modifier = Modifier.padding(8.dp),
@@ -485,37 +455,6 @@ class HubActivity : ComponentActivity() {
                         }
                     }
                 }
-                AnimatedVisibility(visible = musiciansPinned.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            modifier = Modifier.padding(8.dp),
-                            imageVector = Icons.Default.Stars,
-                            contentDescription = null,
-                        )
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.filter_pinned),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                }
-            }
-            items(items = musiciansPinned, key = { it.name }) { musician ->
-                MusicianCard(
-                    modifier = Modifier.padding(8.dp),
-                    musician = musician,
-                    isPinned = musiciansPinned.contains(musician),
-                    onPinnedChangeRequest = {
-                        onMusiciansPinnedChange(
-                            if (it) musiciansPinned + musician
-                            else musiciansPinned - musician
-                        )
-                    },
-                    showYears = true,
-                )
             }
             item {
                 Row(
@@ -542,13 +481,6 @@ class HubActivity : ComponentActivity() {
                 MusicianCard(
                     modifier = Modifier.padding(8.dp),
                     musician = musician,
-                    isPinned = musiciansPinned.contains(musician),
-                    onPinnedChangeRequest = {
-                        onMusiciansPinnedChange(
-                            if (it) musiciansPinned + musician
-                            else musiciansPinned - musician
-                        )
-                    },
                     showYears = true,
                 )
             }
@@ -611,8 +543,6 @@ class HubActivity : ComponentActivity() {
         scrollState: LazyListState,
         musicians: List<Musician>,
         musiciansQuery: String,
-        musiciansPinned: List<Musician>,
-        onMusiciansPinnedChange: (List<Musician>) -> Unit,
     ) {
         val visibleMusicians by remember(
             musicians,
@@ -769,13 +699,6 @@ class HubActivity : ComponentActivity() {
                 MusicianCard(
                     modifier = Modifier.padding(8.dp),
                     musician = musician,
-                    isPinned = musiciansPinned.contains(musician),
-                    onPinnedChangeRequest = {
-                        onMusiciansPinnedChange(
-                            if (it) musiciansPinned + musician
-                            else musiciansPinned - musician
-                        )
-                    },
                     showYears = true,
                 )
             }

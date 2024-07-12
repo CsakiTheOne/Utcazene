@@ -47,17 +47,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataStore
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.ui.components.DaySelectorRow
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
-import com.google.gson.reflect.TypeToken
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -84,17 +83,20 @@ class PlacesActivity : ComponentActivity() {
                 )
             }
 
-            var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
+            val favoriteEvents by DataStore.getState(
+                key = DataStore.favoriteEventsKey,
+                defaultValue = setOf(),
+            )
             var isOnlyPinned by remember { mutableStateOf(false) }
             var isOnlyUpcoming by remember { mutableStateOf(true) }
 
             var eventsGrouped by remember { mutableStateOf(listOf<Map.Entry<Place, List<Event>>>()) }
 
-            LaunchedEffect(selectedDay, eventsPinned, isOnlyPinned, isOnlyUpcoming) {
+            LaunchedEffect(selectedDay, favoriteEvents, isOnlyPinned, isOnlyUpcoming) {
                 EventsProvider.getEventsThisYear(this@PlacesActivity) { events ->
                     eventsGrouped = events
                         .filter { it.day == selectedDay }
-                        .filter { !isOnlyPinned || eventsPinned.contains(it) }
+                        .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
                         .filter { !isOnlyUpcoming || LocalTime.now().isBefore(it.time.toLocalTime()) }
                         .sortedBy { it.time }
                         .groupBy { it.place }
@@ -102,13 +104,6 @@ class PlacesActivity : ComponentActivity() {
                         .toList()
                 }
             }
-
-            ListPreferenceHolder(
-                id = "eventsPinned",
-                value = eventsPinned,
-                onValueChanged = { eventsPinned = it.toList() },
-                type = object : TypeToken<Event>() {}.type,
-            )
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -222,10 +217,16 @@ class PlacesActivity : ComponentActivity() {
                                                 .padding(8.dp)
                                                 .width(300.dp),
                                             event = event,
-                                            isPinned = eventsPinned.contains(event),
+                                            isPinned = favoriteEvents.contains(event.toString()),
                                             onPinnedChangeRequest = {
-                                                eventsPinned = if (it) eventsPinned + event
-                                                else eventsPinned.filter { e -> e != event }
+                                                DataStore.setValue(
+                                                    this@PlacesActivity,
+                                                    DataStore.favoriteEventsKey,
+                                                    favoriteEvents.toMutableSet().apply {
+                                                        if (it) add(event.toString())
+                                                        else remove(event.toString())
+                                                    }
+                                                )
                                             },
                                             showPlace = false,
                                         )

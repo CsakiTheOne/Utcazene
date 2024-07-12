@@ -47,12 +47,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataStore
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.BigMusicianCard
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
-import com.google.gson.reflect.TypeToken
 
 class MusiciansActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,16 +71,19 @@ class MusiciansActivity : ComponentActivity() {
 
             var posterId: Int? by remember { mutableStateOf(null) }
 
-            var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
+            val favoriteMusicians by DataStore.getState(
+                key = DataStore.favoriteMusiciansKey,
+                defaultValue = setOf()
+            )
             var isOnlyPinned by remember { mutableStateOf(false) }
             var filterTags by remember { mutableStateOf(listOf<String>()) }
 
             var musicians by remember { mutableStateOf(listOf<Musician>()) }
-            val visibleMusicians by remember(musicians, musiciansPinned, isOnlyPinned, filterTags) {
+            val visibleMusicians by remember(musicians, favoriteMusicians, isOnlyPinned, filterTags) {
                 mutableStateOf(
                     musicians
                         .filter { filterTags.isEmpty() || filterTags == it.tags }
-                        .filter { !isOnlyPinned || (isOnlyPinned && musiciansPinned.contains(it)) }
+                        .filter { !isOnlyPinned || (isOnlyPinned && favoriteMusicians.contains(it.name)) }
                         .sortedBy { it.name }
                 )
             }
@@ -91,13 +93,6 @@ class MusiciansActivity : ComponentActivity() {
                     musicians = events.groupBy { it.musician }.keys.distinct()
                 }
             }
-
-            ListPreferenceHolder(
-                id = "authorsPinned",
-                value = musiciansPinned,
-                onValueChanged = { musiciansPinned = it.toList() },
-                type = object : TypeToken<Musician>() {}.type,
-            )
 
             if (posterId != null) {
                 Dialog(
@@ -192,10 +187,15 @@ class MusiciansActivity : ComponentActivity() {
                             BigMusicianCard(
                                 modifier = Modifier.padding(8.dp),
                                 musician = musician,
-                                isPinned = musiciansPinned.contains(musician),
+                                isPinned = favoriteMusicians.contains(musician.name),
                                 onPinnedChangeRequest = {
-                                    musiciansPinned = if (it) musiciansPinned + musician
-                                    else musiciansPinned.filter { a -> a != musician }
+                                    DataStore.setValue(
+                                        this@MusiciansActivity,
+                                        DataStore.favoriteMusiciansKey,
+                                        if (favoriteMusicians.contains(musician.name))
+                                            favoriteMusicians.filter { it != musician.name }.toSet()
+                                        else favoriteMusicians + musician.name
+                                    )
                                 },
                             )
                         }

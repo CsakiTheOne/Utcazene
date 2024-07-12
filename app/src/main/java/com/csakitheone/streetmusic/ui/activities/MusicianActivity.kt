@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataStore
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.data.UzApi
 import com.csakitheone.streetmusic.model.Event
@@ -60,13 +62,11 @@ import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import com.csakitheone.streetmusic.util.Helper
 import com.csakitheone.streetmusic.util.TranslatorManager
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 class MusicianActivity : ComponentActivity() {
     companion object {
@@ -100,11 +100,17 @@ class MusicianActivity : ComponentActivity() {
             var englishDescription: String? by remember { mutableStateOf(null) }
 
             var performances by remember { mutableStateOf(mapOf<Int, List<Event>>()) }
-            var musiciansPinned by remember { mutableStateOf<List<Musician>>(listOf()) }
-            val isPinned by remember(musician, musiciansPinned) {
-                mutableStateOf(musiciansPinned.contains(musician))
+            val favoriteEvents by DataStore.getState(
+                key = DataStore.favoriteEventsKey,
+                defaultValue = setOf()
+            )
+            val favoriteMusicians by DataStore.getState(
+                key = DataStore.favoriteMusiciansKey,
+                defaultValue = setOf()
+            )
+            val isPinned by remember(musician, favoriteMusicians) {
+                derivedStateOf { favoriteMusicians.contains(musician?.name) }
             }
-            var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
 
             LaunchedEffect(Unit) {
                 musician = Gson().fromJson(
@@ -119,20 +125,6 @@ class MusicianActivity : ComponentActivity() {
                         .toSortedMap()
                 }
             }
-
-            ListPreferenceHolder(
-                id = "authorsPinned",
-                value = musiciansPinned,
-                onValueChanged = { musiciansPinned = it.toList() },
-                type = object : TypeToken<Musician>() {}.type,
-            )
-
-            ListPreferenceHolder(
-                id = "eventsPinned",
-                value = eventsPinned,
-                onValueChanged = { eventsPinned = it.toList() },
-                type = object : TypeToken<Event>() {}.type,
-            )
 
             if (!englishDescription.isNullOrBlank()) {
                 AlertDialog(
@@ -178,7 +170,10 @@ class MusicianActivity : ComponentActivity() {
                         actions = {
                             IconButton(
                                 onClick = {
-                                    Helper.imageUrlToBitmapUri(this@MusicianActivity, musician?.imageUrl) {
+                                    Helper.imageUrlToBitmapUri(
+                                        this@MusicianActivity,
+                                        musician?.imageUrl
+                                    ) {
                                         startActivity(
                                             Intent.createChooser(
                                                 Intent(Intent.ACTION_SEND)
@@ -199,7 +194,10 @@ class MusicianActivity : ComponentActivity() {
                                         Intent.createChooser(
                                             Intent(Intent.ACTION_SEND)
                                                 .putExtra(Intent.EXTRA_SUBJECT, musician?.name)
-                                                .putExtra(Intent.EXTRA_TEXT, "${musician?.name}\n${musician?.youtubeUrl}")
+                                                .putExtra(
+                                                    Intent.EXTRA_TEXT,
+                                                    "${musician?.name}\n${musician?.youtubeUrl}"
+                                                )
                                                 .setType("text/plain"),
                                             musician?.name ?: ""
                                         )
@@ -210,8 +208,12 @@ class MusicianActivity : ComponentActivity() {
                             }
                             IconButton(
                                 onClick = {
-                                    musiciansPinned = if (!isPinned) musiciansPinned + musician!!
-                                    else musiciansPinned.filter { it != musician }
+                                    DataStore.setValue(
+                                        context,
+                                        DataStore.favoriteMusiciansKey,
+                                        if (isPinned) favoriteMusicians - musician!!.name
+                                        else favoriteMusicians + musician!!.name
+                                    )
                                 },
                             ) {
                                 Icon(
@@ -335,10 +337,15 @@ class MusicianActivity : ComponentActivity() {
                                 EventCard(
                                     modifier = Modifier.padding(8.dp),
                                     event = event,
-                                    isPinned = eventsPinned.contains(event),
+                                    isPinned = favoriteEvents.contains(event.toString()),
                                     onPinnedChangeRequest = {
-                                        eventsPinned = if (it) eventsPinned + event
-                                        else eventsPinned.filter { e -> e != event }
+                                        DataStore.setValue(
+                                            context,
+                                            DataStore.favoriteEventsKey,
+                                            if (favoriteEvents.contains(event.toString()))
+                                                favoriteEvents - event.toString()
+                                            else favoriteEvents + event.toString()
+                                        )
                                     },
                                 )
                             }

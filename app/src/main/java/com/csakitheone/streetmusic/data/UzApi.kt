@@ -3,8 +3,6 @@ package com.csakitheone.streetmusic.data
 import android.content.Context
 import android.util.Log
 import androidx.annotation.Keep
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Place
@@ -110,16 +108,6 @@ class UzApi {
                     val responseString = response.body?.string()
 
                     Log.i("UzApi", "Response string: $responseString")
-
-                    if (!responseString.isNullOrBlank()) {
-                        Log.i("UzApi", "Saving response to preferences...")
-
-                        PreferenceManager.getDefaultSharedPreferences(context).edit {
-                            putString(PREF_KEY_API_RESPONSE_ARTISTS, responseString)
-                            putLong(PREF_KEY_API_LAST_DOWNLOAD_TIMESTAMP, System.currentTimeMillis())
-                            commit()
-                        }
-                    }
                     callback(artistsJsonToEvents(responseString))
                 }
                 catch (ex: Exception) {

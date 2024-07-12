@@ -42,15 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataStore
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.DaySelectorRow
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.NowIndicator
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
-import com.google.gson.reflect.TypeToken
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -77,7 +76,10 @@ class CalendarActivity : ComponentActivity() {
                 )
             }
 
-            var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
+            val favoriteEvents by DataStore.getState(
+                key = DataStore.favoriteEventsKey,
+                defaultValue = setOf(),
+            )
             var isOnlyPinned by remember { mutableStateOf(false) }
             var isOnlyUpcoming by remember { mutableStateOf(true) }
 
@@ -85,7 +87,7 @@ class CalendarActivity : ComponentActivity() {
             val eventsToday by remember(
                 events,
                 selectedDay,
-                eventsPinned,
+                favoriteEvents,
                 isOnlyPinned,
                 isOnlyUpcoming
             ) {
@@ -96,7 +98,7 @@ class CalendarActivity : ComponentActivity() {
                             !isOnlyUpcoming || (LocalTime.now()
                                 .isBefore(it.time.toLocalTime()) || it.time.toLocalTime().hour < 5)
                         }
-                        .filter { !isOnlyPinned || eventsPinned.contains(it) }
+                        .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
                         .filter { it.day == selectedDay }
                         .sortedBy { it.musician.name }
                         .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
@@ -116,13 +118,6 @@ class CalendarActivity : ComponentActivity() {
                     events = it
                 }
             }
-
-            ListPreferenceHolder(
-                id = "eventsPinned",
-                value = eventsPinned,
-                onValueChanged = { eventsPinned = it.toList() },
-                type = object : TypeToken<Event>() {}.type,
-            )
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -201,10 +196,15 @@ class CalendarActivity : ComponentActivity() {
                             EventCard(
                                 modifier = Modifier.padding(8.dp),
                                 event = event,
-                                isPinned = eventsPinned.contains(event),
+                                isPinned = favoriteEvents.contains(event.toString()),
                                 onPinnedChangeRequest = {
-                                    eventsPinned = if (it) eventsPinned + event
-                                    else eventsPinned.filter { e -> e != event }
+                                    DataStore.setValue(
+                                        this@CalendarActivity,
+                                        DataStore.favoriteEventsKey,
+                                        if (favoriteEvents.contains(event.toString()))
+                                            favoriteEvents - event.toString()
+                                        else favoriteEvents + event.toString()
+                                    )
                                 },
                             )
                         }

@@ -24,7 +24,7 @@
     <string name="data_state_downloading">Downloading events…</string>
     <string name="data_state_downloaded">Events successfully downloaded!</string>
     <string name="data_state_download_error">Download failed.</string>
-    <string name="data_state_preferences">Offline mode. Events loaded from storage.</string>
+    <string name="data_state_cache">Offline mode. Events loaded from storage.</string>
     <string name="data_state_app">Events loaded from app. Connect to an unmetered network and restart the app to get the latest information!</string>
     <string name="data_state_unknown" />
 

@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,16 +46,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataStore
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
-import com.csakitheone.streetmusic.ui.components.util.ListPreferenceHolder
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
@@ -80,21 +80,17 @@ class EventActivity : ComponentActivity() {
         val context = LocalContext.current
 
         var event: Event? by remember { mutableStateOf(null) }
-        var eventsPinned by remember { mutableStateOf<List<Event>>(listOf()) }
-        val isPinned by remember(event, eventsPinned) {
-            mutableStateOf(eventsPinned.contains(event))
+        val favoriteEvents by DataStore.getState(
+            key = DataStore.favoriteEventsKey,
+            defaultValue = setOf(),
+        )
+        val isPinned by remember(event, favoriteEvents) {
+            derivedStateOf { favoriteEvents.contains(event.toString()) }
         }
 
         LaunchedEffect(Unit) {
             event = Gson().fromJson(intent.getStringExtra(EXTRA_EVENT_JSON), Event::class.java)
         }
-
-        ListPreferenceHolder(
-            id = "eventsPinned",
-            value = eventsPinned,
-            onValueChanged = { eventsPinned = it.toList() },
-            type = object : TypeToken<Event>() {}.type,
-        )
 
         UtcazeneTheme {
             Surface(
@@ -126,8 +122,12 @@ class EventActivity : ComponentActivity() {
                             IconButton(
                                 modifier = Modifier.padding(start = 8.dp),
                                 onClick = {
-                                    eventsPinned = if (!isPinned) eventsPinned + event!!
-                                    else eventsPinned.filter { it != event }
+                                    DataStore.setValue(
+                                        context,
+                                        DataStore.favoriteEventsKey,
+                                        if (isPinned) favoriteEvents - event.toString()
+                                        else favoriteEvents + event.toString()
+                                    )
                                 },
                             ) {
                                 Icon(

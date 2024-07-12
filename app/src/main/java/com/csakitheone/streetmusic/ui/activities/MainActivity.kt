@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
             var isDataStateVisible by remember(EventsProvider.state) {
                 mutableStateOf(
                     EventsProvider.state != EventsProvider.STATE_DOWNLOADED &&
-                            EventsProvider.state != EventsProvider.STATE_PREFERENCES
+                            EventsProvider.state != EventsProvider.STATE_CACHE
                 )
             }
 

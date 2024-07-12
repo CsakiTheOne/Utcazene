@@ -4,12 +4,13 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.preference.PreferenceManager
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.util.Helper
+import com.google.gson.Gson
+import java.io.File
 import java.time.LocalDate
 
 class EventsProvider {
@@ -34,7 +35,7 @@ class EventsProvider {
         val STATE_DOWNLOADING = R.string.data_state_downloading
         val STATE_DOWNLOADED = R.string.data_state_downloaded
         val STATE_DOWNLOAD_ERROR = R.string.data_state_download_error
-        val STATE_PREFERENCES = R.string.data_state_preferences
+        val STATE_CACHE = R.string.data_state_cache
         val STATE_APP = R.string.data_state_app
         val STATE_UNKNOWN = R.string.data_state_unknown
 
@@ -51,11 +52,24 @@ class EventsProvider {
             )
         )
 
+        private fun saveCache(context: Context, events: List<Event>) {
+            val cacheFile = File(context.cacheDir, "events.json")
+            val json = Gson().toJson(events)
+            cacheFile.writeText(json)
+        }
+
+        private fun loadCache(context: Context): List<Event> {
+            val cacheFile = File(context.cacheDir, "events.json")
+            if (!cacheFile.exists()) return listOf()
+            val json = cacheFile.readText()
+            return Gson().fromJson(json, Array<Event>::class.java).toList()
+        }
+
         /**
          * Gets the events in this order:
-         * 1. If there is an unmetered network connection and downloaded events are old, downloads it from the API.
-         * 2. If there is no network, but events were downloaded once, reads it from preferences.
-         * 3. If there are no events in the preferences, reads it from the CSV.
+         * 1. If there is an unmetered network connection downloads the events from the API.
+         * 2. If there is no network, but events were downloaded once, reads it from cache.
+         * 3. If there are no events in cache, returns the custom events.
          */
         fun getEventsThisYear(
             context: Context,
@@ -66,26 +80,16 @@ class EventsProvider {
             state = STATE_UNKNOWN
             callback(listOf())
             // 1.
-            val timeTillOld = 1000L * 60 * 30
-            val isDataOld = PreferenceManager
-                .getDefaultSharedPreferences(context)
-                .getLong(
-                    UzApi.PREF_KEY_API_LAST_DOWNLOAD_TIMESTAMP,
-                    0L
-                ) + timeTillOld < System.currentTimeMillis()
             if (
                 forceDownload ||
-                (
-                        isDataOld &&
-                                Helper.isUnmeteredNetworkAvailable(context) &&
-                                !skipDownload
-                        )
+                (Helper.isUnmeteredNetworkAvailable(context) && !skipDownload)
             ) {
                 state = STATE_DOWNLOADING
                 UzApi.downloadEvents(context) { events ->
                     val eventsThisYear = events.filter { it.year == LocalDate.now().year }
                     if (eventsThisYear.isNotEmpty()) {
                         callback(eventsThisYear + customEvents)
+                        saveCache(context, events)
                         state = STATE_DOWNLOADED
                     } else {
                         state = STATE_DOWNLOAD_ERROR
@@ -95,18 +99,15 @@ class EventsProvider {
                 return
             }
             // 2.
-            val json = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(UzApi.PREF_KEY_API_RESPONSE_ARTISTS, "")
-            if (!json.isNullOrBlank()) {
-                val eventsThisYear =
-                    UzApi.artistsJsonToEvents(json).filter { it.year == LocalDate.now().year }
-                callback(eventsThisYear + customEvents)
-                state = STATE_PREFERENCES
+            val cachedEvents = loadCache(context)
+            if (cachedEvents.isNotEmpty()) {
+                state = STATE_CACHE
+                callback(cachedEvents + customEvents)
                 return
             }
             // 3.
-            callback(customEvents)
             state = STATE_APP
+            callback(customEvents)
         }
 
     }

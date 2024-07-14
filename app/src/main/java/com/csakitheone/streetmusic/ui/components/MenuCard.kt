@@ -70,7 +70,6 @@ fun MenuCard(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     text = title ?: "",
                 )
-                content()
             }
         } else {
             UzCard(
@@ -84,7 +83,7 @@ fun MenuCard(
                     if (imageVector != null) {
                         Icon(
                             modifier = Modifier
-                                .size(52.dp),
+                                .size(48.dp),
                             imageVector = imageVector,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondaryContainer,
@@ -92,7 +91,7 @@ fun MenuCard(
                     } else if (painter != null) {
                         Icon(
                             modifier = Modifier
-                                .size(52.dp),
+                                .size(48.dp),
                             painter = painter,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondaryContainer,

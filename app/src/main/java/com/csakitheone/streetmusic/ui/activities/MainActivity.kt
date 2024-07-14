@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -19,23 +20,29 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -99,15 +105,10 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         UtcazeneTheme {
-            val context = LocalContext.current
-
             var isMenuOpen by remember { mutableStateOf(false) }
 
             var isDataStateVisible by remember(EventsProvider.state) {
-                mutableStateOf(
-                    EventsProvider.state != EventsProvider.STATE_DOWNLOADED &&
-                            EventsProvider.state != EventsProvider.STATE_CACHE
-                )
+                mutableStateOf(EventsProvider.state != EventsProvider.STATE_DOWNLOADED)
             }
 
             val adaptiveFeedState = rememberLazyListState()
@@ -125,58 +126,72 @@ class MainActivity : ComponentActivity() {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding(),
-                    ) {
-                        Image(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            painter = painterResource(id = R.drawable.header),
-                            contentDescription = null,
-                        )
-                        FilledIconButton(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .align(Alignment.TopEnd),
-                            onClick = { isMenuOpen = true },
-                        ) {
-                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
-                            DropdownMenu(
-                                expanded = isMenuOpen,
-                                onDismissRequest = { isMenuOpen = false },
+                    AnimatedContent(
+                        targetState = adaptiveFeedState.canScrollBackward,
+                    ) { canScrollUp ->
+                        if (canScrollUp) {
+                            TopAppBar(
+                                title = { Text(text = stringResource(id = R.string.app_name)) },
+                                actions = {
+                                    IconButton(
+                                        modifier = Modifier.padding(8.dp),
+                                        onClick = { isDataStateVisible = !isDataStateVisible },
+                                    ) {
+                                        Icon(imageVector = Icons.Default.SdStorage, contentDescription = null)
+                                    }
+                                    IconButton(
+                                        modifier = Modifier,
+                                        onClick = { isMenuOpen = true },
+                                    ) {
+                                        Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+                                        MainMenu(
+                                            isOpen = isMenuOpen,
+                                            onDismissRequest = { isMenuOpen = false },
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                        else {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .statusBarsPadding(),
                             ) {
-                                DropdownMenuItem(
-                                    leadingIcon = {
+                                Image(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    painter = painterResource(id = R.drawable.header),
+                                    contentDescription = null,
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .align(Alignment.TopEnd),
+                                ) {
+                                    IconButton(
+                                        onClick = { isDataStateVisible = !isDataStateVisible },
+                                    ) {
                                         Icon(
-                                            imageVector = Icons.Default.Language,
-                                            contentDescription = null
+                                            imageVector = Icons.Default.SdStorage,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
                                         )
-                                    },
-                                    text = { Text(text = "Uz HUB") },
-                                    onClick = {
-                                        startActivity(
-                                            Intent(
-                                                this@MainActivity,
-                                                HubActivity::class.java
-                                            )
+                                    }
+                                    IconButton(
+                                        onClick = { isMenuOpen = true },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
                                         )
-                                        isMenuOpen = false
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(id = R.string.made_by_csaki)) },
-                                    onClick = {
-                                        startActivity(
-                                            Intent(
-                                                this@MainActivity,
-                                                SupportActivity::class.java
-                                            )
+                                        MainMenu(
+                                            isOpen = isMenuOpen,
+                                            onDismissRequest = { isMenuOpen = false },
                                         )
-                                        isMenuOpen = false
-                                    },
-                                )
+                                    }
+                                }
                             }
                         }
                     }
@@ -202,7 +217,7 @@ class MainActivity : ComponentActivity() {
                                             .weight(1f),
                                         text = stringResource(id = EventsProvider.state),
                                     )
-                                    TextButton(
+                                    IconButton(
                                         enabled = EventsProvider.state != EventsProvider.STATE_DOWNLOADING,
                                         onClick = {
                                             EventsProvider.getEventsThisYear(
@@ -211,12 +226,18 @@ class MainActivity : ComponentActivity() {
                                             )
                                         },
                                     ) {
-                                        Text(text = stringResource(id = R.string.refresh_data))
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = null,
+                                        )
                                     }
-                                    TextButton(
+                                    IconButton(
                                         onClick = { isDataStateVisible = false },
                                     ) {
-                                        Text(text = stringResource(id = R.string.hide))
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null,
+                                        )
                                     }
                                 }
                             }
@@ -281,7 +302,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 imageVector = Icons.Default.Mic,
-                                title = stringResource(id = R.string.musicians),
+                                title = "${stringResource(id = R.string.musicians)} (${events.groupBy { it.musician }.size})",
                                 isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                         }
@@ -301,51 +322,36 @@ class MainActivity : ComponentActivity() {
                                 imageVector = Icons.Default.Place,
                                 title = stringResource(id = R.string.places),
                                 isCompressed = adaptiveFeedState.canScrollBackward,
-                            )
+                            ) {
+                                FilledTonalIconButton(
+                                    modifier = Modifier,
+                                    onClick = {
+                                        CustomTabsManager.open(
+                                            this@MainActivity,
+                                            "https://www.google.com/maps/d/u/0/embed?mid=12plW9qjTupsu26_lLGD-lnE4jqUczO4U&ehbc=2E312F&ll=47.09391673012697%2C17.90851453104826&z=15"
+                                        )
+                                    },
+                                ) {
+                                    Icon(imageVector = Icons.Default.Map, contentDescription = null)
+                                }
+                            }
                             MenuCard(
                                 modifier = Modifier
                                     .padding(8.dp)
                                     .weight(1f),
                                 onClick = {
-                                    CustomTabsManager.open(
-                                        this@MainActivity,
-                                        "https://www.google.com/maps/d/u/0/embed?mid=12plW9qjTupsu26_lLGD-lnE4jqUczO4U&ehbc=2E312F&ll=47.09391673012697%2C17.90851453104826&z=15"
+                                    startActivity(
+                                        Intent(
+                                            this@MainActivity,
+                                            ExtrasActivity::class.java
+                                        )
                                     )
                                 },
-                                imageVector = Icons.Default.Map,
-                                title = stringResource(id = R.string.map),
+                                imageVector = Icons.Default.VideogameAsset,
+                                title = stringResource(id = R.string.extras),
                                 isCompressed = adaptiveFeedState.canScrollBackward,
                             )
                         }
-                        /*MenuCard(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        TeremActivity::class.java
-                                    )
-                                )
-                            },
-                            painter = painterResource(id = R.drawable.terem_logo),
-                            title = "TEREM: UNLOCK FEST Vol.4",
-                        )*/
-                        MenuCard(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = {
-                                startActivity(
-                                    Intent(
-                                        this@MainActivity,
-                                        ExtrasActivity::class.java
-                                    )
-                                )
-                            },
-                            imageVector = Icons.Default.VideogameAsset,
-                            title = stringResource(id = R.string.extras),
-                            isCompressed = adaptiveFeedState.canScrollBackward,
-                        )
                     }
                     AdaptiveFeed(
                         modifier = Modifier
@@ -356,6 +362,96 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+    
+    @Composable
+    fun MainMenu(
+        isOpen: Boolean,
+        onDismissRequest: () -> Unit,
+    ) {
+        DropdownMenu(
+            expanded = isOpen,
+            onDismissRequest = onDismissRequest,
+        ) {
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Feed,
+                        contentDescription = null,
+                    )
+                },
+                text = { Text(text = stringResource(id = R.string.open_website)) },
+                onClick = {
+                    CustomTabsManager.open(
+                        this@MainActivity,
+                        "https://utcazene.hu/"
+                    )
+                    onDismissRequest()
+                },
+            )
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_facebook),
+                        contentDescription = null,
+                    )
+                },
+                text = { Text(text = stringResource(id = R.string.open_facebook)) },
+                onClick = {
+                    CustomTabsManager.open(
+                        this@MainActivity,
+                        "https://facebook.com/utcazene"
+                    )
+                    onDismissRequest()
+                },
+            )
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_instagram),
+                        contentDescription = null,
+                    )
+                },
+                text = { Text(text = stringResource(id = R.string.open_instagram)) },
+                onClick = {
+                    CustomTabsManager.open(
+                        this@MainActivity,
+                        "https://instagram.com/utcazene"
+                    )
+                    onDismissRequest()
+                },
+            )
+            DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Language,
+                        contentDescription = null
+                    )
+                },
+                text = { Text(text = "Uz HUB") },
+                onClick = {
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            HubActivity::class.java
+                        )
+                    )
+                    onDismissRequest()
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(text = stringResource(id = R.string.made_by_csaki)) },
+                onClick = {
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            SupportActivity::class.java
+                        )
+                    )
+                    onDismissRequest()
+                },
+            )
         }
     }
 }

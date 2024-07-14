@@ -15,7 +15,7 @@
     <string name="musicians">Zenészek</string>
     <string name="places">Helyek</string>
     <string name="map">Térkép</string>
-    <string name="extras">Ivós játékok és időutazás</string>
+    <string name="extras">Extrák</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="data_state_downloading">Események letöltése…</string>

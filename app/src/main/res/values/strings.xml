@@ -18,7 +18,7 @@
     <string name="musicians">Musicians</string>
     <string name="places">Places</string>
     <string name="map">Map</string>
-    <string name="extras">Drinking games and time travel</string>
+    <string name="extras">Extras</string>
 
     <!-- MAIN ACTIVITY -->
     <string name="data_state_downloading">Downloading events…</string>

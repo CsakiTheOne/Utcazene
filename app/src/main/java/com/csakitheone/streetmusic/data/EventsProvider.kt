@@ -26,7 +26,7 @@ class EventsProvider {
                         "szórakoztató műfajt adnak elő, néha hangszerkísérettel. Aki kedveli a " +
                         "sea shanty-ket, mindenképp meg kell hallgatnia őket!",
                 country = "HU",
-                imageUrl = "https://instagram.fbud7-3.fna.fbcdn.net/v/t51.29350-15/450180903_360967316773483_6634244899063806694_n.jpg?stp=dst-jpg_e35&efg=eyJ2ZW5jb2RlX3RhZyI6ImltYWdlX3VybGdlbi4xNDQweDEwODAuc2RyLmYyOTM1MCJ9&_nc_ht=instagram.fbud7-3.fna.fbcdn.net&_nc_cat=107&_nc_ohc=P47cy-NccC4Q7kNvgH7b75M&edm=AEhyXUkBAAAA&ccb=7-5&ig_cache_key=MzQwNzc2MDAxNDkzMDQ2MzA5Nw%3D%3D.2-ccb7-5&oh=00_AYBovnMzKp-yXkONESlqYyCa5ObPIMOaE3KFR0IjWNOLwg&oe=6692315D&_nc_sid=8f1549",
+                imageUrl = "https://instagram.fbud7-3.fna.fbcdn.net/v/t51.29350-15/450180903_360967316773483_6634244899063806694_n.jpg?stp=dst-jpg_e35&efg=eyJ2ZW5jb2RlX3RhZyI6ImltYWdlX3VybGdlbi4xNDQweDEwODAuc2RyLmYyOTM1MCJ9&_nc_ht=instagram.fbud7-3.fna.fbcdn.net&_nc_cat=107&_nc_ohc=V-06E9M1SrsQ7kNvgGSA1va&edm=AEhyXUkBAAAA&ccb=7-5&ig_cache_key=MzQwNzc2MDAxNDkzMDQ2MzA5Nw%3D%3D.2-ccb7-5&oh=00_AYCCTGnoUDltE4kfVvHXvsYB8m-h3pdfAC8cmPn2AIvBBA&oe=6699719D&_nc_sid=8f1549",
                 youtubeUrl = "https://www.youtube.com/@shantolok_band",
                 tags = listOf(Musician.TAG_FRIEND),
             )

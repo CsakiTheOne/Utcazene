@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.activities
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -173,13 +174,23 @@ class MusicianActivity : ComponentActivity() {
                                     Helper.imageUrlToBitmapUri(
                                         this@MusicianActivity,
                                         musician?.imageUrl
-                                    ) {
+                                    ) { bitmapUri ->
+                                        if (bitmapUri == null) {
+                                            runOnUiThread {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                            return@imageUrlToBitmapUri
+                                        }
                                         startActivity(
                                             Intent.createChooser(
                                                 Intent(Intent.ACTION_SEND)
-                                                    .putExtra(Intent.EXTRA_STREAM, it)
+                                                    .putExtra(Intent.EXTRA_STREAM, bitmapUri)
                                                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                    .setType("image/*"),
+                                                    .setType("image/"),
                                                 musician?.name ?: ""
                                             )
                                         )
@@ -294,7 +305,11 @@ class MusicianActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        if (!musician?.youtubeUrl.isNullOrBlank()) {
+                        if (
+                            !musician?.youtubeUrl.isNullOrBlank() && musician?.youtubeUrl?.endsWith(
+                                "="
+                            ) == false
+                        ) {
                             MenuCard(
                                 modifier = Modifier
                                     .fillMaxWidth()

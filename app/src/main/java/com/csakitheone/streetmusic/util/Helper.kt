@@ -7,7 +7,6 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.csakitheone.streetmusic.data.UzApi
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -60,7 +59,7 @@ class Helper {
                     val imgBitmap = BitmapFactory.decodeStream(input)
                     val imgBitmapPath = MediaStore.Images.Media.insertImage(
                         context.contentResolver, imgBitmap,
-                        "img", null
+                        "img", ""
                     )
                     callback(Uri.parse(imgBitmapPath))
                 }

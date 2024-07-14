@@ -4,21 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.Label
@@ -29,16 +34,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,17 +85,33 @@ class MusiciansActivity : ComponentActivity() {
                 key = DataStore.favoriteMusiciansKey,
                 defaultValue = setOf()
             )
+
+            val searchFieldFocusRequester = remember { FocusRequester() }
+            var isSearchVisible by remember { mutableStateOf(false) }
+            var searchQuery by remember(isSearchVisible) { mutableStateOf("") }
+
             var isOnlyPinned by remember { mutableStateOf(false) }
             var filterTags by remember { mutableStateOf(listOf<String>()) }
 
             var musicians by remember { mutableStateOf(listOf<Musician>()) }
-            val visibleMusicians by remember(musicians, favoriteMusicians, isOnlyPinned, filterTags) {
-                mutableStateOf(
+            val visibleMusicians by remember(
+                musicians,
+                favoriteMusicians,
+                isOnlyPinned,
+                filterTags,
+                isSearchVisible,
+                searchQuery,
+            ) {
+                if (isSearchVisible) derivedStateOf {
+                    musicians
+                        .filter { it.name.contains(searchQuery, ignoreCase = true) }
+                        .sortedBy { it.name }
+                } else derivedStateOf {
                     musicians
                         .filter { filterTags.isEmpty() || filterTags == it.tags }
                         .filter { !isOnlyPinned || (isOnlyPinned && favoriteMusicians.contains(it.name)) }
                         .sortedBy { it.name }
-                )
+                }
             }
 
             LaunchedEffect(Unit) {
@@ -119,23 +145,70 @@ class MusiciansActivity : ComponentActivity() {
                         modifier = Modifier.zIndex(2f),
                         shadowElevation = if (scroll.canScrollBackward) 16.dp else 0.dp,
                     ) {
-                        TopAppBar(
-                            title = { Text(text = stringResource(id = R.string.musicians)) },
-                            navigationIcon = {
-                                IconButton(onClick = { finish() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = null,
-                                    )
+                        AnimatedContent(targetState = isSearchVisible) {
+                            if (it) {
+                                SideEffect {
+                                    searchFieldFocusRequester.requestFocus()
                                 }
-                            },
-                            colors = TopAppBarDefaults.smallTopAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.background,
-                                titleContentColor = MaterialTheme.colorScheme.onBackground,
-                                navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                                actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                            ),
-                        )
+                                TextField(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .focusRequester(searchFieldFocusRequester)
+                                        .fillMaxWidth()
+                                        .statusBarsPadding(),
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                if (searchQuery.isNotEmpty()) searchQuery = ""
+                                                else isSearchVisible = false
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                            else {
+                                TopAppBar(
+                                    title = { Text(text = stringResource(id = R.string.musicians)) },
+                                    navigationIcon = {
+                                        IconButton(onClick = { finish() }) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowBack,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    },
+                                    actions = {
+                                        IconButton(
+                                            onClick = { isSearchVisible = !isSearchVisible },
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Search,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    },
+                                    colors = TopAppBarDefaults.topAppBarColors(
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                                        actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+                                    ),
+                                )
+                            }
+                        }
                     }
                     LazyColumn(
                         modifier = Modifier

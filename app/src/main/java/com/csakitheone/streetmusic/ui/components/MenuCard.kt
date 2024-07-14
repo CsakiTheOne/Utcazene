@@ -69,6 +69,8 @@ fun MenuCard(
                 Text(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     text = title ?: "",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         } else {

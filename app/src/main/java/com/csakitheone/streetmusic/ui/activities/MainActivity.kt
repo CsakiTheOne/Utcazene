@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -160,7 +161,13 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Image(
                                     modifier = Modifier
-                                        .fillMaxWidth(),
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            CustomTabsManager.open(
+                                                this@MainActivity,
+                                                "https://musiclab.chromeexperiments.com/Spectrogram/",
+                                            )
+                                        },
                                     painter = painterResource(id = R.drawable.header),
                                     contentDescription = null,
                                 )

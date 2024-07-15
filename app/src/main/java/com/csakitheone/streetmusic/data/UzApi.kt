@@ -137,7 +137,8 @@ class UzApi {
                     country = artist.country,
                     imageUrl = artist.image,
                     youtubeUrl = "https://www.youtube.com/watch?v=${artist.youtube_embed}",
-                    tags = listOf(if (artist.headliner) Musician.TAG_FOREIGN else Musician.TAG_COMPETING)
+                    tags = listOf(if (artist.headliner) Musician.TAG_FOREIGN else Musician.TAG_COMPETING),
+                    years = artist.timeslots.map { it.event__start_time.substringBefore('-').toInt() }.distinct(),
                 )
                 artist.timeslots.map { timeslot ->
                     val place = Place.getValues().firstOrNull { place ->

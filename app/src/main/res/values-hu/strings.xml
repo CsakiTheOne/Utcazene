@@ -4,6 +4,7 @@
     <string name="turn_off">Kikapcsolás</string>
     <string name="turn_on">Bekapcsolás</string>
     <string name="hide">Elrejtés</string>
+    <string name="more">Több</string>
     <string name="filter_pinned">Kedvencek</string>
     <string name="filter_upcoming">Következők</string>
     <string name="month_july">Július</string>
@@ -27,12 +28,12 @@
 
     <string name="update_available">A frissítés készen áll a telepítésre.</string>
 
+    <string name="adaptive_feed">Hírfolyam</string>
+    <string name="adaptive_feed_description">Ez az alkalmazkodó hírfolyam, ami a fesztivál napjain folyamatosan változik. A fesztivál előtt és után a fő fellépőket mutatja, a fesztivál napján a koncertek előtt a napi zenészeket, a koncertek alatt pedig az épp játszó előadókat mutatja.</string>
+
     <string name="now_playing">Most játszott</string>
     <string name="tonight_on_utcazene">Ma este az Utcazenén</string>
     <string name="this_year_on_utcazene">Idén az Utcazenén</string>
-
-    <string name="battery_saver">Energiatakarékos mód</string>
-    <string name="battery_saver_description">Ha merül a telefon, de még hosszú az éjszaka, kapcsold be ezt. Az alkalmazás fekete témára vált és kevesebb netet fog használni.</string>
 
     <string name="developer_warning">Az alkalmazás még fejlesztés alatt van ezért előfordulhatnak hibák. Nézegesd gyakran a Play Áruházat frissítésekért!</string>
     <string name="made_by_csaki">Nem hivatalosan készítette: Csáki</string>

@@ -1,5 +1,7 @@
 package com.csakitheone.streetmusic.ui.components
 
+import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,10 +14,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -32,6 +36,8 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
+import com.csakitheone.streetmusic.ui.activities.CalendarActivity
+import com.csakitheone.streetmusic.ui.activities.MusiciansActivity
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -44,6 +50,8 @@ fun AdaptiveFeed(
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
     val context = LocalContext.current
+
+    var isInfoDialogOpen by remember { mutableStateOf(false) }
 
     val dateTime by remember { mutableStateOf(LocalDateTime.now()) }
 
@@ -64,15 +72,18 @@ fun AdaptiveFeed(
             }
         }
     }
-    var musicians by remember { mutableStateOf(emptyList<Musician>()) }
+    var headlinerMusicians by remember { mutableStateOf(emptyList<Musician>()) }
 
     LaunchedEffect(Unit) {
         EventsProvider.getEventsThisYear(context) { newEvents ->
             events = newEvents
                 .sortedBy { it.time.toLocalTime() }
-            musicians = newEvents
+            headlinerMusicians = newEvents
                 .map { it.musician }
                 .distinct()
+                .filter {
+                    it.tags?.contains(Musician.TAG_FOREIGN) == true && !it.isIncomplete()
+                }
                 .sortedBy { it.name }
         }
     }
@@ -82,6 +93,25 @@ fun AdaptiveFeed(
 
     fun isUtcazeneStartedToday() = isTodayUtcazeneDay() && eventsNowPlaying.isNotEmpty()
 
+    if (isInfoDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { isInfoDialogOpen = false },
+            title = {
+                Text(text = stringResource(id = R.string.adaptive_feed))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.adaptive_feed_description))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { isInfoDialogOpen = false },
+                ) {
+                    Text(text = stringResource(id = R.string.close))
+                }
+            },
+        )
+    }
+
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
@@ -90,6 +120,7 @@ fun AdaptiveFeed(
             // Now playing
             item {
                 Row(
+                    modifier = Modifier.clickable { isInfoDialogOpen = true },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -115,6 +146,7 @@ fun AdaptiveFeed(
             // Tonight on Utcazene
             item {
                 Row(
+                    modifier = Modifier.clickable { isInfoDialogOpen = true },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -129,17 +161,29 @@ fun AdaptiveFeed(
                     )
                 }
             }
-            items(eventsToday, { it.toString() }) { event ->
+            items(eventsToday.take(20), { it.toString() }) { event ->
                 EventCard(
                     modifier = Modifier.padding(8.dp),
                     event = event,
                 )
             }
+            item {
+                MenuCard(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        context.startActivity(
+                            Intent(context, CalendarActivity::class.java)
+                        )
+                    },
+                    title = stringResource(id = R.string.more),
+                )
+            }
         }
-        else if (musicians.isNotEmpty()) {
+        else if (headlinerMusicians.isNotEmpty()) {
             // This year on Utcazene
             item {
                 Row(
+                    modifier = Modifier.clickable { isInfoDialogOpen = true },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -154,10 +198,21 @@ fun AdaptiveFeed(
                     )
                 }
             }
-            items(musicians, { it.name }) { musician ->
+            items(headlinerMusicians, { it.name }) { musician ->
                 BigMusicianCard(
                     modifier = Modifier.padding(8.dp),
                     musician = musician,
+                )
+            }
+            item {
+                MenuCard(
+                    modifier = Modifier.padding(8.dp),
+                    onClick = {
+                        context.startActivity(
+                            Intent(context, MusiciansActivity::class.java)
+                        )
+                    },
+                    title = stringResource(id = R.string.more),
                 )
             }
         }

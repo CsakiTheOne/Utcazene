@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
@@ -82,6 +83,9 @@ class CalendarActivity : ComponentActivity() {
                 defaultValue = setOf(),
             )
             var isOnlyPinned by remember { mutableStateOf(false) }
+            var isOnlyUpcoming by remember(pagerState.currentPage) {
+                mutableStateOf(LocalDate.now().dayOfMonth == firstDay + pagerState.currentPage)
+            }
 
             var events by remember { mutableStateOf(listOf<Event>()) }
 
@@ -115,14 +119,44 @@ class CalendarActivity : ComponentActivity() {
                             actionIconContentColor = MaterialTheme.colorScheme.onBackground,
                         ),
                     )
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        ElevatedFilterChip(
+                            modifier = Modifier.padding(8.dp),
+                            selected = isOnlyPinned,
+                            onClick = { isOnlyPinned = !isOnlyPinned },
+                            label = { Text(text = stringResource(id = R.string.filter_pinned)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (isOnlyPinned) Icons.Default.Star
+                                    else Icons.Default.StarBorder,
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                        AnimatedVisibility(visible = LocalDate.now().dayOfMonth == firstDay + pagerState.currentPage) {
+                            ElevatedFilterChip(
+                                modifier = Modifier.padding(8.dp),
+                                selected = isOnlyUpcoming,
+                                onClick = { isOnlyUpcoming = !isOnlyUpcoming },
+                                label = { Text(text = stringResource(id = R.string.filter_upcoming)) },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (isOnlyUpcoming) Icons.Default.SkipNext
+                                        else Icons.Default.ViewDay,
+                                        contentDescription = null,
+                                    )
+                                },
+                            )
+                        }
+                    }
                     HorizontalPager(
                         modifier = Modifier.weight(1f),
                         state = pagerState,
                     ) { pageIndex ->
                         val scroll = rememberLazyListState()
-                        var isOnlyUpcoming by remember {
-                            mutableStateOf(LocalDate.now().dayOfMonth == firstDay + pageIndex)
-                        }
                         val eventsToday by remember(
                             events,
                             pageIndex,
@@ -152,47 +186,16 @@ class CalendarActivity : ComponentActivity() {
                             )
                         }
 
+                        LaunchedEffect(pagerState.currentPage) {
+                            scroll.scrollToItem(0)
+                        }
+
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp),
                             state = scroll,
                         ) {
-                            item {
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    ElevatedFilterChip(
-                                        modifier = Modifier.padding(8.dp),
-                                        selected = isOnlyPinned,
-                                        onClick = { isOnlyPinned = !isOnlyPinned },
-                                        label = { Text(text = stringResource(id = R.string.filter_pinned)) },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = if (isOnlyPinned) Icons.Default.Star
-                                                else Icons.Default.StarBorder,
-                                                contentDescription = null,
-                                            )
-                                        },
-                                    )
-                                    if (LocalDate.now().dayOfMonth == firstDay + pageIndex) {
-                                        ElevatedFilterChip(
-                                            modifier = Modifier.padding(8.dp),
-                                            selected = isOnlyUpcoming,
-                                            onClick = { isOnlyUpcoming = !isOnlyUpcoming },
-                                            label = { Text(text = stringResource(id = R.string.filter_upcoming)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = if (isOnlyUpcoming) Icons.Default.SkipNext
-                                                    else Icons.Default.ViewDay,
-                                                    contentDescription = null,
-                                                )
-                                            },
-                                        )
-                                    }
-                                }
-                            }
                             items(
                                 items = eventsToday,
                                 key = { "${it.id} ${it.musician.name} ${it.day} ${it.time}" }) { event ->
@@ -221,7 +224,7 @@ class CalendarActivity : ComponentActivity() {
                             selectedDay = firstDay + pagerState.currentPage,
                             onChange = {
                                 coroutineScope.launch {
-                                    pagerState.scrollToPage(it - firstDay)
+                                    pagerState.animateScrollToPage(it - firstDay)
                                 }
                             },
                         )

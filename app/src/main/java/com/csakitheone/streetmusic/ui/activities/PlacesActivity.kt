@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,7 +89,12 @@ class PlacesActivity : ComponentActivity() {
                 defaultValue = setOf(),
             )
             var isOnlyPinned by remember { mutableStateOf(false) }
-            var isOnlyUpcoming by remember { mutableStateOf(true) }
+            val isOnlyUpcomingFilterVisible by remember(selectedDay) {
+                derivedStateOf { selectedDay == LocalDate.now().dayOfMonth }
+            }
+            var isOnlyUpcoming by remember(isOnlyUpcomingFilterVisible) {
+                mutableStateOf(isOnlyUpcomingFilterVisible)
+            }
 
             var eventsGrouped by remember { mutableStateOf(listOf<Map.Entry<Place, List<Event>>>()) }
 
@@ -97,7 +103,9 @@ class PlacesActivity : ComponentActivity() {
                     eventsGrouped = events
                         .filter { it.day == selectedDay }
                         .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
-                        .filter { !isOnlyUpcoming || LocalTime.now().isBefore(it.time.toLocalTime()) }
+                        .filter {
+                            !isOnlyUpcoming || LocalTime.now().isBefore(it.time.toLocalTime())
+                        }
                         .sortedBy { it.time }
                         .groupBy { it.place }
                         .entries
@@ -170,19 +178,21 @@ class PlacesActivity : ComponentActivity() {
                                         )
                                     },
                                 )
-                                ElevatedFilterChip(
-                                    modifier = Modifier.padding(8.dp),
-                                    selected = isOnlyUpcoming,
-                                    onClick = { isOnlyUpcoming = !isOnlyUpcoming },
-                                    label = { Text(text = stringResource(id = R.string.filter_upcoming)) },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = if (isOnlyUpcoming) Icons.Default.SkipNext
-                                            else Icons.Default.ViewDay,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                )
+                                if (isOnlyUpcomingFilterVisible) {
+                                    ElevatedFilterChip(
+                                        modifier = Modifier.padding(8.dp),
+                                        selected = isOnlyUpcoming,
+                                        onClick = { isOnlyUpcoming = !isOnlyUpcoming },
+                                        label = { Text(text = stringResource(id = R.string.filter_upcoming)) },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = if (isOnlyUpcoming) Icons.Default.SkipNext
+                                                else Icons.Default.ViewDay,
+                                                contentDescription = null,
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         }
                         items(items = eventsGrouped, key = { it.key.name }) { entry ->

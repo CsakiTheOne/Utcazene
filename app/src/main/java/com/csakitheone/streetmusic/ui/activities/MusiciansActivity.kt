@@ -210,52 +210,50 @@ class MusiciansActivity : ComponentActivity() {
                             }
                         }
                     }
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        ElevatedFilterChip(
+                            modifier = Modifier.padding(8.dp),
+                            selected = isOnlyPinned,
+                            onClick = { isOnlyPinned = !isOnlyPinned },
+                            label = { Text(text = stringResource(id = R.string.filter_pinned)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (isOnlyPinned) Icons.Default.Star
+                                    else Icons.Default.StarBorder,
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                        musicians.flatMap { it.tags ?: listOf() }
+                            .distinct()
+                            .map { tag ->
+                                ElevatedFilterChip(
+                                    modifier = Modifier.padding(8.dp),
+                                    selected = filterTags.contains(tag),
+                                    onClick = {
+                                        filterTags =
+                                            if (filterTags.contains(tag)) filterTags.filter { it != tag }
+                                            else filterTags + tag
+                                    },
+                                    label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
+                                            else Icons.Outlined.Label,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                )
+                            }
+                    }
                     LazyColumn(
                         modifier = Modifier
                             .padding(horizontal = 8.dp),
                         state = scroll,
                     ) {
-                        item {
-                            Row(
-                                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                ElevatedFilterChip(
-                                    modifier = Modifier.padding(8.dp),
-                                    selected = isOnlyPinned,
-                                    onClick = { isOnlyPinned = !isOnlyPinned },
-                                    label = { Text(text = stringResource(id = R.string.filter_pinned)) },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = if (isOnlyPinned) Icons.Default.Star
-                                            else Icons.Default.StarBorder,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                )
-                                musicians.flatMap { it.tags ?: listOf() }
-                                    .distinct()
-                                    .map { tag ->
-                                        ElevatedFilterChip(
-                                            modifier = Modifier.padding(8.dp),
-                                            selected = filterTags.contains(tag),
-                                            onClick = {
-                                                filterTags =
-                                                    if (filterTags.contains(tag)) filterTags.filter { it != tag }
-                                                    else filterTags + tag
-                                            },
-                                            label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
-                                                    else Icons.Outlined.Label,
-                                                    contentDescription = null,
-                                                )
-                                            }
-                                        )
-                                    }
-                            }
-                        }
                         items(items = visibleMusicians, key = { it.id }) { musician ->
                             BigMusicianCard(
                                 modifier = Modifier.padding(8.dp),

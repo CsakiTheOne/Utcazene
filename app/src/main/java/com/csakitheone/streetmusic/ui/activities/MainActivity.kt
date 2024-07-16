@@ -7,8 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,6 +59,7 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.EventsProvider
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.components.AdaptiveFeed
+import com.csakitheone.streetmusic.ui.components.InteractiveHeader2024
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
@@ -159,18 +158,7 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .statusBarsPadding(),
                             ) {
-                                Image(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            CustomTabsManager.open(
-                                                this@MainActivity,
-                                                "https://musiclab.chromeexperiments.com/Spectrogram/",
-                                            )
-                                        },
-                                    painter = painterResource(id = R.drawable.header),
-                                    contentDescription = null,
-                                )
+                                InteractiveHeader2024()
                                 Row(
                                     modifier = Modifier
                                         .padding(8.dp)

@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.ui.activities
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,21 +19,27 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.ViewDay
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -78,6 +85,9 @@ class CalendarActivity : ComponentActivity() {
             val eventDurationDays = 4
             val pagerState = rememberPagerState(pageCount = { eventDurationDays })
 
+            val shareSheetState = rememberModalBottomSheetState()
+            var isShareSheetOpen by remember { mutableStateOf(false) }
+
             val favoriteEvents by DataStore.getState(
                 key = DataStore.favoriteEventsKey,
                 defaultValue = setOf(),
@@ -95,6 +105,93 @@ class CalendarActivity : ComponentActivity() {
                 }
             }
 
+            if (isShareSheetOpen) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        coroutineScope.launch {
+                            shareSheetState.hide()
+                        }.invokeOnCompletion { isShareSheetOpen = false }
+                    },
+                ) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.List,
+                                contentDescription = null,
+                            )
+                        },
+                        text = {
+                            //TODO: translate
+                            Text(text = "Share selected day's favorites as list")
+                        },
+                        onClick = {
+                            val allFavEvents = favoriteEvents
+                                .mapNotNull { events.find { event -> event.toString() == it } }
+                            val today = allFavEvents.filter { it.day == firstDay + pagerState.currentPage }
+                            val text = today
+                                .sortedBy { it.time }
+                                .joinToString("\n") { "- ${it.toStringTimeAndName()}" }
+                            startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                    },
+                                    null
+                                )
+                            )
+                            coroutineScope.launch {
+                                shareSheetState.hide()
+                            }.invokeOnCompletion { isShareSheetOpen = false }
+                        },
+                    )
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Default.List,
+                                contentDescription = null,
+                            )
+                        },
+                        text = {
+                            //TODO: translate
+                            Text(text = "Share all favorites as list")
+                        },
+                        onClick = {
+                            val allFavEvents = favoriteEvents
+                                .mapNotNull { events.find { event -> event.toString() == it } }
+                            val text = allFavEvents
+                                .sortedBy { it.time }
+                                .sortedBy { it.day }
+                                .joinToString("\n") { "- ${it.toStringDayTimeAndName()}" }
+                            startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                    },
+                                    null
+                                )
+                            )
+                            coroutineScope.launch {
+                                shareSheetState.hide()
+                            }.invokeOnCompletion { isShareSheetOpen = false }
+                        },
+                    )
+                    TextButton(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(8.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                shareSheetState.hide()
+                            }.invokeOnCompletion { isShareSheetOpen = false }
+                        },
+                    ) {
+                        Text(text = stringResource(id = R.string.close))
+                    }
+                }
+            }
+
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background,
@@ -108,6 +205,18 @@ class CalendarActivity : ComponentActivity() {
                             IconButton(onClick = { finish() }) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = {
+                                    isShareSheetOpen = true
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
                                     contentDescription = null,
                                 )
                             }

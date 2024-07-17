@@ -20,6 +20,7 @@ data class Musician(
         return countryFlags[country] ?: ""
     }
 
+    @Exclude
     fun isIncomplete(): Boolean {
         return description.isNullOrBlank() ||
                 country.isNullOrBlank() ||
@@ -37,7 +38,6 @@ data class Musician(
         }
         if (
             (!country.isNullOrBlank() && !other.country.isNullOrBlank() && country != other.country) ||
-            (!description.isNullOrBlank() && !other.description.isNullOrBlank() && description != other.description) ||
             (!imageUrl.isNullOrBlank() && !other.imageUrl.isNullOrBlank() && imageUrl != other.imageUrl) ||
             (!youtubeUrl.isNullOrBlank() && !other.youtubeUrl.isNullOrBlank() && youtubeUrl != other.youtubeUrl)
         ) {
@@ -46,7 +46,7 @@ data class Musician(
         }
         return Musician(
             name = name,
-            description = if (!description.isNullOrBlank()) description else other.description,
+            description = (description + "\n\n" + other.description).trim(),
             country = if (!country.isNullOrBlank()) country else other.country,
             imageUrl = if (!imageUrl.isNullOrBlank()) imageUrl else other.imageUrl,
             youtubeUrl = if (!youtubeUrl.isNullOrBlank()) youtubeUrl else other.youtubeUrl,

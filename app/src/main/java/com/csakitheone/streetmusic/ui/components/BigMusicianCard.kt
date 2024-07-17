@@ -132,7 +132,7 @@ fun BigMusicianCard(
                         if (showYears && musician.years != null) {
                             Text(
                                 modifier = Modifier.padding(8.dp),
-                                text = musician.years.joinToString(),
+                                text = musician.years.joinToString { "'${it.toString().takeLast(2)}" },
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }

@@ -12,27 +12,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Code
@@ -44,15 +37,12 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Label
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Label
@@ -79,7 +69,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.toArgb
@@ -92,15 +81,13 @@ import androidx.compose.ui.zIndex
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.Firestore
 import com.csakitheone.streetmusic.model.Musician
-import com.csakitheone.streetmusic.ui.components.BigMusicianCard
 import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.components.MusicianCard
-import com.csakitheone.streetmusic.ui.components.UzCard
+import com.csakitheone.streetmusic.ui.components.hub.HubTabMain
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.Auth
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import java.time.LocalDate
-import kotlin.random.Random
 
 class HubActivity : ComponentActivity() {
     private val TAB_MAIN = "main"
@@ -334,9 +321,14 @@ class HubActivity : ComponentActivity() {
                         AnimatedVisibility(visible = musicians.isNotEmpty()) {
                             AnimatedContent(targetState = selectedTab, label = "TabChange") { tab ->
                                 when (tab) {
-                                    TAB_MAIN -> TabMain(
+                                    TAB_MAIN -> HubTabMain(
                                         scrollState = scroll,
                                         musicians = musicians,
+                                        onBrowseRequest = { countries ->
+                                            clearFilters()
+                                            filterCountries = countries
+                                            selectedTab = TAB_BROWSE
+                                        },
                                     )
 
                                     TAB_BROWSE -> TabBrowse(
@@ -385,157 +377,7 @@ class HubActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    fun TabMain(
-        scrollState: LazyListState,
-        musicians: List<Musician>,
-    ) {
-        val musiciansOfDay = remember { musicians.shuffled(Random(LocalDate.now().dayOfYear)).take(3) }
 
-        LazyColumn(
-            state = scrollState,
-        ) {
-            item {
-                MenuCard(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        val randomVideo = musicians
-                            .filter { !it.youtubeUrl.isNullOrBlank() }
-                            .random()
-                            .youtubeUrl
-                        CustomTabsManager.open(this@HubActivity, randomVideo)
-                    },
-                    painter = painterResource(id = R.drawable.ic_youtube),
-                    title = stringResource(id = R.string.watch_something),
-                )
-                MenuCard(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .fillMaxWidth(),
-                    onClick = {
-                        startActivity(
-                            Intent(
-                                this@HubActivity,
-                                ExtrasActivity::class.java
-                            )
-                        )
-                    },
-                    imageVector = Icons.Default.VideogameAsset,
-                    title = stringResource(id = R.string.extras),
-                )
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = stringResource(id = R.string.random_musicians_of_day),
-                )
-                HorizontalPager(
-                    state = rememberPagerState(pageCount = { musiciansOfDay.size })
-                ) {
-                    Box(contentAlignment = Alignment.BottomCenter) {
-                        BigMusicianCard(
-                            modifier = Modifier.padding(8.dp),
-                            musician = musiciansOfDay[it],
-                        )
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            repeat(musiciansOfDay.size) { dotIndex ->
-                                Box(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .width(if (dotIndex == it) 6.dp else 4.dp)
-                                        .aspectRatio(1f)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.onBackground)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            item {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(8.dp),
-                        imageVector = Icons.Default.Repeat,
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = stringResource(id = R.string.returning_musicians),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-            }
-            items(
-                items = musicians
-                    .filter { (it.years?.size ?: 0) > 2 },
-                key = { it.name },
-            ) { musician ->
-                MusicianCard(
-                    modifier = Modifier.padding(8.dp),
-                    musician = musician,
-                    showYears = true,
-                )
-            }
-            item {
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(8.dp),
-                        imageVector = Icons.Default.Language,
-                        contentDescription = null,
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = stringResource(id = R.string.top_countries),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-            }
-            items(
-                items = musicians
-                    .groupBy { it.country }
-                    .filter { !it.key.isNullOrBlank() && it.value.size > 4 }
-                    .toList()
-                    .sortedByDescending { it.second.size },
-                key = { it.first!! },
-            ) { countryGroup ->
-                UzCard(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = {
-                        clearFilters()
-                        filterCountries = listOf(countryGroup.first!!)
-                        selectedTab = TAB_BROWSE
-                    },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = "${countryGroup.second.first().getFlag()} ${countryGroup.first}",
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = countryGroup.second.size.toString(),
-                        )
-                    }
-                }
-            }
-        }
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

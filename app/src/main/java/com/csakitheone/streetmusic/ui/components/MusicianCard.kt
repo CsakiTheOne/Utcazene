@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.ui.activities.MusicianActivity
 import com.csakitheone.streetmusic.model.Musician
+import com.csakitheone.streetmusic.ui.activities.MusicianActivity
 import com.google.gson.Gson
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +103,7 @@ fun MusicianCard(
                 if (showYears && musician.years != null) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = musician.years.joinToString(),
+                        text = musician.years.joinToString { "'${it.toString().takeLast(2)}" },
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

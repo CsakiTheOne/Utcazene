@@ -190,117 +190,118 @@ class MusiciansActivity : ComponentActivity() {
                         modifier = Modifier.zIndex(2f),
                         shadowElevation = if (scroll.canScrollBackward) 16.dp else 0.dp,
                     ) {
-                        AnimatedContent(targetState = isSearchVisible) {
-                            if (it) {
-                                SideEffect {
-                                    searchFieldFocusRequester.requestFocus()
-                                }
-                                TextField(
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                        .focusRequester(searchFieldFocusRequester)
-                                        .fillMaxWidth()
-                                        .statusBarsPadding(),
-                                    value = searchQuery,
-                                    onValueChange = { searchQuery = it },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Search,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    trailingIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                if (searchQuery.isNotEmpty()) searchQuery = ""
-                                                else isSearchVisible = false
-                                            },
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    },
-                                )
-                            }
-                            else {
-                                TopAppBar(
-                                    title = { Text(text = stringResource(id = R.string.musicians)) },
-                                    navigationIcon = {
-                                        IconButton(onClick = { finish() }) {
-                                            Icon(
-                                                imageVector = Icons.Default.ArrowBack,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                    },
-                                    actions = {
-                                        IconButton(
-                                            onClick = { isShareSheetOpen = true },
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Share,
-                                                contentDescription = null,
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = { isSearchVisible = !isSearchVisible },
-                                        ) {
+                        Column {
+                            AnimatedContent(targetState = isSearchVisible) {
+                                if (it) {
+                                    SideEffect {
+                                        searchFieldFocusRequester.requestFocus()
+                                    }
+                                    TextField(
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .focusRequester(searchFieldFocusRequester)
+                                            .fillMaxWidth()
+                                            .statusBarsPadding(),
+                                        value = searchQuery,
+                                        onValueChange = { searchQuery = it },
+                                        leadingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.Search,
                                                 contentDescription = null,
                                             )
-                                        }
-                                    },
-                                    colors = TopAppBarDefaults.topAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.background,
-                                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                                        actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                                    ),
-                                )
+                                        },
+                                        trailingIcon = {
+                                            IconButton(
+                                                onClick = {
+                                                    if (searchQuery.isNotEmpty()) searchQuery = ""
+                                                    else isSearchVisible = false
+                                                },
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        },
+                                    )
+                                } else {
+                                    TopAppBar(
+                                        title = { Text(text = stringResource(id = R.string.musicians)) },
+                                        navigationIcon = {
+                                            IconButton(onClick = { finish() }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.ArrowBack,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        },
+                                        actions = {
+                                            IconButton(
+                                                onClick = { isShareSheetOpen = true },
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Share,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { isSearchVisible = !isSearchVisible },
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Search,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        },
+                                        colors = TopAppBarDefaults.topAppBarColors(
+                                            containerColor = MaterialTheme.colorScheme.background,
+                                            titleContentColor = MaterialTheme.colorScheme.onBackground,
+                                            navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                                            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+                                        ),
+                                    )
+                                }
                             }
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        ElevatedFilterChip(
-                            modifier = Modifier.padding(8.dp),
-                            selected = isOnlyPinned,
-                            onClick = { isOnlyPinned = !isOnlyPinned },
-                            label = { Text(text = stringResource(id = R.string.filter_pinned)) },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = if (isOnlyPinned) Icons.Default.Star
-                                    else Icons.Default.StarBorder,
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                        musicians.flatMap { it.tags ?: listOf() }
-                            .distinct()
-                            .map { tag ->
+                            Row(
+                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
                                 ElevatedFilterChip(
                                     modifier = Modifier.padding(8.dp),
-                                    selected = filterTags.contains(tag),
-                                    onClick = {
-                                        filterTags =
-                                            if (filterTags.contains(tag)) filterTags.filter { it != tag }
-                                            else filterTags + tag
-                                    },
-                                    label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
+                                    selected = isOnlyPinned,
+                                    onClick = { isOnlyPinned = !isOnlyPinned },
+                                    label = { Text(text = stringResource(id = R.string.filter_pinned)) },
                                     leadingIcon = {
                                         Icon(
-                                            imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
-                                            else Icons.Outlined.Label,
+                                            imageVector = if (isOnlyPinned) Icons.Default.Star
+                                            else Icons.Default.StarBorder,
                                             contentDescription = null,
                                         )
-                                    }
+                                    },
                                 )
+                                musicians.flatMap { it.tags ?: listOf() }
+                                    .distinct()
+                                    .map { tag ->
+                                        ElevatedFilterChip(
+                                            modifier = Modifier.padding(8.dp),
+                                            selected = filterTags.contains(tag),
+                                            onClick = {
+                                                filterTags =
+                                                    if (filterTags.contains(tag)) filterTags.filter { it != tag }
+                                                    else filterTags + tag
+                                            },
+                                            label = { Text(text = stringResource(id = Musician.tagStrings[tag]!!)) },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = if (filterTags.contains(tag)) Icons.Filled.Label
+                                                    else Icons.Outlined.Label,
+                                                    contentDescription = null,
+                                                )
+                                            }
+                                        )
+                                    }
                             }
+                        }
                     }
                     LazyColumn(
                         modifier = Modifier

@@ -140,7 +140,7 @@ class SupportActivity : ComponentActivity() {
                                     )
                                 }
                             },
-                            colors = TopAppBarDefaults.smallTopAppBarColors(
+                            colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.background,
                                 titleContentColor = MaterialTheme.colorScheme.onBackground,
                                 navigationIconContentColor = MaterialTheme.colorScheme.onBackground,

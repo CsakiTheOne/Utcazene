@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.components
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,10 +17,14 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.carousel.CarouselDefaults
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -44,6 +49,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdaptiveFeed(
     modifier: Modifier = Modifier,
@@ -197,14 +203,17 @@ fun AdaptiveFeed(
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
-            }
-            items(headlinerMusicians, { it.name }) { musician ->
-                BigMusicianCard(
-                    modifier = Modifier.padding(8.dp),
-                    musician = musician,
-                )
-            }
-            item {
+                HorizontalMultiBrowseCarousel(
+                    state = rememberCarouselState { headlinerMusicians.size },
+                    preferredItemWidth = 400.dp,
+                    contentPadding = PaddingValues(8.dp),
+                    flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
+                ) { index ->
+                    BigMusicianCard(
+                        modifier = Modifier.padding(8.dp),
+                        musician = headlinerMusicians[index],
+                    )
+                }
                 MenuCard(
                     modifier = Modifier.padding(8.dp),
                     onClick = {

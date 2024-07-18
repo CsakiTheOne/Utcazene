@@ -146,7 +146,7 @@ class PlacesActivity : ComponentActivity() {
                                     Icon(imageVector = Icons.Default.Map, contentDescription = null)
                                 }
                             },
-                            colors = TopAppBarDefaults.smallTopAppBarColors(
+                            colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.background,
                                 titleContentColor = MaterialTheme.colorScheme.onBackground,
                                 navigationIconContentColor = MaterialTheme.colorScheme.onBackground,

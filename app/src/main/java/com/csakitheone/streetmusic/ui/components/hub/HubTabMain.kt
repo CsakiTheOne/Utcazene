@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -13,21 +14,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.VideogameAsset
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,7 +46,7 @@ import com.csakitheone.streetmusic.util.CustomTabsManager
 import java.time.LocalDate
 import kotlin.random.Random
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HubTabMain(
     scrollState: LazyListState,
@@ -91,12 +94,13 @@ fun HubTabMain(
                 modifier = Modifier.padding(16.dp),
                 text = stringResource(id = R.string.random_musicians_of_day),
             )
-            HorizontalPager(
-                state = rememberPagerState(pageCount = { musiciansOfDay.size })
+            HorizontalMultiBrowseCarousel(
+                state = rememberCarouselState { musiciansOfDay.size },
+                preferredItemWidth = 350.dp,
+                contentPadding = PaddingValues(8.dp),
             ) {
                 Box(contentAlignment = Alignment.BottomCenter) {
                     BigMusicianCard(
-                        modifier = Modifier.padding(8.dp),
                         musician = musiciansOfDay[it],
                     )
                     Row(
@@ -110,7 +114,7 @@ fun HubTabMain(
                                     .width(if (dotIndex == it) 6.dp else 4.dp)
                                     .aspectRatio(1f)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onBackground)
+                                    .background(Color.White)
                             )
                         }
                     }

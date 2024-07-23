@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
@@ -58,7 +59,6 @@ import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.ui.components.DaySelectorRow
 import com.csakitheone.streetmusic.ui.components.EventCard
-import com.csakitheone.streetmusic.ui.components.MenuCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import com.csakitheone.streetmusic.util.CustomTabsManager
 import com.csakitheone.streetmusic.util.Helper.Companion.toLocalTime
@@ -204,7 +204,7 @@ class PlacesActivity : ComponentActivity() {
                         items(items = eventsGrouped, key = { it.key.name }) { entry ->
                             Column {
                                 if (entry.key.geoLink != null) {
-                                    MenuCard(
+                                    TextButton(
                                         modifier = Modifier
                                             .padding(horizontal = 16.dp, vertical = 8.dp),
                                         onClick = {
@@ -215,9 +215,16 @@ class PlacesActivity : ComponentActivity() {
                                                 )
                                             )
                                         },
-                                        imageVector = Icons.Default.Place,
-                                        title = entry.key.name,
-                                    )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Place,
+                                            contentDescription = null,
+                                        )
+                                        Text(
+                                            modifier = Modifier.padding(start = 8.dp),
+                                            text = entry.key.name,
+                                        )
+                                    }
                                 } else {
                                     Text(
                                         modifier = Modifier

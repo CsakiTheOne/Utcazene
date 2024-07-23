@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.ui.activities.EventActivity
@@ -53,6 +54,8 @@ fun EventCard(
                         .weight(1f),
                     text = event.musician.name,
                     style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 if (isPinned != null) {
                     IconButton(
@@ -81,6 +84,8 @@ fun EventCard(
                             .weight(1f),
                         text = event.place.name,
                         style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Text(

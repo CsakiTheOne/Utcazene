@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -215,36 +216,41 @@ class PlacesActivity : ComponentActivity() {
                                     )
                                 } else {
                                     Text(
-                                        modifier = Modifier.padding(8.dp),
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
                                         text = entry.key.name,
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                 }
-                                HorizontalMultiBrowseCarousel(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                                        .clip(MaterialTheme.shapes.medium),
-                                    state = rememberCarouselState { entry.value.size },
-                                    preferredItemWidth = 300.dp,
-                                    itemSpacing = 8.dp,
-                                ) { eventIndex ->
-                                    EventCard(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        event = entry.value[eventIndex],
-                                        isPinned = favoriteEvents.contains(entry.value[eventIndex].toString()),
-                                        onPinnedChangeRequest = {
-                                            DataStore.setValue(
-                                                this@PlacesActivity,
-                                                DataStore.favoriteEventsKey,
-                                                favoriteEvents.toMutableSet().apply {
-                                                    if (it) add(entry.value[eventIndex].toString())
-                                                    else remove(entry.value[eventIndex].toString())
-                                                }
-                                            )
-                                        },
-                                        showPlace = false,
-                                    )
+                                if (entry.value.isNotEmpty()) {
+                                    HorizontalMultiBrowseCarousel(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                            .clip(MaterialTheme.shapes.medium),
+                                        state = rememberCarouselState { entry.value.size },
+                                        preferredItemWidth = 300.dp,
+                                        itemSpacing = 8.dp,
+                                    ) { eventIndex ->
+                                        EventCard(
+                                            modifier = Modifier
+                                                .widthIn(min = 300.dp)
+                                                .fillMaxWidth(),
+                                            event = entry.value[eventIndex],
+                                            isPinned = favoriteEvents.contains(entry.value[eventIndex].toString()),
+                                            onPinnedChangeRequest = {
+                                                DataStore.setValue(
+                                                    this@PlacesActivity,
+                                                    DataStore.favoriteEventsKey,
+                                                    favoriteEvents.toMutableSet().apply {
+                                                        if (it) add(entry.value[eventIndex].toString())
+                                                        else remove(entry.value[eventIndex].toString())
+                                                    }
+                                                )
+                                            },
+                                            showPlace = false,
+                                        )
+                                    }
                                 }
                             }
                         }

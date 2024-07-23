@@ -10,8 +10,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,6 +34,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -43,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -155,9 +158,7 @@ class PlacesActivity : ComponentActivity() {
                         )
                     }
                     LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp),
+                        modifier = Modifier.weight(1f),
                         state = scroll,
                     ) {
                         item {
@@ -199,7 +200,8 @@ class PlacesActivity : ComponentActivity() {
                             Column {
                                 if (entry.key.geoLink != null) {
                                     MenuCard(
-                                        modifier = Modifier.padding(8.dp),
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
                                         onClick = {
                                             startActivity(
                                                 Intent(
@@ -218,29 +220,31 @@ class PlacesActivity : ComponentActivity() {
                                         style = MaterialTheme.typography.titleMedium,
                                     )
                                 }
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                ) {
-                                    entry.value.map { event ->
-                                        EventCard(
-                                            modifier = Modifier
-                                                .padding(8.dp)
-                                                .width(300.dp),
-                                            event = event,
-                                            isPinned = favoriteEvents.contains(event.toString()),
-                                            onPinnedChangeRequest = {
-                                                DataStore.setValue(
-                                                    this@PlacesActivity,
-                                                    DataStore.favoriteEventsKey,
-                                                    favoriteEvents.toMutableSet().apply {
-                                                        if (it) add(event.toString())
-                                                        else remove(event.toString())
-                                                    }
-                                                )
-                                            },
-                                            showPlace = false,
-                                        )
-                                    }
+                                HorizontalMultiBrowseCarousel(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                        .clip(MaterialTheme.shapes.medium),
+                                    state = rememberCarouselState { entry.value.size },
+                                    preferredItemWidth = 300.dp,
+                                    itemSpacing = 8.dp,
+                                ) { eventIndex ->
+                                    EventCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        event = entry.value[eventIndex],
+                                        isPinned = favoriteEvents.contains(entry.value[eventIndex].toString()),
+                                        onPinnedChangeRequest = {
+                                            DataStore.setValue(
+                                                this@PlacesActivity,
+                                                DataStore.favoriteEventsKey,
+                                                favoriteEvents.toMutableSet().apply {
+                                                    if (it) add(entry.value[eventIndex].toString())
+                                                    else remove(entry.value[eventIndex].toString())
+                                                }
+                                            )
+                                        },
+                                        showPlace = false,
+                                    )
                                 }
                             }
                         }

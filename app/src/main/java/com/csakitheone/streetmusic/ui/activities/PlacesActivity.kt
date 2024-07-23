@@ -100,21 +100,25 @@ class PlacesActivity : ComponentActivity() {
                 mutableStateOf(isOnlyUpcomingFilterVisible)
             }
 
+            var events by remember { mutableStateOf(listOf<Event>()) }
             var eventsGrouped by remember { mutableStateOf(listOf<Map.Entry<Place, List<Event>>>()) }
 
-            LaunchedEffect(selectedDay, favoriteEvents, isOnlyPinned, isOnlyUpcoming) {
-                EventsProvider.getEventsThisYear(this@PlacesActivity) { events ->
-                    eventsGrouped = events
-                        .filter { it.day == selectedDay }
-                        .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
-                        .filter {
-                            !isOnlyUpcoming || LocalTime.now().isBefore(it.time.toLocalTime())
-                        }
-                        .sortedBy { it.time }
-                        .groupBy { it.place }
-                        .entries
-                        .toList()
-                }
+            LaunchedEffect(Unit) {
+                EventsProvider.getEventsThisYear(this@PlacesActivity) { events = it }
+            }
+
+            LaunchedEffect(events, selectedDay, favoriteEvents, isOnlyPinned, isOnlyUpcoming) {
+                eventsGrouped = events
+                    .asSequence()
+                    .filter {
+                        it.day == selectedDay &&
+                                (!isOnlyPinned || favoriteEvents.contains(it.toString())) &&
+                                (!isOnlyUpcoming || LocalTime.now().isBefore(it.time.toLocalTime()))
+                    }
+                    .sortedBy { it.time }
+                    .groupBy { it.place }
+                    .entries
+                    .toList()
             }
 
             Surface(

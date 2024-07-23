@@ -15,10 +15,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,7 +61,7 @@ fun AdaptiveFeed(
 
     var isInfoDialogOpen by remember { mutableStateOf(false) }
 
-    val dateTime by remember { mutableStateOf(LocalDateTime.now()) }
+    var dateTime by remember { mutableStateOf(LocalDateTime.now()) }
 
     var events by remember { mutableStateOf(emptyList<Event>()) }
     val eventsToday by remember(events) {
@@ -67,7 +69,7 @@ fun AdaptiveFeed(
             events.filter { it.day == LocalDate.now().dayOfMonth }
         }
     }
-    val eventsNowPlaying by remember(eventsToday) {
+    val eventsNowPlaying by remember(eventsToday, dateTime) {
         derivedStateOf {
             eventsToday.filter { event ->
                 val nextTime = eventsToday.firstOrNull {
@@ -135,10 +137,23 @@ fun AdaptiveFeed(
                         contentDescription = null,
                     )
                     Text(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .weight(1f),
                         text = stringResource(id = R.string.now_playing),
                         style = MaterialTheme.typography.titleMedium,
                     )
+                    IconButton(
+                        modifier = Modifier.padding(8.dp),
+                        onClick = {
+                            dateTime = LocalDateTime.now()
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
             items(eventsNowPlaying, { it.toString() }) { event ->

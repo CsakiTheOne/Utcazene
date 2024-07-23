@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shortcuts>
-    <!--shortcut
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
         android:shortcutId="events"
         android:enabled="true"
         android:icon="@drawable/shortcut_events"
@@ -42,15 +42,4 @@
             android:targetPackage="com.csakitheone.streetmusic"
             android:targetClass="com.csakitheone.streetmusic.ui.activities.PlacesActivity" />
     </shortcut>
-    <shortcut
-        android:shortcutId="now_playing"
-        android:enabled="true"
-        android:icon="@drawable/shortcut_now_playing"
-        android:shortcutShortLabel="@string/now_playing">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetPackage="com.csakitheone.streetmusic"
-            android:targetClass="com.csakitheone.streetmusic.ui.activities.MainActivity"
-            android:data="now_playing" />
-    </shortcut-->
 </shortcuts>

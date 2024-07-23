@@ -49,7 +49,15 @@ class EventsProvider {
                 day = 24,
                 time = "17:15",
                 place = Place("Íródeák Művészeti Udvar"),
-            )
+            ),
+            Event(
+                id = 10_001,
+                musician = customMusicians[0],
+                year = 2024,
+                day = 25,
+                time = "17:00",
+                place = Place("Óváros tér"),
+            ),
         )
 
         private fun saveCache(context: Context, events: List<Event>) {

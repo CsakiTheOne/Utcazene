@@ -3,7 +3,6 @@ package com.csakitheone.streetmusic.ui.components
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -219,13 +219,14 @@ fun AdaptiveFeed(
                     )
                 }
                 HorizontalMultiBrowseCarousel(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clip(MaterialTheme.shapes.extraLarge),
                     state = rememberCarouselState { headlinerMusicians.size },
                     preferredItemWidth = 400.dp,
-                    contentPadding = PaddingValues(8.dp),
                     flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
                 ) { index ->
                     BigMusicianCard(
-                        modifier = Modifier.padding(8.dp),
                         musician = headlinerMusicians[index],
                     )
                 }

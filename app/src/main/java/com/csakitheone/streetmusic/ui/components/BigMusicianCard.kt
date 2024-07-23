@@ -100,7 +100,7 @@ fun BigMusicianCard(
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color.Black.copy(alpha = .8f),
+                                    Color.Black.copy(alpha = .6f),
                                     Color.Transparent,
                                 ),
                             )
@@ -144,7 +144,7 @@ fun BigMusicianCard(
                             Brush.verticalGradient(
                                 listOf(
                                     Color.Transparent,
-                                    Color.Black.copy(alpha = .8f),
+                                    Color.Black.copy(alpha = .6f),
                                 ),
                             )
                         ),

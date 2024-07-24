@@ -219,7 +219,9 @@ class MainActivity : ComponentActivity() {
                                             EventsProvider.getEventsThisYear(
                                                 this@MainActivity,
                                                 forceDownload = true
-                                            )
+                                            ) {
+                                                events = it
+                                            }
                                         },
                                     ) {
                                         Icon(

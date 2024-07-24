@@ -71,13 +71,14 @@ fun AdaptiveFeed(
     }
     val eventsNowPlaying by remember(eventsToday, dateTime) {
         derivedStateOf {
-            eventsToday.filter { event ->
-                val nextTime = eventsToday.firstOrNull {
-                    it.time.toLocalTime() > event.time.toLocalTime().plusMinutes(20)
-                }?.time?.toLocalTime()
-                event.time.toLocalTime() < LocalTime.now().plusMinutes(5) &&
-                        (nextTime == null || nextTime > LocalTime.now().minusMinutes(5))
-            }
+            eventsToday
+                .groupBy { it.place }
+                .mapNotNull { (_, eventsHere) ->
+                    val indexOfNext =
+                        eventsHere.indexOfFirst { it.time.toLocalTime() > LocalTime.now() }
+                    if (indexOfNext == -1) return@mapNotNull eventsHere.lastOrNull()
+                    eventsHere.getOrNull(indexOfNext - 1)
+                }
         }
     }
     var headlinerMusicians by remember { mutableStateOf(emptyList<Musician>()) }
@@ -162,8 +163,7 @@ fun AdaptiveFeed(
                     event = event,
                 )
             }
-        }
-        else if (isTodayUtcazeneDay()) {
+        } else if (isTodayUtcazeneDay()) {
             // Tonight on Utcazene
             item {
                 Row(
@@ -199,8 +199,7 @@ fun AdaptiveFeed(
                     title = stringResource(id = R.string.more),
                 )
             }
-        }
-        else if (headlinerMusicians.isNotEmpty()) {
+        } else if (headlinerMusicians.isNotEmpty()) {
             // This year on Utcazene
             item {
                 Row(
@@ -240,8 +239,7 @@ fun AdaptiveFeed(
                     title = stringResource(id = R.string.more),
                 )
             }
-        }
-        else {
+        } else {
             item {
                 Box(
                     modifier = Modifier.fillMaxWidth(),

@@ -83,7 +83,10 @@ class CalendarActivity : ComponentActivity() {
 
             val firstDay = 24
             val eventDurationDays = 4
-            val pagerState = rememberPagerState(pageCount = { eventDurationDays })
+            val pagerState = rememberPagerState(
+                initialPage = LocalDate.now().dayOfMonth - firstDay,
+                pageCount = { eventDurationDays },
+            )
 
             val shareSheetState = rememberModalBottomSheetState()
             var isShareSheetOpen by remember { mutableStateOf(false) }

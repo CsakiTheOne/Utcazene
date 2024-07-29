@@ -235,7 +235,7 @@ class ExtrasActivity : ComponentActivity() {
                                     "2012" to "20120828002612",
                                     "2011" to "20110722065923",
                                     "2010" to "20100824180853",
-                                    //TODO insert missing
+                                    //TODO insert missing years
                                     "2004" to "20040929123114",
                                 ).map {
                                     Button(

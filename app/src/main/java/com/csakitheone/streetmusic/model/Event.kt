@@ -19,9 +19,8 @@ data class Event(
         return "$time ${musician.name}"
     }
 
-    //TODO: use musician's name instead of musician.toString() next year
     override fun toString(): String {
-        return "$musician $year-$day $time"
+        return "${musician.name} $year-$day $time"
     }
 
     override fun equals(other: Any?): Boolean {

@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         UtcazeneTheme {
-            var isPartyEndedDialogOpen by remember { mutableStateOf(false) }
+            var isPartyEndedDialogOpen by remember { mutableStateOf(true) }
 
             var isMenuOpen by remember { mutableStateOf(false) }
 

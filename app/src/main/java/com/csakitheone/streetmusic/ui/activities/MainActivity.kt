@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.VideogameAsset
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -106,6 +107,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         UtcazeneTheme {
+            var isPartyEndedDialogOpen by remember { mutableStateOf(false) }
+
             var isMenuOpen by remember { mutableStateOf(false) }
 
             var isDataStateVisible by remember(EventsProvider.state) {
@@ -118,6 +121,37 @@ class MainActivity : ComponentActivity() {
                 EventsProvider.getEventsThisYear(this@MainActivity) {
                     events = it
                 }
+            }
+
+            if (isPartyEndedDialogOpen) {
+                AlertDialog(
+                    title = { Text(text = "Party is over, but the music is not!") },
+                    text = {
+                        Text(
+                            text = "Hang around and discover all past musicians who played at Utcazene!"
+                        )
+                    },
+                    onDismissRequest = { isPartyEndedDialogOpen = false },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { isPartyEndedDialogOpen = false },
+                        ) {
+                            Text(text = "Stay here")
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                startActivity(
+                                    Intent( this@MainActivity, HubActivity::class.java)
+                                )
+                                finish()
+                            },
+                        ) {
+                            Text(text = "Open Uz Hub")
+                        }
+                    },
+                )
             }
 
             Surface(

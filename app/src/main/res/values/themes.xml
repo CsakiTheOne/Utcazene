@@ -5,7 +5,7 @@
 
     <style name="SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.Utcazene</item>
-        <item name="android:windowSplashScreenBackground" tools:targetApi="s">#66ba87</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="s">#F9CAD2</item>
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">@drawable/ic_splash</item>
     </style>
 </resources>

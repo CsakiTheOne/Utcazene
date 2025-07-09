@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainScreen() {
         UtcazeneTheme {
-            var isPartyEndedDialogOpen by remember { mutableStateOf(true) }
+            var isPartyEndedDialogOpen by remember { mutableStateOf(false) }
 
             var isMenuOpen by remember { mutableStateOf(false) }
 
@@ -193,7 +193,9 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .statusBarsPadding(),
                             ) {
-                                InteractiveHeader2024()
+                                InteractiveHeader2024(
+                                    modifier = Modifier.padding(8.dp),
+                                )
                                 Row(
                                     modifier = Modifier
                                         .padding(8.dp)

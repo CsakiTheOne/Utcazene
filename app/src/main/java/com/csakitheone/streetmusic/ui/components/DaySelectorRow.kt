@@ -27,10 +27,9 @@ fun DaySelectorRow(
             .fillMaxWidth(),
     ) {
         mapOf(
-            24 to stringResource(id = R.string.day_wednesday),
-            25 to stringResource(id = R.string.day_thursday),
-            26 to stringResource(id = R.string.day_friday),
-            27 to stringResource(id = R.string.day_saturday),
+            17 to stringResource(id = R.string.day_thursday),
+            18 to stringResource(id = R.string.day_friday),
+            19 to stringResource(id = R.string.day_saturday),
         ).map {
             NavigationBarItem(
                 selected = selectedDay == it.key,

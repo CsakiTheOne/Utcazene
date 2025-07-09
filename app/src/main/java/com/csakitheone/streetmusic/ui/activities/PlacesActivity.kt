@@ -42,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,9 +83,9 @@ class PlacesActivity : ComponentActivity() {
             val scroll = rememberLazyListState()
 
             var selectedDay by remember {
-                mutableStateOf(
-                    if ((24..27).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
-                    else 24
+                mutableIntStateOf(
+                    if ((17..19).contains(LocalDate.now().dayOfMonth)) LocalDate.now().dayOfMonth
+                    else 17
                 )
             }
 

@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -43,6 +41,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -81,12 +80,9 @@ class CalendarActivity : ComponentActivity() {
         UtcazeneTheme {
             val coroutineScope = rememberCoroutineScope()
 
-            val firstDay = 24
-            val eventDurationDays = 4
-            val pagerState = rememberPagerState(
-                initialPage = LocalDate.now().dayOfMonth - firstDay,
-                pageCount = { eventDurationDays },
-            )
+            val firstDay = 17
+            val eventDurationDays = 3
+            var selectedDay by remember { mutableIntStateOf(firstDay) }
 
             val shareSheetState = rememberModalBottomSheetState()
             var isShareSheetOpen by remember { mutableStateOf(false) }
@@ -96,8 +92,8 @@ class CalendarActivity : ComponentActivity() {
                 defaultValue = setOf(),
             )
             var isOnlyPinned by remember { mutableStateOf(false) }
-            var isOnlyUpcoming by remember(pagerState.currentPage) {
-                mutableStateOf(LocalDate.now().dayOfMonth == firstDay + pagerState.currentPage)
+            var isOnlyUpcoming by remember(selectedDay) {
+                mutableStateOf(LocalDate.now().dayOfMonth == selectedDay)
             }
 
             var events by remember { mutableStateOf(listOf<Event>()) }
@@ -130,7 +126,7 @@ class CalendarActivity : ComponentActivity() {
                         onClick = {
                             val allFavEvents = favoriteEvents
                                 .mapNotNull { events.find { event -> event.toString() == it } }
-                            val today = allFavEvents.filter { it.day == firstDay + pagerState.currentPage }
+                            val today = allFavEvents.filter { it.day == selectedDay }
                             val text = today
                                 .sortedBy { it.time }
                                 .joinToString("\n") { "- ${it.toStringTimeAndName()}" }
@@ -248,7 +244,7 @@ class CalendarActivity : ComponentActivity() {
                                 )
                             },
                         )
-                        AnimatedVisibility(visible = LocalDate.now().dayOfMonth == firstDay + pagerState.currentPage) {
+                        AnimatedVisibility(visible = LocalDate.now().dayOfMonth == selectedDay) {
                             ElevatedFilterChip(
                                 modifier = Modifier.padding(8.dp),
                                 selected = isOnlyUpcoming,
@@ -264,81 +260,68 @@ class CalendarActivity : ComponentActivity() {
                             )
                         }
                     }
-                    HorizontalPager(
-                        modifier = Modifier.weight(1f),
-                        state = pagerState,
-                    ) { pageIndex ->
-                        val scroll = rememberLazyListState()
-                        val eventsToday by remember(
-                            events,
-                            pageIndex,
-                            favoriteEvents,
-                            isOnlyPinned,
-                            isOnlyUpcoming
-                        ) {
-                            mutableStateOf(
-                                events
-                                    .asSequence()
-                                    .filter {
-                                        !isOnlyUpcoming || (LocalTime.now()
-                                            .isBefore(it.time.toLocalTime()) || it.time.toLocalTime().hour < 5)
-                                    }
-                                    .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
-                                    .filter { it.day == firstDay + pageIndex }
-                                    .sortedBy { it.musician.name }
-                                    .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
-                                    .toList()
-                            )
-                        }
-                        val nextEvent by remember(eventsToday) {
-                            mutableStateOf(
-                                eventsToday.firstOrNull {
-                                    LocalTime.now().isBefore(it.time.toLocalTime())
+                    val scroll = rememberLazyListState()
+                    val eventsToday by remember(
+                        events,
+                        selectedDay,
+                        favoriteEvents,
+                        isOnlyPinned,
+                        isOnlyUpcoming
+                    ) {
+                        mutableStateOf(
+                            events
+                                .asSequence()
+                                .filter {
+                                    !isOnlyUpcoming || (LocalTime.now()
+                                        .isBefore(it.time.toLocalTime()) || it.time.toLocalTime().hour < 5)
                                 }
-                            )
-                        }
-
-                        LaunchedEffect(pagerState.currentPage) {
-                            scroll.scrollToItem(0)
-                        }
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 8.dp),
-                            state = scroll,
-                        ) {
-                            items(
-                                items = eventsToday,
-                                key = { "${it.id} ${it.musician.name} ${it.day} ${it.time}" }) { event ->
-                                if (event == nextEvent) {
-                                    NowIndicator(modifier = Modifier.padding(8.dp))
-                                }
-                                EventCard(
-                                    modifier = Modifier.padding(8.dp),
-                                    event = event,
-                                    isPinned = favoriteEvents.contains(event.toString()),
-                                    onPinnedChangeRequest = {
-                                        DataStore.setValue(
-                                            this@CalendarActivity,
-                                            DataStore.favoriteEventsKey,
-                                            if (favoriteEvents.contains(event.toString()))
-                                                favoriteEvents - event.toString()
-                                            else favoriteEvents + event.toString()
-                                        )
-                                    },
-                                )
+                                .filter { !isOnlyPinned || favoriteEvents.contains(it.toString()) }
+                                .filter { it.day == selectedDay }
+                                .sortedBy { it.musician.name }
+                                .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
+                                .toList()
+                        )
+                    }
+                    val nextEvent by remember(eventsToday) {
+                        mutableStateOf(
+                            eventsToday.firstOrNull {
+                                LocalTime.now().isBefore(it.time.toLocalTime())
                             }
+                        )
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp),
+                        state = scroll,
+                    ) {
+                        items(
+                            items = eventsToday,
+                            key = { "${it.id} ${it.musician.name} ${it.day} ${it.time}" }) { event ->
+                            if (event == nextEvent && LocalDate.now().dayOfMonth == selectedDay) {
+                                NowIndicator(modifier = Modifier.padding(8.dp))
+                            }
+                            EventCard(
+                                modifier = Modifier.padding(8.dp),
+                                event = event,
+                                isPinned = favoriteEvents.contains(event.toString()),
+                                onPinnedChangeRequest = {
+                                    DataStore.setValue(
+                                        this@CalendarActivity,
+                                        DataStore.favoriteEventsKey,
+                                        if (favoriteEvents.contains(event.toString()))
+                                            favoriteEvents - event.toString()
+                                        else favoriteEvents + event.toString()
+                                    )
+                                },
+                            )
                         }
                     }
                     NavigationBar {
                         DaySelectorRow(
-                            selectedDay = firstDay + pagerState.currentPage,
-                            onChange = {
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(it - firstDay)
-                                }
-                            },
+                            selectedDay = selectedDay,
+                            onChange = { selectedDay = it },
                         )
                     }
                 }

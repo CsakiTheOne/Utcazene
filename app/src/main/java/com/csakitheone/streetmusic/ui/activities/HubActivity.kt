@@ -47,13 +47,14 @@ import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -118,7 +119,9 @@ class HubActivity : ComponentActivity() {
         filterCountries = listOf()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+        ExperimentalMaterial3ExpressiveApi::class
+    )
     @Preview
     @Composable
     fun HubScreen() {
@@ -315,7 +318,7 @@ class HubActivity : ComponentActivity() {
                                     .fillMaxWidth(),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                CircularProgressIndicator()
+                                LoadingIndicator()
                             }
                         }
                         AnimatedVisibility(visible = musicians.isNotEmpty()) {
@@ -379,7 +382,7 @@ class HubActivity : ComponentActivity() {
 
 
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
     @Composable
     fun TabBrowse(
         scrollState: LazyListState,
@@ -533,7 +536,7 @@ class HubActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        CircularProgressIndicator()
+                        LoadingIndicator()
                     }
                 }
             }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
+import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.util.Helper
 import com.google.gson.Gson
 import java.io.File
@@ -16,7 +17,7 @@ class EventsProvider {
     companion object {
 
         private val customMusicians: List<Musician> = listOf(
-            /*Musician(
+            Musician(
                 name = "Shántolók",
                 description = "Először a Lovassy Alma Mater rendezvényén hallottam " +
                         "sea shanty-ket énekelni az urakat ahol is egyértelműen megnyerték a " +
@@ -25,10 +26,10 @@ class EventsProvider {
                         "szórakoztató műfajt adnak elő, néha hangszerkísérettel. Aki kedveli a " +
                         "sea shanty-ket, mindenképp meg kell hallgatnia őket!",
                 country = "HU",
-                imageUrl = "https://instagram.fbud7-3.fna.fbcdn.net/v/t51.29350-15/450180903_360967316773483_6634244899063806694_n.jpg?stp=dst-jpg_e35&efg=eyJ2ZW5jb2RlX3RhZyI6ImltYWdlX3VybGdlbi4xNDQweDEwODAuc2RyLmYyOTM1MCJ9&_nc_ht=instagram.fbud7-3.fna.fbcdn.net&_nc_cat=107&_nc_ohc=V-06E9M1SrsQ7kNvgGSA1va&edm=AEhyXUkBAAAA&ccb=7-5&ig_cache_key=MzQwNzc2MDAxNDkzMDQ2MzA5Nw%3D%3D.2-ccb7-5&oh=00_AYCCTGnoUDltE4kfVvHXvsYB8m-h3pdfAC8cmPn2AIvBBA&oe=6699719D&_nc_sid=8f1549",
+                imageUrl = "https://i.ytimg.com/vi/grWgky_ZIJw/maxresdefault.jpg",
                 youtubeUrl = "https://www.youtube.com/@shantolok_band",
                 tags = listOf(Musician.TAG_FRIEND),
-            )*/
+            ),
         )
 
         val STATE_DOWNLOADING = R.string.data_state_downloading
@@ -41,22 +42,22 @@ class EventsProvider {
         var state by mutableStateOf(STATE_UNKNOWN)
 
         val customEvents: List<Event> = listOf(
-            /*Event(
+            Event(
                 id = 10_000,
                 musician = customMusicians[0],
-                year = 2024,
-                day = 24,
-                time = "17:15",
-                place = Place("Íródeák Művészeti Udvar"),
+                year = 2025,
+                day = 17,
+                time = "20:00",
+                place = Place("Szabadság tér"),
             ),
             Event(
                 id = 10_001,
                 musician = customMusicians[0],
-                year = 2024,
-                day = 25,
-                time = "17:00",
-                place = Place("Óváros tér"),
-            ),*/
+                year = 2025,
+                day = 18,
+                time = "19:00",
+                place = Place("Deutsches Haus, Thököly u. 11."),
+            ),
         )
 
         private fun saveCache(context: Context, events: List<Event>) {

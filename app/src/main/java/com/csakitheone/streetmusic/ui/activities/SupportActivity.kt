@@ -3,7 +3,6 @@ package com.csakitheone.streetmusic.ui.activities
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.ui.components.UzCard
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
@@ -169,7 +169,22 @@ class SupportActivity : ComponentActivity() {
                                         startActivity(
                                             Intent(
                                                 Intent.ACTION_VIEW,
-                                                Uri.parse("https://play.google.com/store/apps/details?id=com.csakitheone.froccs")
+                                                "https://play.google.com/store/apps/details?id=com.csakitheone.onrail".toUri()
+                                            )
+                                        )
+                                    },
+                                ) {
+                                    Text(text = "Sínen Vagyunk")
+                                }
+                                Button(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    onClick = {
+                                        startActivity(
+                                            Intent(
+                                                Intent.ACTION_VIEW,
+                                                "https://play.google.com/store/apps/details?id=com.csakitheone.froccs".toUri()
                                             )
                                         )
                                     },
@@ -184,7 +199,7 @@ class SupportActivity : ComponentActivity() {
                                         startActivity(
                                             Intent(
                                                 Intent.ACTION_VIEW,
-                                                Uri.parse("https://play.google.com/store/apps/details?id=com.csakitheone.distanthug")
+                                                "https://play.google.com/store/apps/details?id=com.csakitheone.distanthug".toUri()
                                             )
                                         )
                                     },
@@ -199,7 +214,7 @@ class SupportActivity : ComponentActivity() {
                                         startActivity(
                                             Intent(
                                                 Intent.ACTION_VIEW,
-                                                Uri.parse("https://play.google.com/store/apps/dev?id=8177011913013516936")
+                                                "https://play.google.com/store/apps/dev?id=8177011913013516936".toUri()
                                             )
                                         )
                                     },
@@ -218,6 +233,21 @@ class SupportActivity : ComponentActivity() {
                                     modifier = Modifier.padding(8.dp),
                                     text = stringResource(id = R.string.support_methods),
                                 )
+                                Button(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .fillMaxWidth(),
+                                    onClick = {
+                                        startActivity(
+                                            Intent(
+                                                Intent.ACTION_VIEW,
+                                                "https://www.patreon.com/c/wholesomeware".toUri()
+                                            )
+                                        )
+                                    },
+                                ) {
+                                    Text(text = "Patreon")
+                                }
                                 Button(
                                     modifier = Modifier
                                         .padding(8.dp)

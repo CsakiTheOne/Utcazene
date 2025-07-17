@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -68,7 +67,9 @@ fun AdaptiveFeed(
     var events by remember { mutableStateOf(emptyList<Event>()) }
     val eventsToday by remember(events) {
         derivedStateOf {
-            events.filter { it.day == LocalDate.now().dayOfMonth }
+            events
+                .filter { it.day == LocalDate.now().dayOfMonth }
+                .sortedBy { if (it.time.toLocalTime().hour < 5) "b" + it.time else it.time }
         }
     }
     val eventsNowPlaying by remember(eventsToday, dateTime) {

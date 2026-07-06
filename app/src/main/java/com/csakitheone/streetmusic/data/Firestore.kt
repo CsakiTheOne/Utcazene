@@ -3,8 +3,8 @@ package com.csakitheone.streetmusic.data
 import android.util.Log
 import com.csakitheone.streetmusic.model.Musician
 import com.csakitheone.streetmusic.util.Auth
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 import com.google.gson.Gson
 
 class Firestore {

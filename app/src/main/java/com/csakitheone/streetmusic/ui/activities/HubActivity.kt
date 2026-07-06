@@ -51,10 +51,9 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -119,8 +118,7 @@ class HubActivity : ComponentActivity() {
         filterCountries = listOf()
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-        ExperimentalMaterial3ExpressiveApi::class
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class
     )
     @Preview
     @Composable
@@ -318,7 +316,7 @@ class HubActivity : ComponentActivity() {
                                     .fillMaxWidth(),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                LoadingIndicator()
+                                CircularProgressIndicator()
                             }
                         }
                         AnimatedVisibility(visible = musicians.isNotEmpty()) {
@@ -382,7 +380,7 @@ class HubActivity : ComponentActivity() {
 
 
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun TabBrowse(
         scrollState: LazyListState,
@@ -536,7 +534,7 @@ class HubActivity : ComponentActivity() {
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        LoadingIndicator()
+                        CircularProgressIndicator()
                     }
                 }
             }

@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.csakitheone.streetmusic"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.csakitheone.streetmusic"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 43
         versionName = "2025.4"
 

@@ -2,12 +2,11 @@ package com.csakitheone.streetmusic.data
 
 import android.content.Context
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.model.Event
 import com.csakitheone.streetmusic.model.Musician
-import com.csakitheone.streetmusic.model.Place
 import com.csakitheone.streetmusic.util.Helper
 import com.google.gson.Gson
 import java.io.File
@@ -39,10 +38,10 @@ class EventsProvider {
         val STATE_APP = R.string.data_state_app
         val STATE_UNKNOWN = R.string.data_state_unknown
 
-        var state by mutableStateOf(STATE_UNKNOWN)
+        var state by mutableIntStateOf(STATE_UNKNOWN)
 
         val customEvents: List<Event> = listOf(
-            Event(
+            /*Event(
                 id = 10_000,
                 musician = customMusicians[0],
                 year = 2025,
@@ -57,7 +56,7 @@ class EventsProvider {
                 day = 18,
                 time = "19:00",
                 place = Place("Deutsches Haus, Thököly u. 11."),
-            ),
+            ),*/
         )
 
         private fun saveCache(context: Context, events: List<Event>) {

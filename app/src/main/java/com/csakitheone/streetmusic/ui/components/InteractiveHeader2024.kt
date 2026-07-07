@@ -43,7 +43,7 @@ fun InteractiveHeader2024(
                 .fillMaxWidth()
                 .aspectRatio(192f / 66f)
                 .clip(MaterialTheme.shapes.large),
-            painter = painterResource(id = R.drawable.header_2025),
+            painter = painterResource(id = R.drawable.header_2026),
             contentDescription = null,
             contentScale = ContentScale.FillWidth,
         )

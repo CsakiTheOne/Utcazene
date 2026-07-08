@@ -35,7 +35,9 @@ class NearbyManager(
 
     private var activeAdvertiser: Any? = null
     private var activeDiscoverer: Any? = null
+    private var activeStrategy: Strategy? = null
     private var advertisingRetryCount = 0
+    private var discoveryRetryCount = 0
 
     fun clearError() {
         _error.value = null
@@ -67,19 +69,7 @@ class NearbyManager(
     }
 
     fun hasPermissions(): Boolean {
-        val permissions = mutableListOf<String>().apply {
-            add(Manifest.permission.ACCESS_FINE_LOCATION)
-            add(Manifest.permission.ACCESS_COARSE_LOCATION)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                add(Manifest.permission.BLUETOOTH_ADVERTISE)
-                add(Manifest.permission.BLUETOOTH_CONNECT)
-                add(Manifest.permission.BLUETOOTH_SCAN)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                add(Manifest.permission.NEARBY_WIFI_DEVICES)
-            }
-        }
-        return permissions.all {
+        return REQUIRED_PERMISSIONS.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
     }
@@ -103,10 +93,16 @@ class NearbyManager(
         callback: ConnectionLifecycleCallback,
         onSuccess: () -> Unit = {}
     ) {
-        if (activeAdvertiser != null && activeAdvertiser != requester) {
+        if (activeStrategy != null && activeStrategy != strategy) {
+            connectionsClient.stopAdvertising()
+            connectionsClient.stopDiscovery()
+            activeAdvertiser = null
+            activeDiscoverer = null
+        } else if (activeAdvertiser != null && activeAdvertiser != requester) {
             connectionsClient.stopAdvertising()
         }
         activeAdvertiser = requester
+        activeStrategy = strategy
 
         val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startAdvertising(endpointName, serviceId, callback, options)
@@ -130,25 +126,32 @@ class NearbyManager(
         callback: ConnectionLifecycleCallback,
         onSuccess: () -> Unit
     ) {
-        if (e is ApiException && e.statusCode == 8 && advertisingRetryCount < 3) {
-            advertisingRetryCount++
-            scope.launch {
-                delay(2.seconds)
-                if (activeAdvertiser == requester) {
-                    connectionsClient.stopAdvertising()
-                    delay(500.milliseconds)
-                    requestAdvertising(requester, endpointName, serviceId, strategy, callback, onSuccess)
+        val statusCode = (e as? ApiException)?.statusCode
+        if (statusCode == ConnectionsStatusCodes.STATUS_ALREADY_HAVE_ACTIVE_STRATEGY ||
+            statusCode == ConnectionsStatusCodes.STATUS_OUT_OF_ORDER_API_CALL ||
+            statusCode == 8
+        ) {
+            if (advertisingRetryCount < 3) {
+                advertisingRetryCount++
+                scope.launch {
+                    delay(2.seconds)
+                    if (activeAdvertiser == requester) {
+                        connectionsClient.stopAdvertising()
+                        delay(500.milliseconds)
+                        requestAdvertising(requester, endpointName, serviceId, strategy, callback, onSuccess)
+                    }
                 }
+                return
             }
-        } else {
-            _error.value = "Advertising failed: ${e.message}"
         }
+        _error.value = "Advertising failed: ${e.message}"
     }
 
     internal fun releaseAdvertising(requester: Any) {
         if (activeAdvertiser == requester) {
             connectionsClient.stopAdvertising()
             activeAdvertiser = null
+            if (activeDiscoverer == null) activeStrategy = null
         }
     }
 
@@ -159,27 +162,85 @@ class NearbyManager(
         callback: EndpointDiscoveryCallback,
         onSuccess: () -> Unit = {}
     ) {
-        if (activeDiscoverer != null && activeDiscoverer != requester) {
+        if (activeStrategy != null && activeStrategy != strategy) {
+            connectionsClient.stopAdvertising()
+            connectionsClient.stopDiscovery()
+            activeAdvertiser = null
+            activeDiscoverer = null
+        } else if (activeDiscoverer != null && activeDiscoverer != requester) {
             connectionsClient.stopDiscovery()
         }
         activeDiscoverer = requester
+        activeStrategy = strategy
 
         val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
         connectionsClient.startDiscovery(serviceId, callback, options)
             .addOnSuccessListener {
                 Log.i("NearbyManager", "Discovery started for ${requester::class.simpleName}")
+                discoveryRetryCount = 0
                 onSuccess()
             }
             .addOnFailureListener { e ->
                 Log.e("NearbyManager", "Discovery failed for ${requester::class.simpleName}", e)
-                _error.value = "Discovery failed: ${e.message}"
+                handleDiscoveryFailure(e, requester, serviceId, strategy, callback, onSuccess)
             }
+    }
+
+    private fun handleDiscoveryFailure(
+        e: Exception,
+        requester: Any,
+        serviceId: String,
+        strategy: Strategy,
+        callback: EndpointDiscoveryCallback,
+        onSuccess: () -> Unit
+    ) {
+        val statusCode = (e as? ApiException)?.statusCode
+        if (statusCode == ConnectionsStatusCodes.STATUS_ALREADY_HAVE_ACTIVE_STRATEGY ||
+            statusCode == ConnectionsStatusCodes.STATUS_ALREADY_DISCOVERING ||
+            statusCode == 8
+        ) {
+            if (discoveryRetryCount < 3) {
+                discoveryRetryCount++
+                scope.launch {
+                    delay(2.seconds)
+                    if (activeDiscoverer == requester) {
+                        connectionsClient.stopDiscovery()
+                        delay(500.milliseconds)
+                        requestDiscovery(requester, serviceId, strategy, callback, onSuccess)
+                    }
+                }
+                return
+            }
+        }
+        _error.value = "Discovery failed: ${e.message}"
     }
 
     internal fun releaseDiscovery(requester: Any) {
         if (activeDiscoverer == requester) {
             connectionsClient.stopDiscovery()
             activeDiscoverer = null
+            if (activeAdvertiser == null) activeStrategy = null
+        }
+    }
+
+    companion object {
+        val REQUIRED_PERMISSIONS = mutableListOf<String>().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_ADVERTISE)
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+                add(Manifest.permission.BLUETOOTH_SCAN)
+            }
+            
+            add(Manifest.permission.ACCESS_FINE_LOCATION)
+            add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.NEARBY_WIFI_DEVICES)
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+                add(Manifest.permission.ACCESS_LOCAL_NETWORK)
+            }
         }
     }
 }

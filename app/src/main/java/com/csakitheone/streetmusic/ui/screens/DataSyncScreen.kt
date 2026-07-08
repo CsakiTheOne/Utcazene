@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import kotlinx.coroutines.launch
 
@@ -52,18 +53,7 @@ fun DataSyncScreen() {
         }
     }
 
-    val nearbyPermissions = mutableListOf<String>().apply {
-        add(Manifest.permission.ACCESS_FINE_LOCATION)
-        add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            add(Manifest.permission.BLUETOOTH_CONNECT)
-            add(Manifest.permission.BLUETOOTH_SCAN)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(Manifest.permission.NEARBY_WIFI_DEVICES)
-        }
-    }
+    val nearbyPermissions = NearbyManager.REQUIRED_PERMISSIONS
 
     LaunchedEffect(incomingData) {
         incomingData?.let { data ->

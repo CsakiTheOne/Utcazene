@@ -21,7 +21,7 @@ class FriendsFeature(
     private val scope: CoroutineScope
 ) {
     private val connectionsClient = nearbyManager.connectionsClient
-    private val serviceId = "com.csakitheone.streetmusic.nearby_friends"
+    private val serviceId = "com.csakitheone.streetmusic.NEARBY_GANG"
     private val strategy = Strategy.P2P_CLUSTER
 
     private val _connectedFriends = MutableStateFlow<Map<String, FriendsPayload>>(emptyMap())

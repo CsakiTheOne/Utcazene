@@ -67,6 +67,7 @@ import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.ArtistCard
 import com.csakitheone.streetmusic.ui.components.EventCard
+import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -93,18 +94,7 @@ fun HomeScreen() {
         }
     }
 
-    val nearbyPermissions = mutableListOf<String>().apply {
-        add(Manifest.permission.ACCESS_FINE_LOCATION)
-        add(Manifest.permission.ACCESS_COARSE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            add(Manifest.permission.BLUETOOTH_ADVERTISE)
-            add(Manifest.permission.BLUETOOTH_CONNECT)
-            add(Manifest.permission.BLUETOOTH_SCAN)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(Manifest.permission.NEARBY_WIFI_DEVICES)
-        }
-    }
+    val nearbyPermissions = NearbyManager.REQUIRED_PERMISSIONS
 
     Scaffold { padding ->
         Column(

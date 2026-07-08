@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.csakitheone.streetmusic" />
-                  <option name="mobileSdkAppId" value="1:911588427998:android:9467b3a115e5566c9f9a4f" />
-                  <option name="projectId" value="utcazene-3537d" />
-                  <option name="projectNumber" value="911588427998" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

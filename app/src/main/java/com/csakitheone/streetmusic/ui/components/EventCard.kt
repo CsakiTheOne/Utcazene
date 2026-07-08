@@ -1,45 +1,36 @@
 package com.csakitheone.streetmusic.ui.components
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.csakitheone.streetmusic.model.Event
-import com.csakitheone.streetmusic.ui.activities.EventActivity
-import com.google.gson.Gson
+import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.data.model.Event
+import com.csakitheone.streetmusic.navigation.Destination
+import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 
 @Composable
 fun EventCard(
     modifier: Modifier = Modifier,
     event: Event,
-    isPinned: Boolean? = null,
-    onPinnedChangeRequest: (Boolean) -> Unit = {},
-    showPlace: Boolean = true,
+    hidePlace: Boolean = false,
 ) {
-    val context = LocalContext.current
+    val repository = LocalRepository.current
+    val backStack = LocalNavBackStack.current
 
-    UzCard(
+    Card(
         modifier = modifier,
         onClick = {
-            context.startActivity(
-                Intent(context, EventActivity::class.java)
-                    .putExtra(EventActivity.EXTRA_EVENT_JSON, Gson().toJson(event))
-            )
+            backStack.add(Destination.EventDetail(event.id))
         },
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -52,37 +43,33 @@ fun EventCard(
                     modifier = Modifier
                         .padding(8.dp)
                         .weight(1f),
-                    text = event.musician.name,
+                    text = event.artistName,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (isPinned != null) {
-                    IconButton(
-                        modifier = Modifier.padding(start = 8.dp),
-                        onClick = {
-                            onPinnedChangeRequest(!isPinned)
-                        },
-                    ) {
-                        Icon(
-                            imageVector = if (isPinned) Icons.Default.Favorite
-                            else Icons.Default.FavoriteBorder,
-                            contentDescription = null,
-                        )
+                FavoritesIndicator(
+                    slug = "${event.artistSlug} at ${event.startTime}",
+                    isStarred = event.isStarred,
+                    onToggle = {
+                        repository.toggleFavorite("${event.artistSlug} at ${event.startTime}")
+                        if (event.isStarred) {
+                            repository.setFavorite(event.artistSlug, true)
+                        }
                     }
-                }
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (showPlace) {
+                if (!hidePlace) {
                     Text(
                         modifier = Modifier
                             .padding(8.dp)
                             .weight(1f),
-                        text = event.place.name,
+                        text = event.place,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -90,7 +77,7 @@ fun EventCard(
                 }
                 Text(
                     modifier = Modifier.padding(8.dp),
-                    text = event.time,
+                    text = event.startTime.substringAfter("T").take(5),
                 )
             }
         }

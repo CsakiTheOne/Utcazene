@@ -2,78 +2,39 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:minSdkVersion="32" android:name="android.permission.NEARBY_WIFI_DEVICES" tools:targetApi="s_v2" android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:minSdkVersion="37" android:name="android.permission.ACCESS_LOCAL_NETWORK" tools:targetApi="37" />
 
     <application
+        android:name=".UZApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Utcazene"
-        tools:targetApi="tiramisu"
-        android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
+        android:theme="@style/Theme.Utcazene">
         <activity
-            android:name=".ui.activities.AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.MusicianActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.EventActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.MusiciansActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.CalendarActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.PlacesActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.SupportActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.TeremActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.ExtrasActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.DiceActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.PlayingCardsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.HubActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/SplashScreen">
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
-
+            android:theme="@style/SplashScreen"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="https" />
-                <data android:host="utcazene.hu" />
             </intent-filter>
         </activity>
     </application>

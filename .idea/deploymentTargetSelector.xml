@@ -4,17 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-07-14T14:01:42.701040300Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=2C011JEHN16456" />
-            </handle>
-          </Target>
-        </DropdownSelection>
         <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="UtcazeneApiTest">
-        <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
   </component>

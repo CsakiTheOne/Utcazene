@@ -24,7 +24,7 @@ class NearbyManager(
     private val context: Context,
     private val scope: CoroutineScope
 ) {
-    internal val connectionsClient = Nearby.getConnectionsClient(context)
+    internal val connectionsClient get() = Nearby.getConnectionsClient(context)
     internal val localId = System.currentTimeMillis().toString(36).takeLast(4)
 
     val friends = FriendsFeature(this, scope)
@@ -44,6 +44,9 @@ class NearbyManager(
     }
 
     fun setNearbyActive(active: Boolean) {
+        if (!active) {
+            dataSync.stop()
+        }
         friends.setActive(active)
         if (active && !hasPermissions()) {
             _error.value = "Permissions required for Nearby features"
@@ -94,10 +97,17 @@ class NearbyManager(
         onSuccess: () -> Unit = {}
     ) {
         if (activeStrategy != null && activeStrategy != strategy) {
-            connectionsClient.stopAdvertising()
-            connectionsClient.stopDiscovery()
-            activeAdvertiser = null
-            activeDiscoverer = null
+            scope.launch {
+                connectionsClient.stopAdvertising()
+                connectionsClient.stopDiscovery()
+                connectionsClient.stopAllEndpoints()
+                activeStrategy = null
+                activeAdvertiser = null
+                activeDiscoverer = null
+                delay(1.seconds)
+                requestAdvertising(requester, endpointName, serviceId, strategy, callback, onSuccess)
+            }
+            return
         } else if (activeAdvertiser != null && activeAdvertiser != requester) {
             connectionsClient.stopAdvertising()
         }
@@ -137,6 +147,7 @@ class NearbyManager(
                     delay(2.seconds)
                     if (activeAdvertiser == requester) {
                         connectionsClient.stopAdvertising()
+                        connectionsClient.stopAllEndpoints()
                         delay(500.milliseconds)
                         requestAdvertising(requester, endpointName, serviceId, strategy, callback, onSuccess)
                     }
@@ -163,10 +174,17 @@ class NearbyManager(
         onSuccess: () -> Unit = {}
     ) {
         if (activeStrategy != null && activeStrategy != strategy) {
-            connectionsClient.stopAdvertising()
-            connectionsClient.stopDiscovery()
-            activeAdvertiser = null
-            activeDiscoverer = null
+            scope.launch {
+                connectionsClient.stopAdvertising()
+                connectionsClient.stopDiscovery()
+                connectionsClient.stopAllEndpoints()
+                activeStrategy = null
+                activeAdvertiser = null
+                activeDiscoverer = null
+                delay(1.seconds)
+                requestDiscovery(requester, serviceId, strategy, callback, onSuccess)
+            }
+            return
         } else if (activeDiscoverer != null && activeDiscoverer != requester) {
             connectionsClient.stopDiscovery()
         }
@@ -197,6 +215,7 @@ class NearbyManager(
         val statusCode = (e as? ApiException)?.statusCode
         if (statusCode == ConnectionsStatusCodes.STATUS_ALREADY_HAVE_ACTIVE_STRATEGY ||
             statusCode == ConnectionsStatusCodes.STATUS_ALREADY_DISCOVERING ||
+            statusCode == ConnectionsStatusCodes.STATUS_OUT_OF_ORDER_API_CALL ||
             statusCode == 8
         ) {
             if (discoveryRetryCount < 3) {
@@ -205,6 +224,7 @@ class NearbyManager(
                     delay(2.seconds)
                     if (activeDiscoverer == requester) {
                         connectionsClient.stopDiscovery()
+                        connectionsClient.stopAllEndpoints()
                         delay(500.milliseconds)
                         requestDiscovery(requester, serviceId, strategy, callback, onSuccess)
                     }

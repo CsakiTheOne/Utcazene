@@ -20,7 +20,6 @@ class FriendsFeature(
     private val nearbyManager: NearbyManager,
     private val scope: CoroutineScope
 ) {
-    private val connectionsClient = nearbyManager.connectionsClient
     private val serviceId = "com.csakitheone.streetmusic.NEARBY_GANG"
     private val strategy = Strategy.P2P_CLUSTER
 
@@ -101,7 +100,7 @@ class FriendsFeature(
         val payload = Payload.fromBytes(payloadData.toByteArray())
 
         _connectedFriends.value.keys.forEach { endpointId ->
-            connectionsClient.sendPayload(endpointId, payload)
+            nearbyManager.connectionsClient.sendPayload(endpointId, payload)
         }
     }
 
@@ -126,7 +125,7 @@ class FriendsFeature(
                     synchronized(connectingEndpoints) { connectingEndpoints.remove(endpointId) }
                     return@launch
                 }
-                connectionsClient.requestConnection(
+                nearbyManager.connectionsClient.requestConnection(
                     nearbyManager.packName(localNickname),
                     endpointId,
                     connectionLifecycleCallback
@@ -148,10 +147,10 @@ class FriendsFeature(
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             val (_, peerId) = nearbyManager.unpackName(info.endpointName)
             if (peerId == nearbyManager.localId) {
-                connectionsClient.rejectConnection(endpointId)
+                nearbyManager.connectionsClient.rejectConnection(endpointId)
                 return
             }
-            connectionsClient.acceptConnection(endpointId, payloadCallback)
+            nearbyManager.connectionsClient.acceptConnection(endpointId, payloadCallback)
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {

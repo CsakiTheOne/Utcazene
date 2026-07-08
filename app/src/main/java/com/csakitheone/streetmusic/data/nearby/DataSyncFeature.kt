@@ -26,7 +26,6 @@ class DataSyncFeature(
     private val nearbyManager: NearbyManager,
     private val scope: CoroutineScope
 ) {
-    private val connectionsClient = nearbyManager.connectionsClient
     private val serviceId = "com.csakitheone.streetmusic.nearby_data_sync"
     private val strategy = Strategy.P2P_STAR
 
@@ -76,7 +75,7 @@ class DataSyncFeature(
     }
 
     fun connectToEndpoint(endpointId: String) {
-        connectionsClient.requestConnection(
+        nearbyManager.connectionsClient.requestConnection(
             nearbyManager.packName(localNickname),
             endpointId,
             connectionLifecycleCallback
@@ -86,7 +85,7 @@ class DataSyncFeature(
     fun sendData(endpointId: String, artists: List<ArtistEntity>, events: List<EventEntity>) {
         val payloadData = Json.encodeToString(DataSyncPayload(artists, events))
         val payload = Payload.fromBytes(payloadData.toByteArray())
-        connectionsClient.sendPayload(endpointId, payload)
+        nearbyManager.connectionsClient.sendPayload(endpointId, payload)
     }
 
     fun clearIncomingData() {
@@ -109,10 +108,10 @@ class DataSyncFeature(
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             val (_, peerId) = nearbyManager.unpackName(info.endpointName)
             if (peerId == nearbyManager.localId) {
-                connectionsClient.rejectConnection(endpointId)
+                nearbyManager.connectionsClient.rejectConnection(endpointId)
                 return
             }
-            connectionsClient.acceptConnection(endpointId, payloadCallback)
+            nearbyManager.connectionsClient.acceptConnection(endpointId, payloadCallback)
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {

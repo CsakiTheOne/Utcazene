@@ -39,6 +39,8 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -48,7 +50,6 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.carousel.CarouselDefaults
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.DataRepository
+import com.csakitheone.streetmusic.data.ImuRepository
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
@@ -469,12 +471,24 @@ fun HomeScreen() {
 
             OutlinedCard(
                 onClick = {
-                    backStack.add(Destination.UnlockFest)
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            ImuRepository.imuFacebookUrl.toUri()
+                        )
+                    )
                 },
             ) {
-                Image(
-                    painter = painterResource(R.drawable.unlock_fest_banner),
-                    contentDescription = null,
+                ListItem(
+                    leadingContent = {
+                        Image(
+                            modifier = Modifier.size(64.dp),
+                            painter = painterResource(R.drawable.imu),
+                            contentDescription = null,
+                        )
+                    },
+                    content = { Text("Íródeák Művészeti Udvar") },
+                    supportingContent = { Text("More info soon...") },
                 )
             }
 
@@ -483,17 +497,41 @@ fun HomeScreen() {
                     backStack.add(Destination.Gyarkert)
                 },
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                ListItem(
+                    leadingContent = {
+                        Image(
+                            modifier = Modifier.size(64.dp),
+                            painter = painterResource(R.drawable.gyarkert_logo),
+                            contentDescription = null,
+                        )
+                    },
+                    content = { Text("Gyárkert") },
+                    supportingContent = { Text("Pont Ott Parti and more") },
+                )
+            }
+
+            OutlinedCard(
+                onClick = {
+                    backStack.add(Destination.UnlockFest)
+                },
+            ) {
+                Box(
+                    contentAlignment = Alignment.BottomStart,
                 ) {
-                    Text(text = "Gyárkert", style = MaterialTheme.typography.headlineSmall)
-                    Text(
-                        text = "Pont Ott Parti and more",
-                        style = MaterialTheme.typography.bodyMedium
+                    Image(
+                        painter = painterResource(R.drawable.unlock_fest_banner),
+                        contentDescription = null,
                     )
+                    Card(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .alpha(.9f),
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = "Unlock Fest Vol. VII - TEREM",
+                        )
+                    }
                 }
             }
 
@@ -505,22 +543,34 @@ fun HomeScreen() {
                 )
             }
 
-            TextButton(
-                onClick = {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            "https://www.instagram.com/csakitheone/".toUri()
-                        )
-                    )
-                },
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
             ) {
-                Icon(
-                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                    painter = painterResource(R.drawable.ic_instagram),
+                Image(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .padding(end = ButtonDefaults.IconSpacing),
+                    painter = painterResource(R.drawable.miku_hi),
                     contentDescription = null,
                 )
-                Text("@csakitheone")
+                Button(
+                    onClick = {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                "https://www.instagram.com/csakitheone/".toUri()
+                            )
+                        )
+                    },
+                ) {
+                    Icon(
+                        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                        painter = painterResource(R.drawable.ic_instagram),
+                        contentDescription = null,
+                    )
+                    Text("@csakitheone")
+                }
             }
 
             Spacer(modifier = Modifier.size(padding.calculateBottomPadding()))

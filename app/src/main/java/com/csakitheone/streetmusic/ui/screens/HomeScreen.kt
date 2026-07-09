@@ -226,7 +226,7 @@ fun HomeScreen() {
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(text = "Download data?", style = MaterialTheme.typography.titleMedium)
-                        Text("You are on a metered connection or Utcazene hasn't uploaded this years musicians yet. Would you like to download the event data now or sync from another device?")
+                        Text("You are on a metered connection or Utcazene hasn't uploaded this year's musicians yet. Would you like to download the event data now or sync from another device?")
                         Button(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {

@@ -552,6 +552,7 @@ fun ToggleNearbyFriendsCard(
         },
     ) {
         Box(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
             contentAlignment = Alignment.Center,
         ) {
             Switch(
@@ -568,7 +569,9 @@ fun ToggleNearbyFriendsCard(
                 },
             )
             Row(
-                modifier = Modifier.height(64.dp).padding(16.dp),
+                modifier = Modifier
+                    .height(64.dp)
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

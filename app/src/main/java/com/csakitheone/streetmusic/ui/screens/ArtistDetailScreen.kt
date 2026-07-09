@@ -1,12 +1,14 @@
 package com.csakitheone.streetmusic.ui.screens
 
 import android.content.Intent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -34,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -55,7 +58,7 @@ fun ArtistDetailScreen(artistSlug: String) {
     val artist by repository.getArtist(artistSlug).collectAsState(initial = null)
     val events by repository.getEventsByArtist(artistSlug).collectAsState(initial = emptyList())
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(if (events.isEmpty()) 1 else 0) }
 
     Scaffold(
         topBar = {
@@ -120,9 +123,20 @@ fun ArtistDetailScreen(artistSlug: String) {
                             modifier = Modifier.padding(16.dp),
                         )
                         AsyncImage(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 256.dp)
+                                .clickable {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            artist?.image?.toUri()
+                                        )
+                                    )
+                                },
                             model = artist?.image,
                             contentDescription = null,
+                            contentScale = ContentScale.FillWidth,
                         )
                     }
                 }
@@ -136,8 +150,12 @@ fun ArtistDetailScreen(artistSlug: String) {
             ) {
                 when (selectedTabIndex) {
                     0 -> {
-                        events.forEach { event ->
-                            EventCard(event = event)
+                        if (events.isEmpty()) {
+                            Text("Waiting for Utcazene to upload events...")
+                        } else {
+                            events.forEach { event ->
+                                EventCard(event = event)
+                            }
                         }
                     }
 
@@ -171,8 +189,11 @@ fun ArtistDetailScreen(artistSlug: String) {
 
                         Card {
                             Text(
-                                modifier = Modifier.padding(16.dp),
-                                text = artist?.description ?: "",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                text = (artist?.description
+                                    ?: "").ifBlank { "Waiting for Utcazene to finish artist details..." },
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }

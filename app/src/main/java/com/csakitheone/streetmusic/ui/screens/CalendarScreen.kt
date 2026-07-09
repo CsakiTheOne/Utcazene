@@ -186,6 +186,11 @@ fun CalendarScreen() {
                     )
                 }
             }
+            if (events.isEmpty()) {
+                item {
+                    Text("Waiting for Utcazene to upload events...")
+                }
+            }
             itemsIndexed(eventsAtDate, key = { _, event -> event.id }) { index, event ->
                 if (index == indicatorIndex) {
                     NowIndicator(

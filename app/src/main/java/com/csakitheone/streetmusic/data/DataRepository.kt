@@ -139,8 +139,6 @@ class DataRepository(
             }
         }
 
-    val hasData: Flow<Boolean> = database.eventDao().getCount().map { it > 0 }
-
     val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates()
 
     fun getArtist(slug: String): Flow<Artist?> =
@@ -174,6 +172,11 @@ class DataRepository(
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
             }
+        }
+
+    val hasData: Flow<Boolean> = database.artistDao().getCount()
+        .combine(database.eventDao().getCount()) { artistCount, eventCount ->
+            artistCount > 0 || eventCount > 0
         }
 
     /**

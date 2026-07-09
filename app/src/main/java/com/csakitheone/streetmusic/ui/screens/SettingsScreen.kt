@@ -75,7 +75,7 @@ fun SettingsScreen() {
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(text = "Profile", style = MaterialTheme.typography.titleMedium)
+                    Text(text = "Profile for nearby friends", style = MaterialTheme.typography.titleMedium)
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         value = nickname,
@@ -109,7 +109,7 @@ fun SettingsScreen() {
                     )
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        text = "Show images on metered connections",
+                        text = "Show images and videos on metered connections",
                     )
                 }
             }
@@ -139,6 +139,11 @@ fun SettingsScreen() {
                             backStack.add(com.csakitheone.streetmusic.navigation.Destination.DataSync)
                         },
                     ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_connect_without_contact),
+                            contentDescription = null,
+                        )
                         Text("Send data to another device")
                     }
 
@@ -151,6 +156,11 @@ fun SettingsScreen() {
                             }
                         },
                     ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = null,
+                        )
                         Text("Redownload data")
                     }
 
@@ -168,6 +178,11 @@ fun SettingsScreen() {
                             contentColor = MaterialTheme.colorScheme.onError,
                         ),
                     ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_delete_forever),
+                            contentDescription = null,
+                        )
                         Text("Remove data from device")
                     }
 
@@ -185,6 +200,11 @@ fun SettingsScreen() {
                             contentColor = MaterialTheme.colorScheme.onError,
                         ),
                     ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_delete_forever),
+                            contentDescription = null,
+                        )
                         Text("Remove all favorites")
                     }
                 }

@@ -15,6 +15,9 @@ interface ArtistDao {
     @Query("SELECT * FROM artists WHERE slug = :slug LIMIT 1")
     fun getBySlug(slug: String): Flow<ArtistEntity?>
 
+    @Query("SELECT COUNT(slug) FROM artists")
+    fun getCount(): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(artists: List<ArtistEntity>)
 
@@ -33,7 +36,7 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE id = :id LIMIT 1")
     fun getById(id: Int): Flow<EventEntity?>
 
-    @Query("SELECT COUNT(*) FROM events")
+    @Query("SELECT COUNT(id) FROM events")
     fun getCount(): Flow<Int>
 
     @Query("SELECT DISTINCT SUBSTR(startTime, 1, 10) FROM events ORDER BY startTime ASC")

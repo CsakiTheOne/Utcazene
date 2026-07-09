@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.csakitheone.streetmusic.data.model.Event
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -40,4 +41,7 @@ interface EventDao {
 
     @Query("DELETE FROM events")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM events WHERE artistSlug = :artistSlug")
+    fun getEventsByArtist(artistSlug: String): Flow<List<EventEntity>>
 }

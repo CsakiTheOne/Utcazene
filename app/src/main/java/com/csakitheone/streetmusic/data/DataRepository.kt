@@ -159,6 +159,17 @@ class DataRepository(
             }
         }
 
+    fun getEventsByArtist(artistSlug: String): Flow<List<Event>> =
+        database.eventDao().getEventsByArtist(artistSlug).combine(favoriteSlugs) { entities, favs ->
+            entities.map {
+                Event(
+                    it.id, it.artistId, it.artistSlug, it.artistName,
+                    it.startTime, it.endTime, it.place,
+                    isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
+                )
+            }
+        }
+
     /**
      * Tries to download the data from the API and store it in the local database.
      * This function checks network conditions and if the data is already in the database.
@@ -263,13 +274,16 @@ class DataRepository(
         database.clearAllTables()
     }
 
-    suspend fun syncData(artists: List<ArtistEntity>, events: List<EventEntity>) = withContext(Dispatchers.IO) {
-        database.artistDao().deleteAll()
-        database.artistDao().insertAll(artists)
-        database.eventDao().deleteAll()
-        database.eventDao().insertAll(events)
-    }
+    suspend fun syncData(artists: List<ArtistEntity>, events: List<EventEntity>) =
+        withContext(Dispatchers.IO) {
+            database.artistDao().deleteAll()
+            database.artistDao().insertAll(artists)
+            database.eventDao().deleteAll()
+            database.eventDao().insertAll(events)
+        }
 
     fun getAllArtistEntities(): Flow<List<ArtistEntity>> = database.artistDao().getAll()
     fun getAllEventEntities(): Flow<List<EventEntity>> = database.eventDao().getAll()
+    fun getEventEntitiesByArtist(artistSlug: String): Flow<List<EventEntity>> =
+        database.eventDao().getEventsByArtist(artistSlug)
 }

@@ -53,7 +53,7 @@ fun EventCard(
                     isStarred = event.isStarred,
                     onToggle = {
                         repository.toggleFavorite("${event.artistSlug} at ${event.startTime}")
-                        if (event.isStarred) {
+                        if (!event.isStarred) {
                             repository.setFavorite(event.artistSlug, true)
                         }
                     }

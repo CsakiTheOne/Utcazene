@@ -42,6 +42,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -477,6 +478,19 @@ fun HomeScreen() {
                         )
                     },
                     label = { Text("Facebook") },
+                )
+            }
+
+            Text(text = "Parallel events", style = MaterialTheme.typography.titleLarge)
+
+            OutlinedCard(
+                onClick = {
+                    backStack.add(Destination.UnlockFest)
+                },
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.unlock_fest_banner),
+                    contentDescription = null,
                 )
             }
 

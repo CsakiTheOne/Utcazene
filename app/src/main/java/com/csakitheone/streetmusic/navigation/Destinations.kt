@@ -25,6 +25,8 @@ sealed interface Destination : NavKey {
     data class ArtistDetail(val artistSlug: String) : Destination
     @Serializable
     data class EventDetail(val eventId: Int) : Destination
+    @Serializable
+    data object UnlockFest : Destination
 }
 
 val LocalNavBackStack = staticCompositionLocalOf<NavBackStack<Destination>> {

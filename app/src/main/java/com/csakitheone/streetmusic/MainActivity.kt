@@ -36,6 +36,7 @@ import com.csakitheone.streetmusic.ui.screens.HomeScreen
 import com.csakitheone.streetmusic.ui.screens.MapScreen
 import com.csakitheone.streetmusic.ui.screens.PlacesScreen
 import com.csakitheone.streetmusic.ui.screens.SettingsScreen
+import com.csakitheone.streetmusic.ui.screens.UnlockFestScreen
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import kotlinx.coroutines.awaitCancellation
 
@@ -124,6 +125,10 @@ class MainActivity : ComponentActivity() {
 
                                     is Destination.EventDetail -> NavEntry(key) {
                                         EventDetailScreen(key.eventId)
+                                    }
+
+                                    is Destination.UnlockFest -> NavEntry(key) {
+                                        UnlockFestScreen()
                                     }
                                 }
                             }

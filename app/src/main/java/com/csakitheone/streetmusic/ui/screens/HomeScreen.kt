@@ -272,103 +272,102 @@ fun HomeScreen() {
                         }
                     }
                 }
-                return@Column
-            }
-
-            Grid(
-                config = {
-                    column(.5f)
-                    column(.5f)
-                    columnGap(8.dp)
-                    row(64.dp)
-                    row(64.dp)
-                    rowGap(8.dp)
-                }
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { backStack.add(Destination.Calendar) },
-                    shape = MaterialTheme.shapes.large,
+            } else {
+                Grid(
+                    config = {
+                        column(.5f)
+                        column(.5f)
+                        columnGap(8.dp)
+                        row(64.dp)
+                        row(64.dp)
+                        rowGap(8.dp)
+                    }
                 ) {
-                    Icon(
-                        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                        painter = painterResource(R.drawable.shortcut_events),
-                        contentDescription = null
-                    )
-                    Text("Calendar")
-                }
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { backStack.add(Destination.Artists) },
-                    shape = MaterialTheme.shapes.large,
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                        painter = painterResource(R.drawable.shortcut_musicians),
-                        contentDescription = null
-                    )
-                    Text("Artists")
-                }
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { backStack.add(Destination.Places) },
-                    shape = MaterialTheme.shapes.large,
-                ) {
-                    Icon(
-                        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                        painter = painterResource(R.drawable.shortcut_places),
-                        contentDescription = null
-                    )
-                    Text("Places")
-                    FilledTonalIconButton(
-                        modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
-                        onClick = { backStack.add(Destination.Map) }
+                    Button(
+                        modifier = Modifier.fillMaxSize(),
+                        onClick = { backStack.add(Destination.Calendar) },
+                        shape = MaterialTheme.shapes.large,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_map),
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.shortcut_events),
                             contentDescription = null
                         )
+                        Text("Calendar")
                     }
-                }
-                Card(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = MaterialTheme.shapes.large,
-                    onClick = {
-                        if (!nearbyFeatures) {
-                            permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                        } else {
-                            repository.setNearbyFeatures(false)
-                        }
-                    },
-                ) {
-                    Box(
+                    Button(
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
+                        onClick = { backStack.add(Destination.Artists) },
+                        shape = MaterialTheme.shapes.large,
                     ) {
-                        Switch(
-                            modifier = Modifier
-                                .scale(1.5f)
-                                .alpha(.6f),
-                            checked = nearbyFeatures,
-                            onCheckedChange = { checked ->
-                                if (checked) {
-                                    permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                                } else {
-                                    repository.setNearbyFeatures(false)
-                                }
-                            },
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.shortcut_musicians),
+                            contentDescription = null
                         )
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
+                        Text("Artists")
+                    }
+                    Button(
+                        modifier = Modifier.fillMaxSize(),
+                        onClick = { backStack.add(Destination.Places) },
+                        shape = MaterialTheme.shapes.large,
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.shortcut_places),
+                            contentDescription = null
+                        )
+                        Text("Places")
+                        FilledTonalIconButton(
+                            modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
+                            onClick = { backStack.add(Destination.Map) }
                         ) {
                             Icon(
-                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                                painter = painterResource(R.drawable.ic_connect_without_contact),
+                                painter = painterResource(R.drawable.ic_map),
                                 contentDescription = null
                             )
-                            Text("The gang")
+                        }
+                    }
+                    Card(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = MaterialTheme.shapes.large,
+                        onClick = {
+                            if (!nearbyFeatures) {
+                                permissionLauncher.launch(nearbyPermissions.toTypedArray())
+                            } else {
+                                repository.setNearbyFeatures(false)
+                            }
+                        },
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Switch(
+                                modifier = Modifier
+                                    .scale(1.5f)
+                                    .alpha(.6f),
+                                checked = nearbyFeatures,
+                                onCheckedChange = { checked ->
+                                    if (checked) {
+                                        permissionLauncher.launch(nearbyPermissions.toTypedArray())
+                                    } else {
+                                        repository.setNearbyFeatures(false)
+                                    }
+                                },
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                    painter = painterResource(R.drawable.ic_connect_without_contact),
+                                    contentDescription = null
+                                )
+                                Text("The gang")
+                            }
                         }
                     }
                 }
@@ -382,7 +381,9 @@ fun HomeScreen() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            modifier = Modifier.padding(16.dp).weight(1f),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .weight(1f),
                             text = "Nearby friends",
                             style = MaterialTheme.typography.titleMedium,
                         )

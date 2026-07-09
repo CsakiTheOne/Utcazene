@@ -156,9 +156,7 @@ fun SettingsScreen() {
 
                     Button(
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !repository.isDownloading && repository.hasData.collectAsState(
-                            initial = false
-                        ).value,
+                        enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
                         onClick = {
                             coroutineScope.launch(Dispatchers.IO) {
                                 repository.deleteDatabase()

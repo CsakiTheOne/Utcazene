@@ -133,7 +133,7 @@ class DataRepository(
             }
         }
 
-    val hasData: Flow<Boolean> = database.eventDao().getCount().map { count -> count > 0 }
+    val hasData: Flow<Boolean> = database.eventDao().getCount().map { it > 0 }
 
     val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates()
 
@@ -204,8 +204,8 @@ class DataRepository(
      * Downloads the data from the API and stores it in the local database.
      */
     suspend fun downloadData() = withContext(Dispatchers.IO) {
-        val yearFilter = 2024
-        val emulateFirstDayOfEvent = true
+        val yearFilter = 2026
+        val emulateFirstDayOfEvent = false
 
         isDownloading = true
 
@@ -218,17 +218,26 @@ class DataRepository(
 
         if (apiArtists.isNotEmpty()) {
             database.artistDao().deleteAll()
-            database.artistDao().insertAll(apiArtists.map {
-                val tags = mutableListOf<String>()
-                if (it.headliner) tags.add("headliner")
-                else tags.add("competitor")
-                ArtistEntity(
-                    it.id, it.name, it.country, it.description, it.image, it.slug,
-                    it.youtubeEmbed, tags.joinToString(",")
-                )
-            })
 
             val events = apiArtists.flatMap { artist ->
+                val artistTags = mutableListOf<String>()
+                if (artist.headliner) artistTags.add("headliner")
+                else artistTags.add("competitor")
+
+                val hasEventInFilteredYear = artist.timeslots.any { slot ->
+                    val date = slot.eventStartTime ?: ""
+                    date.startsWith(yearFilter.toString())
+                }
+                if (!hasEventInFilteredYear) return@flatMap emptyList()
+
+                database.artistDao().insert(
+                    ArtistEntity(
+                        artist.id, artist.name, artist.country, artist.description,
+                        artist.image, artist.slug, artist.youtubeEmbed,
+                        artistTags.joinToString(",")
+                    )
+                )
+
                 artist.timeslots.mapNotNull { slot ->
                     val date = slot.eventStartTime ?: ""
                     if (!date.startsWith(yearFilter.toString())) return@mapNotNull null

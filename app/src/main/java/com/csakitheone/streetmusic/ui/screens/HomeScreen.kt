@@ -236,7 +236,7 @@ fun HomeScreen() {
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(text = "Download data?", style = MaterialTheme.typography.titleMedium)
-                        Text("You are on a metered connection. Would you like to download the event data now or sync from another device?")
+                        Text("You are on a metered connection or Utcazene hasn't uploaded this years musicians yet. Would you like to download the event data now or sync from another device?")
                         Button(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {
@@ -260,14 +260,19 @@ fun HomeScreen() {
                                 painter = painterResource(R.drawable.ic_download),
                                 contentDescription = null,
                             )
-                            Text("Download using mobile data")
+                            Text("Retry / Download using mobile data")
                         }
-                        OutlinedButton(
+                        Button(
                             modifier = Modifier.fillMaxWidth(),
                             onClick = {
                                 backStack.add(Destination.DataSync)
                             },
                         ) {
+                            Icon(
+                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                painter = painterResource(R.drawable.ic_connect_without_contact),
+                                contentDescription = null,
+                            )
                             Text("Sync from another device")
                         }
                     }

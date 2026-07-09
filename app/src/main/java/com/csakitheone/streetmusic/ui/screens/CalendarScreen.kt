@@ -46,7 +46,7 @@ fun CalendarScreen() {
     val backStack = LocalNavBackStack.current
 
     val events by repository.events.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allStarredSlugs.collectAsState(initial = emptySet())
+    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
     val dates by repository.eventDates.collectAsState(initial = emptyList())
     var selectedDate by remember { mutableStateOf<String?>(null) }
     var showOnlyStarred by remember { mutableStateOf(false) }

@@ -170,6 +170,23 @@ fun SettingsScreen() {
                     ) {
                         Text("Remove data from device")
                     }
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                repository.deleteDatabase()
+                            }
+                            backStack.removeLastOrNull()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                    ) {
+                        Text("Remove all favorites")
+                    }
                 }
             }
         }

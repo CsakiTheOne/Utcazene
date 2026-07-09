@@ -1,15 +1,12 @@
 package com.csakitheone.streetmusic.ui.screens
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +35,7 @@ fun ArtistsScreen() {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val artists by repository.artists.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allStarredSlugs.collectAsState(initial = emptySet())
+    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
     var showOnlyStarred by remember { mutableStateOf(false) }
     var selectedTag by remember { mutableStateOf<String?>(null) }
     var selectedCountry by remember { mutableStateOf<String?>(null) }

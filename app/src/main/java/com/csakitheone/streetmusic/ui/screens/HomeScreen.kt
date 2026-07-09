@@ -1,16 +1,11 @@
 package com.csakitheone.streetmusic.ui.screens
 
-import android.Manifest
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,26 +23,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -597,7 +586,7 @@ fun ToggleNearbyFriendsCard(
 @Composable
 fun HomeSectionToday(repository: DataRepository) {
     val events by repository.events.collectAsState(initial = emptyList())
-    val allFavs by repository.allStarredSlugs.collectAsState(initial = emptySet())
+    val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
     val now = LocalDateTime.now()
     val today = LocalDate.now().toString()
@@ -638,7 +627,7 @@ fun HomeSectionToday(repository: DataRepository) {
 fun HomeSectionTomorrow(repository: DataRepository) {
     val events by repository.events.collectAsState(initial = emptyList())
     val tomorrow = LocalDate.now().plusDays(1).toString()
-    val allFavs by repository.allStarredSlugs.collectAsState(initial = emptySet())
+    val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
     val tomorrowStarred =
         events.filter { it.startTime.startsWith(tomorrow) && allFavs.contains("${it.artistSlug} at ${it.startTime}") }
@@ -658,7 +647,7 @@ fun HomeSectionTomorrow(repository: DataRepository) {
 @Composable
 fun HomeSectionThisYear(repository: DataRepository) {
     val artists by repository.artists.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allStarredSlugs.collectAsState(initial = emptySet())
+    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
 
     val favoriteArtists = artists.filter { allStarredSlugs.contains(it.slug) }
     val headliners = artists.filter { it.tags.contains("headliner") }

@@ -66,41 +66,47 @@ class DataRepository(
         return !connectivityManager.isActiveNetworkMetered || _showImagesOnMetered.value
     }
 
-    private val _favoriteSlugs =
+    private val _userFavorites =
         MutableStateFlow(prefs.getStringSet("fav_slugs", emptySet()) ?: emptySet())
-    val favoriteSlugs: StateFlow<Set<String>> = _favoriteSlugs.asStateFlow()
+    val userFavorites: StateFlow<Set<String>> = _userFavorites.asStateFlow()
 
     /**
      * User's favorite items + favorites from nearby devices
      */
-    val allStarredSlugs: Flow<Set<String>> = combine(
-        favoriteSlugs,
+    val allFavorites: Flow<Set<String>> = combine(
+        userFavorites,
         nearbyManager.friends.nearbyFavorites
     ) { local, nearby ->
         local + nearby.values.flatten()
     }
 
     fun setFavorite(slug: String, value: Boolean) {
-        val current = _favoriteSlugs.value.toMutableSet()
+        val current = _userFavorites.value.toMutableSet()
         if (value) current.add(slug) else current.remove(slug)
 
         prefs.edit { putStringSet("fav_slugs", current) }
-        _favoriteSlugs.value = current
+        _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
     }
 
     fun toggleFavorite(slug: String) {
-        val current = _favoriteSlugs.value.toMutableSet()
+        val current = _userFavorites.value.toMutableSet()
         if (current.contains(slug)) current.remove(slug) else current.add(slug)
 
         prefs.edit { putStringSet("fav_slugs", current) }
-        _favoriteSlugs.value = current
+        _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
+    }
+
+    fun clearFavorites() {
+        prefs.edit { putStringSet("fav_slugs", emptySet()) }
+        _userFavorites.value = emptySet()
+        nearbyManager.updateLocalFavorites(emptySet())
     }
 
     init {
         nearbyManager.setNearbyActive(_nearbyFeatures.value)
-        nearbyManager.updateLocalFavorites(_favoriteSlugs.value)
+        nearbyManager.updateLocalFavorites(_userFavorites.value)
         nearbyManager.updateLocalNickname(_nickname.value)
     }
 
@@ -112,7 +118,7 @@ class DataRepository(
     }
 
     val artists: Flow<List<Artist>> =
-        database.artistDao().getAll().combine(favoriteSlugs) { entities, favs ->
+        database.artistDao().getAll().combine(userFavorites) { entities, favs ->
             entities.map {
                 Artist(
                     it.id, it.name, it.country, it.description, it.image, it.slug,
@@ -123,7 +129,7 @@ class DataRepository(
         }
 
     val events: Flow<List<Event>> =
-        database.eventDao().getAll().combine(favoriteSlugs) { entities, favs ->
+        database.eventDao().getAll().combine(userFavorites) { entities, favs ->
             entities.map {
                 Event(
                     it.id, it.artistId, it.artistSlug, it.artistName,
@@ -138,7 +144,7 @@ class DataRepository(
     val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates()
 
     fun getArtist(slug: String): Flow<Artist?> =
-        database.artistDao().getBySlug(slug).combine(favoriteSlugs) { entity, favs ->
+        database.artistDao().getBySlug(slug).combine(userFavorites) { entity, favs ->
             entity?.let {
                 Artist(
                     it.id, it.name, it.country, it.description, it.image, it.slug,
@@ -149,7 +155,7 @@ class DataRepository(
         }
 
     fun getEvent(id: Int): Flow<Event?> =
-        database.eventDao().getById(id).combine(favoriteSlugs) { entity, favs ->
+        database.eventDao().getById(id).combine(userFavorites) { entity, favs ->
             entity?.let {
                 Event(
                     it.id, it.artistId, it.artistSlug, it.artistName,
@@ -160,7 +166,7 @@ class DataRepository(
         }
 
     fun getEventsByArtist(artistSlug: String): Flow<List<Event>> =
-        database.eventDao().getEventsByArtist(artistSlug).combine(favoriteSlugs) { entities, favs ->
+        database.eventDao().getEventsByArtist(artistSlug).combine(userFavorites) { entities, favs ->
             entities.map {
                 Event(
                     it.id, it.artistId, it.artistSlug, it.artistName,

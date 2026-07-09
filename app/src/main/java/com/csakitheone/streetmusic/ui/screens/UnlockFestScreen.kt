@@ -1,6 +1,5 @@
 package com.csakitheone.streetmusic.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,7 +51,7 @@ fun UnlockFestScreen() {
     val events = remember(selectedDay) {
         UnlockFestRepository.events.filter { it.day == selectedDay }.sortedBy { it.order }
     }
-    val favorites by repository.favoriteSlugs.collectAsState(emptySet())
+    val favorites by repository.userFavorites.collectAsState(emptySet())
 
     Scaffold(
         topBar = {

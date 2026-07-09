@@ -30,7 +30,7 @@ fun FavoritesIndicator(
     val context = LocalContext.current
     val connectedFriends by repository.nearbyManager.friends.connectedFriends.collectAsState()
 
-    val myFavorites = repository.favoriteSlugs.collectAsState(emptySet())
+    val myFavorites = repository.userFavorites.collectAsState(emptySet())
     val favoritedBy = connectedFriends.values.filter { it.favoriteSlugs.contains(slug) }
 
     val isStarred by remember(myFavorites) {

@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -122,6 +123,7 @@ fun EventDetailScreen(eventId: Int) {
                         )
                     }
                 }
+                HorizontalDivider()
             }
 
             Column(
@@ -133,15 +135,8 @@ fun EventDetailScreen(eventId: Int) {
                     Text(
                         text = artist?.name ?: event?.artistName ?: "",
                         style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
                     )
-                    artist?.country?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+                    artist?.country?.let { Text(it) }
                 }
 
                 // Event Details Card
@@ -150,15 +145,14 @@ fun EventDetailScreen(eventId: Int) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                modifier = Modifier.size(20.dp),
                                 painter = painterResource(R.drawable.shortcut_places),
                                 contentDescription = null,
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
                             Text(
                                 text = event?.place ?: "",
                                 style = MaterialTheme.typography.titleMedium
@@ -170,10 +164,8 @@ fun EventDetailScreen(eventId: Int) {
                                 Icon(
                                     painter = painterResource(R.drawable.shortcut_events),
                                     contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = MaterialTheme.colorScheme.primary
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(16.dp))
                                 val startTime = LocalDateTime.parse(e.startTime)
                                 val endTime = LocalDateTime.parse(e.endTime)
                                 val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d.")

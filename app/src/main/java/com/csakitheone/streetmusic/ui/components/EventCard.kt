@@ -50,13 +50,11 @@ fun EventCard(
                 )
                 FavoritesIndicator(
                     slug = "${event.artistSlug} at ${event.startTime}",
-                    isStarred = event.isStarred,
-                    onToggle = {
-                        repository.toggleFavorite("${event.artistSlug} at ${event.startTime}")
-                        if (!event.isStarred) {
+                    onToggled = {
+                        if (it) {
                             repository.setFavorite(event.artistSlug, true)
                         }
-                    }
+                    },
                 )
             }
             Row(

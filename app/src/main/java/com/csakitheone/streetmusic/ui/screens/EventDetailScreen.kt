@@ -36,11 +36,7 @@ fun EventDetailScreen(eventId: Int) {
                 actions = {
                     event?.let {
                         val favSlug = "${it.artistSlug} at ${it.startTime}"
-                        FavoritesIndicator(
-                            slug = favSlug,
-                            isStarred = it.isStarred,
-                            onToggle = { repository.toggleFavorite(favSlug) }
-                        )
+                        FavoritesIndicator(slug = favSlug)
                     }
                 }
             )

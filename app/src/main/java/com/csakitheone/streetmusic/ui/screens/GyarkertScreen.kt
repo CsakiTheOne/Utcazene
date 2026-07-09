@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,13 +27,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.GyarkertRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -124,28 +130,32 @@ fun GyarkertScreen() {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = event.name,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        val timeText = if (event.endTime != null) {
-                            "${event.startTime} - ${event.endTime}"
-                        } else {
-                            "${event.startTime}"
-                        }
-                        Text(
-                            text = timeText,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
-                        event.description?.let {
-                            Text(
-                                modifier = Modifier.padding(top = 8.dp),
-                                text = it,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
+                    ListItem(
+                        content = { Text(text = event.name) },
+                        supportingContent = {
+                            val timeText = if (event.endTime != null) {
+                                "${event.startTime} - ${event.endTime}"
+                            } else {
+                                "${event.startTime}"
+                            }
+                            Column {
+                                Text(text = timeText)
+                                event.description?.let {
+                                    Text(
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        text = it,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                }
+                            }
+                        },
+                        trailingContent = {
+                            FavoritesIndicator(slug = "gyarkert_pop_${event.name}")
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent,
+                        ),
+                    )
                 }
             }
 
@@ -179,7 +189,7 @@ fun GyarkertScreen() {
             item {
                 Text(
                     modifier = Modifier.padding(top = 16.dp),
-                    text = "Other events",
+                    text = "Later",
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -197,11 +207,18 @@ fun GyarkertScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { uriHandler.openUri(GyarkertRepository.day24facebookUrl) }
                 ) {
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = "July 24: Thievery Corporation",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = "July 24: Thievery Corporation",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        FavoritesIndicator(slug = "gyarkert_day24")
+                    }
                 }
             }
 
@@ -218,11 +235,18 @@ fun GyarkertScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { uriHandler.openUri(GyarkertRepository.day25facebookUrl) }
                 ) {
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = "July 25: DESH",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = "July 25: DESH",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        FavoritesIndicator(slug = "gyarkert_day25")
+                    }
                 }
             }
         }

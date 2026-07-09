@@ -75,13 +75,7 @@ fun ArtistCard(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    FavoritesIndicator(
-                        slug = artist.slug,
-                        isStarred = artist.isStarred,
-                        onToggle = {
-                            repository.toggleFavorite(artist.slug)
-                        }
-                    )
+                    FavoritesIndicator(slug = artist.slug)
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),

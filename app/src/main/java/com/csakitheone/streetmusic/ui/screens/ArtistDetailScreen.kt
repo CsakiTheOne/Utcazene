@@ -67,11 +67,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                 },
                 actions = {
                     artist?.let {
-                        FavoritesIndicator(
-                            slug = it.slug,
-                            isStarred = it.isStarred,
-                            onToggle = { repository.toggleFavorite(it.slug) }
-                        )
+                        FavoritesIndicator(slug = it.slug)
                     }
                 }
             )

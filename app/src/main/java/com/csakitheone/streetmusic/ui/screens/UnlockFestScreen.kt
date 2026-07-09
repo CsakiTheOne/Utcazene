@@ -22,24 +22,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.UnlockFestRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnlockFestScreen() {
+    val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val uriHandler = LocalUriHandler.current
 
@@ -49,6 +54,7 @@ fun UnlockFestScreen() {
     val events = remember(selectedDay) {
         UnlockFestRepository.events.filter { it.day == selectedDay }.sortedBy { it.order }
     }
+    val favorites by repository.favoriteSlugs.collectAsState(emptySet())
 
     Scaffold(
         topBar = {
@@ -134,12 +140,19 @@ fun UnlockFestScreen() {
                         event.url?.let { uriHandler.openUri(it) }
                     },
                 ) {
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = event.name,
-                        style = if (event.url != null) MaterialTheme.typography.titleMedium
-                        else MaterialTheme.typography.bodyMedium,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f).padding(16.dp),
+                            text = event.name,
+                            style = if (event.url != null) MaterialTheme.typography.titleMedium
+                            else MaterialTheme.typography.bodyMedium,
+                        )
+                        FavoritesIndicator(slug = "terem_${event.name}")
+                    }
                 }
             }
         }

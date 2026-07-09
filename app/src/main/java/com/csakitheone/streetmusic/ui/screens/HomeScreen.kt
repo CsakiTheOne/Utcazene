@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -98,19 +99,6 @@ fun HomeScreen() {
     val backStack = LocalNavBackStack.current
     val hasData by repository.hasData.collectAsState(initial = false)
     val nearbyFeatures by repository.nearbyFeatures.collectAsState()
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions.values.all { it }) {
-            repository.setNearbyFeatures(true)
-        } else {
-            Toast.makeText(context, "Permissions required for nearby features", Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
-
-    val nearbyPermissions = NearbyManager.REQUIRED_PERMISSIONS
 
     val appUpdateManager = remember { AppUpdateManagerFactory.create(context) }
     var updateInfo by remember {
@@ -279,6 +267,10 @@ fun HomeScreen() {
                         }
                     }
                 }
+
+                ToggleNearbyFriendsCard(
+                    modifier = Modifier.align(Alignment.End),
+                )
             } else {
                 Grid(
                     config = {
@@ -335,48 +327,9 @@ fun HomeScreen() {
                             )
                         }
                     }
-                    Card(
+                    ToggleNearbyFriendsCard(
                         modifier = Modifier.fillMaxSize(),
-                        shape = MaterialTheme.shapes.large,
-                        onClick = {
-                            if (!nearbyFeatures) {
-                                permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                            } else {
-                                repository.setNearbyFeatures(false)
-                            }
-                        },
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Switch(
-                                modifier = Modifier
-                                    .scale(1.5f)
-                                    .alpha(.6f),
-                                checked = nearbyFeatures,
-                                onCheckedChange = { checked ->
-                                    if (checked) {
-                                        permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                                    } else {
-                                        repository.setNearbyFeatures(false)
-                                    }
-                                },
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Icon(
-                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                                    painter = painterResource(R.drawable.ic_connect_without_contact),
-                                    contentDescription = null
-                                )
-                                Text("The gang")
-                            }
-                        }
-                    }
+                    )
                 }
             }
 
@@ -574,6 +527,69 @@ fun HomeScreen() {
             }
 
             Spacer(modifier = Modifier.size(padding.calculateBottomPadding()))
+        }
+    }
+}
+
+@Composable
+fun ToggleNearbyFriendsCard(
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val repository = LocalRepository.current
+
+    val nearbyFeatures by repository.nearbyFeatures.collectAsState()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.all { it }) {
+            repository.setNearbyFeatures(true)
+        } else {
+            Toast.makeText(context, "Permissions required for nearby features", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        onClick = {
+            if (!nearbyFeatures) {
+                permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
+            } else {
+                repository.setNearbyFeatures(false)
+            }
+        },
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+        ) {
+            Switch(
+                modifier = Modifier
+                    .scale(1.5f)
+                    .alpha(.6f),
+                checked = nearbyFeatures,
+                onCheckedChange = { checked ->
+                    if (checked) {
+                        permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
+                    } else {
+                        repository.setNearbyFeatures(false)
+                    }
+                },
+            )
+            Row(
+                modifier = Modifier.height(64.dp).padding(16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                    painter = painterResource(R.drawable.ic_connect_without_contact),
+                    contentDescription = null
+                )
+                Text("The gang")
+            }
         }
     }
 }

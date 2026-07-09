@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.screens
 import android.content.Intent
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -111,16 +112,19 @@ fun ArtistDetailScreen(artistSlug: String) {
                         .padding(16.dp)
                         .fillMaxWidth(),
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(16.dp),
-                    )
-                    AsyncImage(
+                    Box(
                         modifier = Modifier.fillMaxWidth(),
-                        model = artist?.image,
-                        contentDescription = null,
-                    )
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(16.dp),
+                        )
+                        AsyncImage(
+                            modifier = Modifier.fillMaxWidth(),
+                            model = artist?.image,
+                            contentDescription = null,
+                        )
+                    }
                 }
                 HorizontalDivider()
             }

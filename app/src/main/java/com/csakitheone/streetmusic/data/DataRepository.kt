@@ -225,6 +225,8 @@ class DataRepository(
         if (apiArtists.isNotEmpty()) {
             database.artistDao().deleteAll()
 
+            Log.d("DataRepository", "Processing ${apiArtists.size} artists...")
+
             val events = apiArtists.flatMap { artist ->
                 val artistTags = mutableListOf<String>()
                 if (artist.headliner) artistTags.add("headliner")
@@ -233,8 +235,11 @@ class DataRepository(
                 val hasEventInFilteredYear = artist.timeslots.any { slot ->
                     val date = slot.eventStartTime ?: ""
                     date.startsWith(yearFilter.toString())
+                } || artist.timeslots.isEmpty()
+                if (!hasEventInFilteredYear) {
+                    Log.d("DataRepository", "Skipping artist: ${artist.name}")
+                    return@flatMap emptyList()
                 }
-                if (!hasEventInFilteredYear) return@flatMap emptyList()
 
                 database.artistDao().insert(
                     ArtistEntity(
@@ -243,6 +248,7 @@ class DataRepository(
                         artistTags.joinToString(",")
                     )
                 )
+                Log.d("DataRepository", "Added artist: ${artist.name}")
 
                 artist.timeslots.mapNotNull { slot ->
                     val date = slot.eventStartTime ?: ""

@@ -32,6 +32,7 @@ import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
 import com.csakitheone.streetmusic.ui.screens.CalendarScreen
 import com.csakitheone.streetmusic.ui.screens.DataSyncScreen
 import com.csakitheone.streetmusic.ui.screens.EventDetailScreen
+import com.csakitheone.streetmusic.ui.screens.GyarkertScreen
 import com.csakitheone.streetmusic.ui.screens.HomeScreen
 import com.csakitheone.streetmusic.ui.screens.MapScreen
 import com.csakitheone.streetmusic.ui.screens.PlacesScreen
@@ -129,6 +130,10 @@ class MainActivity : ComponentActivity() {
 
                                     is Destination.UnlockFest -> NavEntry(key) {
                                         UnlockFestScreen()
+                                    }
+
+                                    Destination.Gyarkert -> NavEntry(key) {
+                                        GyarkertScreen()
                                     }
                                 }
                             }

@@ -48,6 +48,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.carousel.CarouselDefaults
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -107,7 +110,11 @@ fun HomeScreen() {
     val nearbyPermissions = NearbyManager.REQUIRED_PERMISSIONS
 
     val appUpdateManager = remember { AppUpdateManagerFactory.create(context) }
-    var updateInfo by remember { mutableStateOf<com.google.android.play.core.appupdate.AppUpdateInfo?>(null) }
+    var updateInfo by remember {
+        mutableStateOf<com.google.android.play.core.appupdate.AppUpdateInfo?>(
+            null
+        )
+    }
     val updateLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -494,9 +501,28 @@ fun HomeScreen() {
                 )
             }
 
+            OutlinedCard(
+                onClick = {
+                    backStack.add(Destination.Gyarkert)
+                },
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Gyárkert", style = MaterialTheme.typography.headlineSmall)
+                    Text(text = "Pont Ott Parti and more", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+
             Column {
                 Text(text = "UZ App was made by Csáki", style = MaterialTheme.typography.titleLarge)
-                Text(text = "With excitement since 2023", style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = "With excitement since 2023",
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
 
             TextButton(
@@ -596,28 +622,40 @@ fun HomeSectionThisYear(repository: DataRepository) {
 
     if (favoriteArtists.isNotEmpty()) {
         Text(text = "Favorite artists", style = MaterialTheme.typography.titleMedium)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(favoriteArtists) { artist ->
-                ArtistCard(modifier = Modifier.width(280.dp), artist = artist)
-            }
+        HorizontalMultiBrowseCarousel(
+            state = rememberCarouselState(initialItem = 0) { favoriteArtists.size },
+            preferredItemWidth = 280.dp,
+            itemSpacing = 8.dp,
+            flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
+        ) { index ->
+            val artist = favoriteArtists[index]
+            ArtistCard(artist = artist)
         }
     }
 
     if (headliners.isNotEmpty()) {
         Text(text = "From around the world", style = MaterialTheme.typography.titleMedium)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(headliners) { artist ->
-                ArtistCard(modifier = Modifier.width(280.dp), artist = artist)
-            }
+        HorizontalMultiBrowseCarousel(
+            state = rememberCarouselState(initialItem = 0) { headliners.size },
+            preferredItemWidth = 280.dp,
+            itemSpacing = 8.dp,
+            flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
+        ) { index ->
+            val artist = headliners[index]
+            ArtistCard(artist = artist)
         }
     }
 
     if (competitors.isNotEmpty()) {
         Text(text = "This year's competitors", style = MaterialTheme.typography.titleMedium)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(competitors) { artist ->
-                ArtistCard(modifier = Modifier.width(280.dp), artist = artist)
-            }
+        HorizontalMultiBrowseCarousel(
+            state = rememberCarouselState(initialItem = 0) { competitors.size },
+            preferredItemWidth = 280.dp,
+            itemSpacing = 8.dp,
+            flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
+        ) { index ->
+            val artist = competitors[index]
+            ArtistCard(artist = artist)
         }
     }
 }

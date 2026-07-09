@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
@@ -101,14 +102,48 @@ fun DataSyncScreen() {
                     }
                 }
             )
-        }
+        },
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = isDiscovering,
+                    onClick = {
+                        isDiscovering = true
+                        isAdvertising = false
+                        repository.nearbyManager.dataSync.startDiscovery()
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_connect_without_contact),
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text("Receive data") },
+                )
+                NavigationBarItem(
+                    selected = isAdvertising,
+                    onClick = {
+                        isAdvertising = true
+                        isDiscovering = false
+                        repository.nearbyManager.dataSync.startAdvertising(repository.nickname.value)
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_connect_without_contact),
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text("Send data") },
+                )
+            }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card {
                 Column(
@@ -116,38 +151,13 @@ fun DataSyncScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Your Local Data", style = MaterialTheme.typography.titleMedium)
-                    Text("Artists: ${artists.size}")
-                    Text("Events: ${events.size}")
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                        isDiscovering = true
-                        isAdvertising = false
-                        repository.nearbyManager.dataSync.startDiscovery()
-                    },
-                    enabled = !isDiscovering
-                ) {
-                    Text("Receive Data")
-                }
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        permissionLauncher.launch(nearbyPermissions.toTypedArray())
-                        isAdvertising = true
-                        isDiscovering = false
-                        repository.nearbyManager.dataSync.startAdvertising(repository.nickname.value)
-                    },
-                    enabled = !isAdvertising
-                ) {
-                    Text("Send Data")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(modifier = Modifier.weight(1f), text = "Artists: ${artists.size}")
+                        Text(modifier = Modifier.weight(1f), text = "Events: ${events.size}")
+                    }
                 }
             }
 
@@ -190,6 +200,7 @@ fun DataSyncScreen() {
                         }
                     }
                 }
+                return@Scaffold
             }
 
             if (isAdvertising) {
@@ -234,7 +245,15 @@ fun DataSyncScreen() {
                         }
                     }
                 }
+                return@Column
             }
+
+            Text(
+                modifier = Modifier.padding(24.dp),
+                text = "Select an option below to start syncing data with nearby devices.",
+                style = MaterialTheme.typography.labelLarge,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }

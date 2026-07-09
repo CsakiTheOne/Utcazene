@@ -32,6 +32,7 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.EventCard
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -127,7 +128,10 @@ fun CalendarScreen() {
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
+                actions = {
+                    NearbyConnectionsDisplay()
+                },
             )
         },
         bottomBar = {

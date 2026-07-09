@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -77,6 +78,7 @@ import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.ArtistCard
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
@@ -94,7 +96,6 @@ fun HomeScreen() {
     val backStack = LocalNavBackStack.current
     val hasData by repository.hasData.collectAsState(initial = false)
     val nearbyFeatures by repository.nearbyFeatures.collectAsState()
-    val connectedFriends by repository.nearbyManager.friends.connectedFriends.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -144,10 +145,14 @@ fun HomeScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-                .padding(padding),
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Spacer(modifier = Modifier.size(padding.calculateTopPadding()))
+
             Box(
                 contentAlignment = Alignment.TopEnd,
             ) {
@@ -372,50 +377,16 @@ fun HomeScreen() {
             AnimatedVisibility(nearbyFeatures) {
                 Card {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.padding(16.dp).weight(1f),
                             text = "Nearby friends",
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        if (connectedFriends.isEmpty()) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .alpha(.5f),
-                                strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth / 2,
-                            )
-                            Text(
-                                text = "Waiting for others...",
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        } else {
-                            connectedFriends.values.forEach { payload ->
-                                val name = payload.nickname
-                                Box(
-                                    modifier = Modifier
-                                        .padding(2.dp)
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .clickable {
-                                            Toast.makeText(context, name, Toast.LENGTH_SHORT).show()
-                                        },
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Text(
-                                        text = name.firstOrNull()?.toString() ?: "?",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                    )
-                                }
-                            }
-                        }
+                        NearbyConnectionsDisplay()
                     }
                 }
             }
@@ -513,7 +484,10 @@ fun HomeScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = "Gyárkert", style = MaterialTheme.typography.headlineSmall)
-                    Text(text = "Pont Ott Parti and more", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = "Pont Ott Parti and more",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
 
@@ -542,6 +516,8 @@ fun HomeScreen() {
                 )
                 Text("@csakitheone")
             }
+
+            Spacer(modifier = Modifier.size(padding.calculateBottomPadding()))
         }
     }
 }

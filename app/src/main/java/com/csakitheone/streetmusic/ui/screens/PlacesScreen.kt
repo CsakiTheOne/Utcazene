@@ -39,6 +39,7 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.EventCard
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -57,15 +58,21 @@ fun PlacesScreen() {
 
     val today = remember { LocalDate.now().toString() }
 
-    val eventsByPlace by remember(events, selectedDate, showOnlyStarred, showOnlyUpcoming, allStarredSlugs) {
+    val eventsByPlace by remember(
+        events,
+        selectedDate,
+        showOnlyStarred,
+        showOnlyUpcoming,
+        allStarredSlugs
+    ) {
         derivedStateOf {
             val now = LocalDateTime.now()
             events
                 .filter { it.startTime.startsWith(selectedDate ?: "") }
-                .filter { 
+                .filter {
                     if (showOnlyStarred) {
                         allStarredSlugs.contains("${it.artistSlug} at ${it.startTime}")
-                    } else true 
+                    } else true
                 }
                 .filter {
                     if (showOnlyUpcoming) {
@@ -107,7 +114,10 @@ fun PlacesScreen() {
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
+                actions = {
+                    NearbyConnectionsDisplay()
+                },
             )
         },
         bottomBar = {

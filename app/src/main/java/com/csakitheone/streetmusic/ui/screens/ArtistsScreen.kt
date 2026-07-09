@@ -31,6 +31,7 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.ArtistCard
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 
 @Composable
 fun ArtistsScreen() {
@@ -80,7 +81,10 @@ fun ArtistsScreen() {
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
+                actions = {
+                    NearbyConnectionsDisplay()
+                },
             )
         },
     ) { paddingValues ->

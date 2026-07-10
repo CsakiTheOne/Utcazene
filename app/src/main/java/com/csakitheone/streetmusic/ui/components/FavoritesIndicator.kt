@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 
 @Composable
 fun FavoritesIndicator(
@@ -26,8 +27,9 @@ fun FavoritesIndicator(
     slug: String,
     onToggled: (Boolean) -> Unit = {},
 ) {
-    val repository = LocalRepository.current
     val context = LocalContext.current
+    val sharedTransitionContext = LocalSharedTransitionContext.current
+    val repository = LocalRepository.current
     val connectedFriends by repository.nearbyManager.friends.connectedFriends.collectAsState()
 
     val myFavorites = repository.userFavorites.collectAsState(emptySet())
@@ -37,32 +39,38 @@ fun FavoritesIndicator(
         derivedStateOf { myFavorites.value.contains(slug) }
     }
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        favoritedBy.forEach { payload ->
-            Icon(
-                modifier = Modifier
-                    .size(16.dp)
-                    .clickable {
-                        Toast.makeText(context, payload.nickname, Toast.LENGTH_SHORT).show()
-                    },
-                painter = painterResource(R.drawable.ic_star),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            )
-        }
+    with(sharedTransitionContext.sharedTransitionScope) {
+        Row(
+            modifier = modifier
+                .sharedElement(
+                    sharedTransitionContext.sharedTransitionScope.rememberSharedContentState("favorites-$slug"),
+                    sharedTransitionContext.animatedVisibilityScope,
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            favoritedBy.forEach { payload ->
+                Icon(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .clickable {
+                            Toast.makeText(context, payload.nickname, Toast.LENGTH_SHORT).show()
+                        },
+                    painter = painterResource(R.drawable.ic_star),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                )
+            }
 
-        IconButton(onClick = {
-            repository.toggleFavorite(slug)
-            onToggled(!isStarred)
-        }) {
-            Icon(
-                painter = painterResource(if (isStarred) R.drawable.ic_star else R.drawable.ic_star_outline),
-                contentDescription = if (isStarred) "Unstar" else "Star",
-                tint = if (isStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-            )
+            IconButton(onClick = {
+                repository.toggleFavorite(slug)
+                onToggled(!isStarred)
+            }) {
+                Icon(
+                    painter = painterResource(if (isStarred) R.drawable.ic_star else R.drawable.ic_star_outline),
+                    contentDescription = if (isStarred) "Unstar" else "Star",
+                    tint = if (isStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
 }

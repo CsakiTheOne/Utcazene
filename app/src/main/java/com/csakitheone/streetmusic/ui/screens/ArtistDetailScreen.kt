@@ -57,6 +57,7 @@ import coil3.compose.AsyncImage
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
@@ -65,6 +66,7 @@ import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
 @Composable
 fun ArtistDetailScreen(artistSlug: String) {
     val context = LocalContext.current
+    val sharedTransition = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val artist by repository.getArtist(artistSlug).collectAsState(initial = null)
@@ -80,20 +82,28 @@ fun ArtistDetailScreen(artistSlug: String) {
         topBar = {
             Box {
                 if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
-                    AsyncImage(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .alpha(1f - scrollBehavior.state.collapsedFraction),
-                        model = artist?.image,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
+                    with(sharedTransition.sharedTransitionScope) {
+                        AsyncImage(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .alpha(1f - scrollBehavior.state.collapsedFraction)
+                                .sharedElement(
+                                    sharedTransition.sharedTransitionScope.rememberSharedContentState(
+                                        "image-$artistSlug"
+                                    ),
+                                    sharedTransition.animatedVisibilityScope,
+                                ),
+                            model = artist?.image,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
                 LargeTopAppBar(
                     title = {
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .5f),
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .75f),
                             ),
                         ) {
                             Text(

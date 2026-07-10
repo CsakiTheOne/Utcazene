@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,12 +27,14 @@ import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 
 @Composable
 fun ArtistCard(
     modifier: Modifier = Modifier,
     artist: Artist,
 ) {
+    val sharedTransition = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -45,15 +50,20 @@ fun ArtistCard(
                 .height(IntrinsicSize.Min)
         ) {
             if (repository.shouldShowImage()) {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(156.dp)
-                        .alpha(0.5f),
-                    model = artist.image,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                )
+                with(sharedTransition.sharedTransitionScope) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16 / 9f)
+                            .sharedElement(
+                                sharedTransition.sharedTransitionScope.rememberSharedContentState("image-${artist.slug}"),
+                                sharedTransition.animatedVisibilityScope,
+                            ),
+                        model = artist.image,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
             Column(
                 modifier = Modifier
@@ -66,31 +76,42 @@ fun ArtistCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .weight(1f),
-                        text = artist.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    FavoritesIndicator(slug = artist.slug)
+                    Box(
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Card {
+                            Text(
+                                modifier = Modifier.padding(8.dp),
+                                text = artist.name,
+                                style = MaterialTheme.typography.titleSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                    Card {
+                        FavoritesIndicator(slug = artist.slug)
+                    }
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = artist.tags.joinToString(),
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = artist.country,
-                    )
+                    Card {
+                        Text(
+                            modifier = Modifier.padding(4.dp),
+                            text = artist.tags.joinToString(),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                    Card {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = artist.country,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
                 }
             }
         }

@@ -9,7 +9,7 @@ import java.time.LocalTime
 class ImuRepository {
     companion object {
 
-        val imuFacebookUrl = "https://www.facebook.com/imuveszprem/"
+        val imuFacebookUrl = "https://www.facebook.com/events/1016707544548354"
 
         val events = listOf(
             // 07.22 - Szerda

@@ -178,8 +178,8 @@ fun HomeScreen() {
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Text(
-                                text = "A new version of UZ App is available. Update now for the latest features.",
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = "A new version of UZ App is available. Download it to stay up to date with the events.",
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                         Button(

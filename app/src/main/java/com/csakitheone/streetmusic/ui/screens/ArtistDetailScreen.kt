@@ -76,7 +76,9 @@ fun ArtistDetailScreen(artistSlug: String) {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(if (events.isEmpty()) 1 else 0) }
+    var selectedTabIndex by rememberSaveable(events) {
+        mutableIntStateOf(if (events.isEmpty()) 1 else 0)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -156,10 +158,10 @@ fun ArtistDetailScreen(artistSlug: String) {
                     icon = {
                         Icon(
                             painterResource(R.drawable.shortcut_events),
-                            contentDescription = "Events"
+                            contentDescription = "Performances"
                         )
                     },
-                    label = { Text("Events") }
+                    label = { Text("Performances") }
                 )
                 NavigationBarItem(
                     selected = selectedTabIndex == 1,

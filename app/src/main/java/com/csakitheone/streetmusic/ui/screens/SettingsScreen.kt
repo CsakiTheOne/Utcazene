@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
@@ -38,6 +40,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen() {
+    val context = LocalContext.current
     val repository = LocalRepository.current
     val coroutineScope = rememberCoroutineScope()
     val backStack = LocalNavBackStack.current
@@ -191,9 +194,13 @@ fun SettingsScreen() {
                         enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
                         onClick = {
                             coroutineScope.launch(Dispatchers.IO) {
-                                repository.deleteDatabase()
+                                repository.clearFavorites()
                             }
-                            backStack.removeLastOrNull()
+                            Toast.makeText(
+                                context,
+                                "All favorites removed",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,

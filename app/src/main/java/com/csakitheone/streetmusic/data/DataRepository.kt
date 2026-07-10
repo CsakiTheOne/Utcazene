@@ -125,7 +125,7 @@ class DataRepository(
                     it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
                     isStarred = favs.contains(it.slug)
                 )
-            }
+            }.sortedBy { it.name }
         }
 
     val events: Flow<List<Event>> =

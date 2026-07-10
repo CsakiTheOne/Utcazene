@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,8 +19,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,7 +36,12 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.ImuRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
+import com.csakitheone.streetmusic.ui.components.NowIndicator
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,8 +52,28 @@ fun ImuScreen() {
     val days = ImuRepository.eventDays
     var selectedDay by rememberSaveable { mutableIntStateOf(days.firstOrNull() ?: 0) }
 
+    var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(30.seconds)
+            currentTime = LocalDateTime.now()
+        }
+    }
+
     val events = remember(selectedDay) {
         ImuRepository.events.filter { it.day == selectedDay }.sortedBy { it.time }
+    }
+
+    val todayDay = remember { currentTime.dayOfMonth }
+
+    val indicatorIndex by remember(events, selectedDay, currentTime) {
+        derivedStateOf {
+            if (selectedDay != todayDay) -1
+            else {
+                val nowTime = currentTime.toLocalTime()
+                events.indexOfFirst { it.time.isAfter(nowTime) }
+            }
+        }
     }
 
     Scaffold(
@@ -98,7 +126,15 @@ fun ImuScreen() {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(events) { event ->
+            itemsIndexed(events) { index, event ->
+                if (index == indicatorIndex) {
+                    NowIndicator(
+                        time = currentTime.toLocalTime(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -119,6 +155,19 @@ fun ImuScreen() {
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         FavoritesIndicator(slug = "imu_${event.name}")
+                    }
+                }
+            }
+            if (indicatorIndex == -1 && selectedDay == todayDay && events.isNotEmpty()) {
+                val lastEventTime = events.last().time
+                if (currentTime.toLocalTime().isAfter(lastEventTime)) {
+                    item {
+                        NowIndicator(
+                            time = currentTime.toLocalTime(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        )
                     }
                 }
             }

@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,8 +44,8 @@ fun DataSyncScreen() {
     val incomingData by repository.nearbyManager.dataSync.incomingData.collectAsState()
     val nearbyError by repository.nearbyManager.error.collectAsState()
 
-    var isDiscovering by remember { mutableStateOf(false) }
-    var isAdvertising by remember { mutableStateOf(false) }
+    var isDiscovering by rememberSaveable { mutableStateOf(false) }
+    var isAdvertising by rememberSaveable { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()

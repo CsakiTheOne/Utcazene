@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.room.Room
 import com.csakitheone.streetmusic.data.DataRepository
@@ -94,6 +95,9 @@ class MainActivity : ComponentActivity() {
                                     finish()
                                 }
                             },
+                            entryDecorators = listOf(
+                                rememberSaveableStateHolderNavEntryDecorator(),
+                            ),
                             entryProvider = { key ->
                                 when (key) {
                                     Destination.Home -> NavEntry(key) {

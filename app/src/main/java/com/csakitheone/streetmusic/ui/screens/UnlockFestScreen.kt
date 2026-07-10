@@ -25,6 +25,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,17 +42,15 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UnlockFestScreen() {
-    val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val uriHandler = LocalUriHandler.current
 
     val days = UnlockFestRepository.eventDays
-    var selectedDay by remember { mutableIntStateOf(days.firstOrNull() ?: 0) }
+    var selectedDay by rememberSaveable { mutableIntStateOf(days.firstOrNull() ?: 0) }
 
     val events = remember(selectedDay) {
         UnlockFestRepository.events.filter { it.day == selectedDay }.sortedBy { it.order }
     }
-    val favorites by repository.userFavorites.collectAsState(emptySet())
 
     Scaffold(
         topBar = {

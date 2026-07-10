@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -48,9 +49,9 @@ fun CalendarScreen() {
     val events by repository.events.collectAsState(initial = emptyList())
     val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
     val dates by repository.eventDates.collectAsState(initial = emptyList())
-    var selectedDate by remember { mutableStateOf<String?>(null) }
-    var showOnlyStarred by remember { mutableStateOf(false) }
-    var showOnlyUpcoming by remember { mutableStateOf(false) }
+    var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
+    var showOnlyStarred by rememberSaveable { mutableStateOf(false) }
+    var showOnlyUpcoming by rememberSaveable { mutableStateOf(false) }
 
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {

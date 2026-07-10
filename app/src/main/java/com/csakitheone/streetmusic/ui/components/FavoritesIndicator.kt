@@ -28,7 +28,6 @@ fun FavoritesIndicator(
     onToggled: (Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
-    val sharedTransitionContext = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val connectedFriends by repository.nearbyManager.friends.connectedFriends.collectAsState()
 
@@ -39,38 +38,32 @@ fun FavoritesIndicator(
         derivedStateOf { myFavorites.value.contains(slug) }
     }
 
-    with(sharedTransitionContext.sharedTransitionScope) {
-        Row(
-            modifier = modifier
-                .sharedElement(
-                    sharedTransitionContext.sharedTransitionScope.rememberSharedContentState("favorites-$slug"),
-                    sharedTransitionContext.animatedVisibilityScope,
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            favoritedBy.forEach { payload ->
-                Icon(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .clickable {
-                            Toast.makeText(context, payload.nickname, Toast.LENGTH_SHORT).show()
-                        },
-                    painter = painterResource(R.drawable.ic_star),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-            }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        favoritedBy.forEach { payload ->
+            Icon(
+                modifier = Modifier
+                    .size(16.dp)
+                    .clickable {
+                        Toast.makeText(context, payload.nickname, Toast.LENGTH_SHORT).show()
+                    },
+                painter = painterResource(R.drawable.ic_star),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            )
+        }
 
-            IconButton(onClick = {
-                repository.toggleFavorite(slug)
-                onToggled(!isStarred)
-            }) {
-                Icon(
-                    painter = painterResource(if (isStarred) R.drawable.ic_star else R.drawable.ic_star_outline),
-                    contentDescription = if (isStarred) "Unstar" else "Star",
-                    tint = if (isStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                )
-            }
+        IconButton(onClick = {
+            repository.toggleFavorite(slug)
+            onToggled(!isStarred)
+        }) {
+            Icon(
+                painter = painterResource(if (isStarred) R.drawable.ic_star else R.drawable.ic_star_outline),
+                contentDescription = if (isStarred) "Unstar" else "Star",
+                tint = if (isStarred) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+            )
         }
     }
 }

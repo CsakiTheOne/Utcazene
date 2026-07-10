@@ -63,7 +63,7 @@ fun ArtistsScreen() {
                 val matchesTag = selectedTag?.let { artist.tags.contains(it) } ?: true
                 val matchesCountry = selectedCountry?.let { artist.country == it } ?: true
                 matchesStarred && matchesTag && matchesCountry
-            }
+            }.sortedBy { it.name }
         }
     }
 

@@ -2,6 +2,8 @@ package com.csakitheone.streetmusic.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,19 +17,25 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -58,23 +69,70 @@ fun ArtistDetailScreen(artistSlug: String) {
     val artist by repository.getArtist(artistSlug).collectAsState(initial = null)
     val events by repository.getEventsByArtist(artistSlug).collectAsState(initial = emptyList())
 
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+
     var selectedTabIndex by remember { mutableIntStateOf(if (events.isEmpty()) 1 else 0) }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                title = { Text(artist?.name ?: "Artist Details") },
-                navigationIcon = {
-                    IconButton(onClick = { backStack.removeLastOrNull() }) {
-                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    artist?.let {
-                        FavoritesIndicator(slug = it.slug)
-                    }
+            Box {
+                if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .alpha(1f - scrollBehavior.state.collapsedFraction),
+                        model = artist?.image,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                    )
                 }
-            )
+                LargeTopAppBar(
+                    title = {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .5f),
+                            ),
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(4.dp),
+                                text = artist?.name ?: "Artist Details",
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        FilledIconButton(
+                            onClick = { backStack.removeLastOrNull() },
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                            )
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    actions = {
+                        artist?.let {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surface,
+                                ),
+                            ) {
+                                FavoritesIndicator(slug = it.slug)
+                            }
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = .5f),
+                    ),
+                )
+            }
         },
         bottomBar = {
             NavigationBar {
@@ -109,40 +167,6 @@ fun ArtistDetailScreen(artistSlug: String) {
                 .padding(padding)
                 .verticalScroll(rememberScrollState()),
         ) {
-            if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
-                Card(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(16.dp),
-                        )
-                        AsyncImage(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 256.dp)
-                                .clickable {
-                                    context.startActivity(
-                                        Intent(
-                                            Intent.ACTION_VIEW,
-                                            artist?.image?.toUri()
-                                        )
-                                    )
-                                },
-                            model = artist?.image,
-                            contentDescription = null,
-                            contentScale = ContentScale.FillWidth,
-                        )
-                    }
-                }
-                HorizontalDivider()
-            }
-
             Column(
                 modifier = Modifier
                     .padding(16.dp),
@@ -160,6 +184,36 @@ fun ArtistDetailScreen(artistSlug: String) {
                     }
 
                     1 -> {
+                        artist?.let {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_map),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = it.country,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                it.tags.forEach { tag ->
+                                    SuggestionChip(
+                                        onClick = { },
+                                        label = { Text(tag) }
+                                    )
+                                }
+                            }
+                        }
+
                         if (!artist?.youtubeEmbed.isNullOrBlank()) {
                             if (repository.shouldShowImage()) {
                                 YouTubeEmbed(videoId = artist!!.youtubeEmbed!!)

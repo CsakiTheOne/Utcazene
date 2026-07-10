@@ -41,6 +41,7 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import kotlin.collections.sortedBy
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,7 +62,8 @@ fun ImuScreen() {
     }
 
     val events = remember(selectedDay) {
-        ImuRepository.events.filter { it.day == selectedDay }.sortedBy { it.time }
+        ImuRepository.events.filter { it.day == selectedDay }
+            .sortedBy { if (it.time.hour >= 12) it.time.toSecondOfDay() else it.time.toSecondOfDay() + 86400 }
     }
 
     val todayDay = remember { currentTime.dayOfMonth }

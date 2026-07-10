@@ -15,3 +15,9 @@ data class PontOttPartiEvent(
     val endTime: LocalTime? = null,
     val description: String? = null,
 )
+
+data class ImuEvent(
+    val name: String,
+    val day: Int,
+    val time: LocalTime,
+)

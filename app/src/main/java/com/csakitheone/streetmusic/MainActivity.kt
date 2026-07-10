@@ -35,6 +35,7 @@ import com.csakitheone.streetmusic.ui.screens.DataSyncScreen
 import com.csakitheone.streetmusic.ui.screens.EventDetailScreen
 import com.csakitheone.streetmusic.ui.screens.GyarkertScreen
 import com.csakitheone.streetmusic.ui.screens.HomeScreen
+import com.csakitheone.streetmusic.ui.screens.ImuScreen
 import com.csakitheone.streetmusic.ui.screens.MapScreen
 import com.csakitheone.streetmusic.ui.screens.PlacesScreen
 import com.csakitheone.streetmusic.ui.screens.SettingsScreen
@@ -138,6 +139,10 @@ class MainActivity : ComponentActivity() {
 
                                     Destination.Gyarkert -> NavEntry(key) {
                                         GyarkertScreen()
+                                    }
+
+                                    Destination.Imu -> NavEntry(key) {
+                                        ImuScreen()
                                     }
                                 }
                             }

@@ -413,12 +413,7 @@ fun HomeScreen() {
 
             OutlinedCard(
                 onClick = {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            ImuRepository.imuFacebookUrl.toUri()
-                        )
-                    )
+                    backStack.add(Destination.Imu)
                 },
             ) {
                 ListItem(
@@ -430,7 +425,7 @@ fun HomeScreen() {
                         )
                     },
                     content = { Text("Íródeák Művészeti Udvar") },
-                    supportingContent = { Text("More info soon...") },
+                    supportingContent = { Text("Full schedule") },
                 )
             }
 

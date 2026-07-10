@@ -47,6 +47,7 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,11 +65,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.DataRepository
-import com.csakitheone.streetmusic.data.ImuRepository
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.data.CombinedRepository
 import com.csakitheone.streetmusic.ui.components.ArtistCard
+import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
@@ -76,9 +78,11 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalGridApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -597,18 +601,30 @@ fun HomeSectionToday(repository: DataRepository) {
     val events by repository.events.collectAsState(initial = emptyList())
     val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
-    val now = LocalDateTime.now()
-    val today = LocalDate.now().toString()
-
-    val todayEvents = events.filter { it.startTime.startsWith(today) }
-    val upcomingStarred = todayEvents.filter {
-        allFavs.contains("${it.artistSlug} at ${it.startTime}") && LocalDateTime.parse(it.startTime)
-            .isAfter(now)
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(30.seconds)
+            now = LocalDateTime.now()
+        }
     }
-        .sortedBy { it.startTime }
-    val nowPlaying = todayEvents.filter {
-        LocalDateTime.parse(it.startTime).isBefore(now) && LocalDateTime.parse(it.endTime)
-            .isAfter(now)
+
+    val upcomingStarred by remember(now, events, allFavs) {
+        derivedStateOf {
+            val todayDay = now.dayOfMonth
+            CombinedRepository.getCombinedEventsForDay(todayDay, events)
+                .filter { allFavs.contains(it.slug) && it.startTime.isAfter(now.toLocalTime()) }
+        }
+    }
+    val nowPlaying by remember(now) {
+        derivedStateOf {
+            val today = now.toLocalDate().toString()
+            events.filter { it.startTime.startsWith(today) }
+                .filter {
+                    LocalDateTime.parse(it.startTime).isBefore(now) && LocalDateTime.parse(it.endTime)
+                        .isAfter(now)
+                }
+        }
     }
 
     if (upcomingStarred.isEmpty() && nowPlaying.isEmpty()) return
@@ -618,7 +634,7 @@ fun HomeSectionToday(repository: DataRepository) {
     if (upcomingStarred.isNotEmpty()) {
         Text(text = "Today's plan", style = MaterialTheme.typography.titleMedium)
         upcomingStarred.forEach { event ->
-            EventCard(event = event)
+            CombinedDisplay(data = event, slug = event.slug)
         }
     }
 
@@ -635,12 +651,15 @@ fun HomeSectionToday(repository: DataRepository) {
 @Composable
 fun HomeSectionTomorrow(repository: DataRepository) {
     val events by repository.events.collectAsState(initial = emptyList())
-    val tomorrow = LocalDate.now().plusDays(1).toString()
     val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
-    val tomorrowStarred =
-        events.filter { it.startTime.startsWith(tomorrow) && allFavs.contains("${it.artistSlug} at ${it.startTime}") }
-            .sortedBy { it.startTime }
+    val tomorrowStarred by remember(events, allFavs) {
+        derivedStateOf {
+            val tomorrowDay = LocalDate.now().plusDays(1).dayOfMonth
+            CombinedRepository.getCombinedEventsForDay(tomorrowDay, events)
+                .filter { allFavs.contains(it.slug) }
+        }
+    }
 
     if (tomorrowStarred.isEmpty()) return
 
@@ -649,7 +668,7 @@ fun HomeSectionTomorrow(repository: DataRepository) {
     Text(text = "Tomorrow's plan", style = MaterialTheme.typography.titleMedium)
 
     tomorrowStarred.forEach { event ->
-        EventCard(event = event)
+        CombinedDisplay(data = event, slug = event.slug)
     }
 }
 
@@ -658,9 +677,15 @@ fun HomeSectionThisYear(repository: DataRepository) {
     val artists by repository.artists.collectAsState(initial = emptyList())
     val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
 
-    val favoriteArtists = artists.filter { allStarredSlugs.contains(it.slug) }
-    val headliners = artists.filter { it.tags.contains("headliner") }
-    val competitors = artists.filter { it.tags.contains("competitor") }
+    val favoriteArtists by remember {
+        derivedStateOf { artists.filter { allStarredSlugs.contains(it.slug) } }
+    }
+    val headliners by remember {
+        derivedStateOf { artists.filter { it.tags.contains("headliner") } }
+    }
+    val competitors by remember {
+        derivedStateOf { artists.filter { it.tags.contains("competitor") } }
+    }
 
     if (favoriteArtists.isEmpty() && headliners.isEmpty() && competitors.isEmpty()) return
 

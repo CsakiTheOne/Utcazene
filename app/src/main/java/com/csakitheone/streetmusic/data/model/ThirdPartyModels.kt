@@ -9,15 +9,13 @@ data class UnlockFestEvent(
     val order: Int,
 )
 
-data class PontOttPartiEvent(
+data class ExternalEvent(
     val name: String,
+    val day: Int,
     val startTime: LocalTime,
     val endTime: LocalTime? = null,
     val description: String? = null,
-)
-
-data class ImuEvent(
-    val name: String,
-    val day: Int,
-    val time: LocalTime,
-)
+    val customSlug: String? = null,
+) {
+    val slug: String get() = customSlug ?: "$name at $day $startTime"
+}

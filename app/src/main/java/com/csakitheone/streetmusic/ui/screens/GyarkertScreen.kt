@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.GyarkertRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
@@ -119,7 +120,10 @@ fun GyarkertScreen() {
                 )
             }
 
-            itemsIndexed(GyarkertRepository.pontOttPartiEvents) { index, event ->
+            itemsIndexed(
+                GyarkertRepository.pontOttPartiEvents,
+                key = { _, event -> event.name },
+            ) { index, event ->
                 if (index == indicatorIndex) {
                     NowIndicator(
                         time = currentTime.toLocalTime(),
@@ -128,40 +132,11 @@ fun GyarkertScreen() {
                             .padding(bottom = 8.dp)
                     )
                 }
-                Card(
+                CombinedDisplay(
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    ListItem(
-                        content = {
-                            SelectionContainer {
-                                Text(text = event.name)
-                            }
-                        },
-                        supportingContent = {
-                            val timeText = if (event.endTime != null) {
-                                "${event.startTime} - ${event.endTime}"
-                            } else {
-                                "${event.startTime}"
-                            }
-                            Column {
-                                Text(text = timeText)
-                                event.description?.let {
-                                    Text(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        text = it,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                }
-                            }
-                        },
-                        trailingContent = {
-                            FavoritesIndicator(slug = "gyarkert_pop_${event.name}")
-                        },
-                        colors = ListItemDefaults.colors(
-                            containerColor = Color.Transparent,
-                        ),
-                    )
-                }
+                    data = event,
+                    slug = "gyarkert_${event.name}",
+                )
             }
 
             if (indicatorIndex == -1 && isJuly23) {

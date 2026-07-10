@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.ImuRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
@@ -64,7 +65,7 @@ fun ImuScreen() {
 
     val events = remember(selectedDay) {
         ImuRepository.events.filter { it.day == selectedDay }
-            .sortedBy { if (it.time.hour >= 12) it.time.toSecondOfDay() else it.time.toSecondOfDay() + 86400 }
+            .sortedBy { if (it.startTime.hour >= 12) it.startTime.toSecondOfDay() else it.startTime.toSecondOfDay() + 86400 }
     }
 
     val todayDay = remember { currentTime.dayOfMonth }
@@ -74,7 +75,7 @@ fun ImuScreen() {
             if (selectedDay != todayDay) -1
             else {
                 val nowTime = currentTime.toLocalTime()
-                events.indexOfFirst { it.time.isAfter(nowTime) }
+                events.indexOfFirst { it.startTime.isAfter(nowTime) }
             }
         }
     }
@@ -129,7 +130,7 @@ fun ImuScreen() {
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            itemsIndexed(events) { index, event ->
+            itemsIndexed(events, key = { _, event -> "${event.day}_${event.startTime}" }) { index, event ->
                 if (index == indicatorIndex) {
                     NowIndicator(
                         time = currentTime.toLocalTime(),
@@ -138,32 +139,14 @@ fun ImuScreen() {
                             .padding(bottom = 8.dp)
                     )
                 }
-                Card(
+                CombinedDisplay(
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = event.time.toString(),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        SelectionContainer(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = event.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                        }
-                        FavoritesIndicator(slug = "imu_${event.name}")
-                    }
-                }
+                    data = event,
+                    slug = "imu_${event.name}"
+                )
             }
             if (indicatorIndex == -1 && selectedDay == todayDay && events.isNotEmpty()) {
-                val lastEventTime = events.last().time
+                val lastEventTime = events.last().startTime
                 if (currentTime.toLocalTime().isAfter(lastEventTime)) {
                     item {
                         NowIndicator(

@@ -14,8 +14,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -50,6 +52,7 @@ fun SettingsScreen() {
 
     val artists by repository.artists.collectAsState(initial = emptyList())
     val events by repository.events.collectAsState(initial = emptyList())
+    val userFavorites by repository.userFavorites.collectAsState()
 
     Scaffold(
         topBar = {
@@ -188,31 +191,61 @@ fun SettingsScreen() {
                         )
                         Text("Remove data from device")
                     }
+                }
+            }
 
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
-                        onClick = {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                repository.clearFavorites()
-                            }
-                            Toast.makeText(
-                                context,
-                                "All favorites removed",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
-                        ),
+            if (userFavorites.isNotEmpty()) {
+                Card {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                            painter = painterResource(R.drawable.ic_delete_forever),
-                            contentDescription = null,
+                        Text(
+                            text = "Debug: Raw favorites",
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        Text("Remove all favorites")
+
+                        userFavorites.sorted().forEach { slug ->
+                            ListItem(
+                                trailingContent = {
+                                    IconButton(onClick = { repository.setFavorite(slug, false) }) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.ic_delete_forever),
+                                            contentDescription = "Remove",
+                                            tint = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
+                                }
+                            ) {
+                                Text(text = slug, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
+                            onClick = {
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    repository.clearFavorites()
+                                }
+                                Toast.makeText(
+                                    context,
+                                    "All favorites removed",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                painter = painterResource(R.drawable.ic_delete_forever),
+                                contentDescription = null,
+                            )
+                            Text("Remove all favorites")
+                        }
                     }
                 }
             }

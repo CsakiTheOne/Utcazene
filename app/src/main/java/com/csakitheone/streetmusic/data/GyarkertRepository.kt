@@ -1,6 +1,6 @@
 package com.csakitheone.streetmusic.data
 
-import com.csakitheone.streetmusic.data.model.PontOttPartiEvent
+import com.csakitheone.streetmusic.data.model.ExternalEvent
 import java.time.LocalTime
 
 class GyarkertRepository {
@@ -14,31 +14,37 @@ class GyarkertRepository {
          * Events on July 23.
          */
         val pontOttPartiEvents = listOf(
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Kapunyitás, HÖK elnöki köszöntő",
+                day = 23,
                 startTime = LocalTime.of(17, 0),
             ),
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Warm up DJ - Shake It",
+                day = 23,
                 startTime = LocalTime.of(17, 0),
                 endTime = LocalTime.of(19, 0),
             ),
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Éberkóma koncert",
+                day = 23,
                 startTime = LocalTime.of(19, 0),
                 endTime = LocalTime.of(19, 50),
             ),
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Rektori köszöntő",
+                day = 23,
                 startTime = LocalTime.of(19, 50),
                 description = "Köszöntőt mond Dr. Abonyi János a Pannon Egyetem rektora.",
             ),
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Ponthatárok kihirdetése",
+                day = 23,
                 startTime = LocalTime.of(20, 0),
             ),
-            PontOttPartiEvent(
+            ExternalEvent(
                 name = "Brains koncert",
+                day = 23,
                 startTime = LocalTime.of(20, 15),
                 endTime = LocalTime.of(22, 0),
             ),

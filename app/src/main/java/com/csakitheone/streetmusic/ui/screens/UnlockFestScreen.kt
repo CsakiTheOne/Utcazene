@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -141,12 +142,15 @@ fun UnlockFestScreen() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            modifier = Modifier.weight(1f).padding(16.dp),
-                            text = event.name,
-                            style = if (event.url != null) MaterialTheme.typography.titleMedium
-                            else MaterialTheme.typography.bodyMedium,
-                        )
+                        SelectionContainer(
+                            modifier = Modifier.padding(16.dp).weight(1f)
+                        ) {
+                            Text(
+                                text = event.name,
+                                style = if (event.url != null) MaterialTheme.typography.titleMedium
+                                else MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                         FavoritesIndicator(slug = "terem_${event.name}")
                     }
                 }

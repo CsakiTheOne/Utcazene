@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -131,7 +132,11 @@ fun GyarkertScreen() {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     ListItem(
-                        content = { Text(text = event.name) },
+                        content = {
+                            SelectionContainer {
+                                Text(text = event.name)
+                            }
+                        },
                         supportingContent = {
                             val timeText = if (event.endTime != null) {
                                 "${event.startTime} - ${event.endTime}"

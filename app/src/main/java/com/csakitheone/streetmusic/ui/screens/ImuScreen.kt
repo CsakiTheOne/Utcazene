@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -151,11 +152,12 @@ fun ImuScreen() {
                             text = event.time.toString(),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = event.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+                        SelectionContainer(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = event.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
                         FavoritesIndicator(slug = "imu_${event.name}")
                     }
                 }

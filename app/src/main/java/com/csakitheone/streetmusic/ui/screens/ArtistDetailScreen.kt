@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -106,10 +107,12 @@ fun ArtistDetailScreen(artistSlug: String) {
                                 containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .75f),
                             ),
                         ) {
-                            Text(
-                                modifier = Modifier.padding(4.dp),
-                                text = artist?.name ?: "Artist Details",
-                            )
+                            SelectionContainer {
+                                Text(
+                                    modifier = Modifier.padding(4.dp),
+                                    text = artist?.name ?: "Artist Details",
+                                )
+                            }
                         }
                     },
                     navigationIcon = {
@@ -253,14 +256,16 @@ fun ArtistDetailScreen(artistSlug: String) {
                         }
 
                         Card {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                text = (artist?.description
-                                    ?: "").ifBlank { "Waiting for Utcazene to finish artist details..." },
-                                style = MaterialTheme.typography.bodySmall,
-                            )
+                            SelectionContainer {
+                                Text(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    text = (artist?.description
+                                        ?: "").ifBlank { "Waiting for Utcazene to finish artist details..." },
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                         }
                     }
                 }

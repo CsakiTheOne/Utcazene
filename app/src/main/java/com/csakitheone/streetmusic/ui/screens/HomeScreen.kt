@@ -634,7 +634,7 @@ fun HomeSectionToday(repository: DataRepository) {
     if (upcomingStarred.isNotEmpty()) {
         Text(text = "Today's plan", style = MaterialTheme.typography.titleMedium)
         upcomingStarred.forEach { event ->
-            CombinedDisplay(data = event, slug = event.slug)
+            CombinedDisplay(data = event)
         }
     }
 
@@ -668,7 +668,7 @@ fun HomeSectionTomorrow(repository: DataRepository) {
     Text(text = "Tomorrow's plan", style = MaterialTheme.typography.titleMedium)
 
     tomorrowStarred.forEach { event ->
-        CombinedDisplay(data = event, slug = event.slug)
+        CombinedDisplay(data = event)
     }
 }
 

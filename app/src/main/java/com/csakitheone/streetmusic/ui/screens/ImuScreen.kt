@@ -142,7 +142,6 @@ fun ImuScreen() {
                 CombinedDisplay(
                     modifier = Modifier.fillMaxWidth(),
                     data = event,
-                    slug = "imu_${event.name}"
                 )
             }
             if (indicatorIndex == -1 && selectedDay == todayDay && events.isNotEmpty()) {

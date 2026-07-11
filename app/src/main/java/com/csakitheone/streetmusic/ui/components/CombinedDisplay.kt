@@ -17,14 +17,12 @@ import com.csakitheone.streetmusic.data.model.Event
 
 /**
  * A composable that can display multiple data types.
- * @param slug Used for favorites indicator. Utcazene events use their default slug.
  * @param onClick Callback for card click. Utcazene events use their default onClick handler.
  */
 @Composable
 fun CombinedDisplay(
     modifier: Modifier = Modifier,
     data: Any,
-    slug: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
     when (data) {
@@ -58,9 +56,7 @@ fun CombinedDisplay(
                     }
                 },
                 trailingContent = {
-                    if (!slug.isNullOrBlank()) {
-                        FavoritesIndicator(slug = slug)
-                    }
+                    FavoritesIndicator(slug = data.slug)
                 },
                 colors = ListItemDefaults.colors(
                     containerColor = Color.Transparent,

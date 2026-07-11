@@ -48,7 +48,7 @@ class GyarkertRepository {
                 startTime = LocalTime.of(20, 15),
                 endTime = LocalTime.of(22, 0),
             ),
-        )
+        ).map { it.copy(customSlug = "gyarkert_${it.name}") }
 
         val day24facebookUrl = "https://www.facebook.com/events/4243592019197077/"
 

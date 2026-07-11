@@ -46,7 +46,7 @@ class ImuRepository {
             ExternalEvent("IMU AS", 25, LocalTime.of(21, 55)),
             ExternalEvent("Tengeri Püspök", 25, LocalTime.of(23, 5)),
             ExternalEvent("Dogs'N'Roses", 25, LocalTime.of(0, 15)),
-        )
+        ).map { it.copy(customSlug = "imu_${it.name}") }
 
         val eventDays = events.map { it.day }.toSet().sorted()
 

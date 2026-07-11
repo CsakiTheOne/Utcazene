@@ -135,7 +135,6 @@ fun GyarkertScreen() {
                 CombinedDisplay(
                     modifier = Modifier.fillMaxWidth(),
                     data = event,
-                    slug = "gyarkert_${event.name}",
                 )
             }
 

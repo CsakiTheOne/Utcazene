@@ -228,7 +228,7 @@ class DataRepository(
      */
     suspend fun downloadData() = withContext(Dispatchers.IO) {
         val yearFilter = 2026
-        val emulateFirstDayOfEvent = true
+        val emulateFirstDayOfEvent = false
 
         isDownloading = true
 

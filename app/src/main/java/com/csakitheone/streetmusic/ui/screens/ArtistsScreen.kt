@@ -120,23 +120,13 @@ fun ArtistsScreen() {
                     item {
                         Text("-")
                     }
-                    item {
+                    items(artists.flatMap { it.tags }.distinct().sorted()) { tag ->
                         FilterChip(
-                            selected = selectedTag == "headliner",
+                            selected = selectedTag == tag,
                             onClick = {
-                                selectedTag = if (selectedTag != "headliner") "headliner" else null
+                                selectedTag = if (selectedTag != tag) tag else null
                             },
-                            label = { Text("Headliners") },
-                        )
-                    }
-                    item {
-                        FilterChip(
-                            selected = selectedTag == "competitor",
-                            onClick = {
-                                selectedTag =
-                                    if (selectedTag != "competitor") "competitor" else null
-                            },
-                            label = { Text("Competitors") },
+                            label = { Text(tag) },
                         )
                     }
                     item {

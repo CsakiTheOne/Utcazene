@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -268,6 +267,8 @@ class DataRepository(
                 }
             }
 
+            Log.d("DataRepository", "Processing ${events.size} events...")
+
             database.eventDao().deleteAll()
             if (events.isNotEmpty()) {
                 if (emulateFirstDayOfEvent) {
@@ -290,6 +291,28 @@ class DataRepository(
                     database.eventDao().insertAll(events)
                 }
             }
+
+            Log.d(
+                "DataRepository",
+                "Finished downloading data. Now tagging artists based on event info..."
+            )
+
+            val eventDays = database.eventDao().getDistinctDates().first()
+            val artists = database.artistDao().getAll().first()
+            val taggedArtists = artists.map { artist ->
+                val events = database.eventDao().getEventsByArtist(artist.slug).first()
+                val tags = artist.tags.split(",").map { it.trim() }.toMutableSet()
+
+                if (events.size < eventDays.size && events.size == 1) {
+                    tags.add("onechance")
+                } else if (events.size > eventDays.size) {
+                    tags.add("encore")
+                }
+
+                artist.copy(tags = tags.joinToString(","))
+            }
+            database.artistDao().deleteAll()
+            database.artistDao().insertAll(taggedArtists)
         }
         isDownloading = false
     }

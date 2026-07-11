@@ -194,7 +194,20 @@ fun ArtistDetailScreen(artistSlug: String) {
                             Text("Waiting for Utcazene to upload events...")
                         } else {
                             events.forEach { event ->
-                                EventCard(event = event)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = event.startTime.substring(8, 10),
+                                        style = MaterialTheme.typography.labelLarge,
+                                    )
+                                    EventCard(
+                                        modifier = Modifier.weight(1f),
+                                        event = event,
+                                    )
+                                }
                             }
                         }
                     }

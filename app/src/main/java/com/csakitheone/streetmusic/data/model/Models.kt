@@ -33,7 +33,7 @@ data class Event(
         day = startTime.substring(8, 10).toInt(),
         startTime = LocalTime.parse(startTime.substring(11)),
         endTime = LocalTime.parse(endTime.substring(11)),
-        description = place,
+        description = "Utcazene event #$id. Location: $place",
         customSlug = "$artistSlug at $startTime"
     )
 }

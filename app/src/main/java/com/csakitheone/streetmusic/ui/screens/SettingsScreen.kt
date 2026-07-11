@@ -81,7 +81,10 @@ fun SettingsScreen() {
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(text = "Profile for nearby friends", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "Profile for nearby friends",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
                         value = nickname,
@@ -194,58 +197,61 @@ fun SettingsScreen() {
                 }
             }
 
-            if (userFavorites.isNotEmpty()) {
-                Card {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Text(
-                            text = "Debug: Raw favorites",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+            Card {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(
+                        text = "Favorites",
+                        style = MaterialTheme.typography.titleMedium
+                    )
 
-                        userFavorites.sorted().forEach { slug ->
-                            ListItem(
-                                trailingContent = {
-                                    IconButton(onClick = { repository.setFavorite(slug, false) }) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.ic_delete_forever),
-                                            contentDescription = "Remove",
-                                            tint = MaterialTheme.colorScheme.error,
-                                        )
-                                    }
+                    Text(
+                        text = "Raw data for debugging",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    userFavorites.sorted().forEach { slug ->
+                        ListItem(
+                            trailingContent = {
+                                IconButton(onClick = { repository.setFavorite(slug, false) }) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_delete_forever),
+                                        contentDescription = "Remove",
+                                        tint = MaterialTheme.colorScheme.error,
+                                    )
                                 }
-                            ) {
-                                Text(text = slug, style = MaterialTheme.typography.bodySmall)
                             }
-                        }
-
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
-                            onClick = {
-                                coroutineScope.launch(Dispatchers.IO) {
-                                    repository.clearFavorites()
-                                }
-                                Toast.makeText(
-                                    context,
-                                    "All favorites removed",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError,
-                            ),
                         ) {
-                            Icon(
-                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                                painter = painterResource(R.drawable.ic_delete_forever),
-                                contentDescription = null,
-                            )
-                            Text("Remove all favorites")
+                            Text(text = slug, style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                repository.clearFavorites()
+                            }
+                            Toast.makeText(
+                                context,
+                                "All favorites removed",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_delete_forever),
+                            contentDescription = null,
+                        )
+                        Text("Remove all favorites")
                     }
                 }
             }

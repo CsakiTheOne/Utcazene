@@ -613,7 +613,10 @@ fun HomeSectionToday(repository: DataRepository) {
         derivedStateOf {
             val todayDay = now.dayOfMonth
             CombinedRepository.getCombinedEventsForDay(todayDay, events)
-                .filter { allFavs.contains(it.slug) && it.startTime.isAfter(now.toLocalTime()) }
+                .filter {
+                    allFavs.contains(CombinedRepository.getSlugForAny(it)) &&
+                            CombinedRepository.getIsAfterAny(it, now)
+                }
         }
     }
     val nowPlaying by remember(now) {
@@ -621,7 +624,8 @@ fun HomeSectionToday(repository: DataRepository) {
             val today = now.toLocalDate().toString()
             events.filter { it.startTime.startsWith(today) }
                 .filter {
-                    LocalDateTime.parse(it.startTime).isBefore(now) && LocalDateTime.parse(it.endTime)
+                    LocalDateTime.parse(it.startTime)
+                        .isBefore(now) && LocalDateTime.parse(it.endTime)
                         .isAfter(now)
                 }
         }
@@ -657,7 +661,7 @@ fun HomeSectionTomorrow(repository: DataRepository) {
         derivedStateOf {
             val tomorrowDay = LocalDate.now().plusDays(1).dayOfMonth
             CombinedRepository.getCombinedEventsForDay(tomorrowDay, events)
-                .filter { allFavs.contains(it.slug) }
+                .filter { allFavs.contains(CombinedRepository.getSlugForAny(it)) }
         }
     }
 

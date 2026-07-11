@@ -67,9 +67,11 @@ fun CombinedDisplay(
             )
         }
 
-        else -> Text(
-            modifier = modifier,
-            text = "Unknown data type"
-        )
+        else -> Card(modifier = modifier) {
+            Text(
+                modifier = Modifier.padding(16.dp),
+                text = "Unknown data type"
+            )
+        }
     }
 }

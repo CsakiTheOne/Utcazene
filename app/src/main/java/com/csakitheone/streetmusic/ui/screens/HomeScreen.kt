@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -198,7 +200,7 @@ fun HomeScreen() {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Update available",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                             )
                             Text(
                                 text = "A new version of UZ App is available. Download it to stay up to date with the events.",
@@ -239,7 +241,10 @@ fun HomeScreen() {
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(text = "Download data?", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = "Download data?",
+                            style = MaterialTheme.typography.headlineSmall
+                        )
                         Text("You are on a metered connection or Utcazene hasn't uploaded this year's musicians yet. Would you like to download the event data now or sync from another device?")
                         Button(
                             modifier = Modifier.fillMaxWidth(),
@@ -364,7 +369,7 @@ fun HomeScreen() {
                                 .padding(16.dp)
                                 .weight(1f),
                             text = "Nearby friends",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                         )
                         NearbyConnectionsDisplay()
                     }
@@ -380,7 +385,7 @@ fun HomeScreen() {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = "Parallel events",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineLarge,
             )
 
             Card(
@@ -454,7 +459,7 @@ fun HomeScreen() {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = "Utcazene socials",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineLarge,
             )
 
             Row(
@@ -520,7 +525,10 @@ fun HomeScreen() {
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
-                Text(text = "UZ App was made by Csáki", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = "UZ App was made by Csáki",
+                    style = MaterialTheme.typography.headlineLarge
+                )
                 Text(
                     text = "With excitement since 2023",
                     style = MaterialTheme.typography.labelSmall
@@ -636,6 +644,7 @@ fun ToggleNearbyFriendsCard(
 
 @Composable
 fun HomeSectionToday(repository: DataRepository) {
+    val context = LocalContext.current
     val events by repository.events.collectAsState(initial = emptyList())
     var now by remember { mutableStateOf(LocalDateTime.now()) }
 
@@ -675,13 +684,13 @@ fun HomeSectionToday(repository: DataRepository) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "Today",
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineLarge,
     )
 
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "Where do we go now",
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.headlineSmall,
     )
 
     if (upcomingStarred.isEmpty()) {
@@ -699,11 +708,44 @@ fun HomeSectionToday(repository: DataRepository) {
         }
     }
 
+    Card(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        onClick = {
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "https://www.google.com/android/find/people".toUri()
+                )
+            )
+        },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape),
+                painter = painterResource(R.drawable.find_hub_icon),
+                contentDescription = null,
+            )
+            Text(
+                text = "Use Find Hub to find your friends. It's the recommended, Android built-in way to see where your friends are.\nTap here to open.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+
     if (nowPlaying.isNotEmpty()) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
         ) {
-            Text(text = "Now playing", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Now playing", style = MaterialTheme.typography.headlineSmall)
             Text(
                 text = "External events not included",
                 style = MaterialTheme.typography.labelSmall
@@ -733,7 +775,7 @@ fun HomeSectionTomorrow(repository: DataRepository) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "Tomorrow's plan",
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineLarge,
     )
 
     tomorrowStarred.forEach { event ->
@@ -763,7 +805,7 @@ fun HomeSectionThisYear(repository: DataRepository) {
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "This year on Utcazene",
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.headlineLarge,
     )
 
     Button(
@@ -791,14 +833,15 @@ fun HomeSectionThisYear(repository: DataRepository) {
 
     if (favoriteArtists.isNotEmpty()) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
                 text = "Favorite artists",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
             )
 
             TextButton(
@@ -838,7 +881,7 @@ fun HomeSectionThisYear(repository: DataRepository) {
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
             text = "From around the world",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
         )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { headliners.size + 1 },
@@ -871,7 +914,7 @@ fun HomeSectionThisYear(repository: DataRepository) {
         Text(
             modifier = Modifier.padding(horizontal = 16.dp),
             text = "This year's competitors",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
         )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { competitors.size + 1 },

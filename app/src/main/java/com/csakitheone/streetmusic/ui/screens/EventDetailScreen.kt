@@ -24,6 +24,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -31,10 +33,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -55,10 +60,13 @@ import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.minutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +78,36 @@ fun EventDetailScreen(eventId: Int) {
     val artist by (event?.let { repository.getArtist(it.artistSlug) }
         ?: flowOf(null)).collectAsState(initial = null)
     val allEvents by repository.events.collectAsState(initial = emptyList())
+
+    val isToday by remember(event) {
+        derivedStateOf {
+            val today = LocalDate.now()
+            val eventDate = event?.startTime?.let { LocalDateTime.parse(it).toLocalDate() }
+            today == eventDate
+        }
+    }
+
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(isToday) {
+        while (isToday) {
+            now = LocalDateTime.now()
+            delay(1.minutes)
+        }
+    }
+
+    val progress by remember(event, isToday, now) {
+        derivedStateOf {
+            val e = event ?: return@derivedStateOf 0f
+            if (!isToday || e.startTime.isEmpty() || e.endTime.isEmpty()) return@derivedStateOf 0f
+            val startTime = LocalTime.parse(e.startTime.substring(11)).toSecondOfDay()
+            var endTime = LocalTime.parse(e.endTime.substring(11)).toSecondOfDay()
+            if (endTime < startTime) endTime += 24 * 60 * 60
+            if (startTime == endTime) return@derivedStateOf 0f
+            val progress =
+                (now.toLocalTime().toSecondOfDay() - startTime).toFloat() / (endTime - startTime)
+            progress.coerceIn(0f, 1f)
+        }
+    }
 
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -199,16 +237,29 @@ fun EventDetailScreen(eventId: Int) {
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                 }
-                                Text(
+                                Column(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = "${startTime.format(timeFormatter)} - ${
-                                        endTime.format(
-                                            timeFormatter
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = "${startTime.format(timeFormatter)} - ${
+                                            endTime.format(
+                                                timeFormatter
+                                            )
+                                        }",
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        textAlign = TextAlign.Center,
+                                    )
+
+                                    if (progress > 0) {
+                                        LinearWavyProgressIndicator(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            progress = { progress },
                                         )
-                                    }",
-                                    style = MaterialTheme.typography.headlineLarge,
-                                    textAlign = TextAlign.Center,
-                                )
+                                    }
+                                }
                             }
                         }
                     }

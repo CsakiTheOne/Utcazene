@@ -67,10 +67,21 @@ class MainActivity : ComponentActivity() {
                 DataRepository(UtcazeneApi(), db, connectivityManager, prefs, nearbyManager)
             }
 
+
             val backStack = rememberNavBackStack(Destination.Home) as NavBackStack<Destination>
 
             LaunchedEffect(Unit) {
                 repository.tryDownloadData()
+
+                val startDestination = when (intent.action) {
+                    "com.csakitheone.streetmusic.ACTION_CALENDAR" -> Destination.Calendar
+                    "com.csakitheone.streetmusic.ACTION_ARTISTS" -> Destination.Artists
+                    "com.csakitheone.streetmusic.ACTION_PLACES" -> Destination.Places
+                    else -> null
+                }
+                if (startDestination != null) {
+                    backStack.add(startDestination)
+                }
             }
 
             LaunchedEffect(Unit) {

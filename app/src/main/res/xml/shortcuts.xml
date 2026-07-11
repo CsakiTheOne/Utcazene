@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="calendar"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_events"
+        android:shortcutShortLabel="@string/shortcut_calendar_label">
+        <intent
+            android:action="com.csakitheone.streetmusic.ACTION_CALENDAR"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="artists"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_musicians"
+        android:shortcutShortLabel="@string/shortcut_artists_label">
+        <intent
+            android:action="com.csakitheone.streetmusic.ACTION_ARTISTS"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="places"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_places"
+        android:shortcutShortLabel="@string/shortcut_places_label">
+        <intent
+            android:action="com.csakitheone.streetmusic.ACTION_PLACES"
+            android:targetPackage="com.csakitheone.streetmusic"
+            android:targetClass="com.csakitheone.streetmusic.MainActivity" />
+    </shortcut>
+</shortcuts>

@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">UZ App</string>
+    <string name="shortcut_calendar_label">Calendar</string>
+    <string name="shortcut_artists_label">Artists</string>
+    <string name="shortcut_places_label">Places</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,8 +26,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
@@ -34,6 +38,7 @@ import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 
 @Composable
 fun ArtistsScreen() {
+    val context = LocalContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val artists by repository.artists.collectAsState(initial = emptyList())
@@ -83,6 +88,27 @@ fun ArtistsScreen() {
                 },
                 actions = {
                     NearbyConnectionsDisplay()
+                },
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = { Text("I'm feeling lucky") },
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_youtube),
+                        contentDescription = null
+                    )
+                },
+                onClick = {
+                    val randomYouTubeId =
+                        artists.filter { !it.youtubeEmbed.isNullOrBlank() }.random().youtubeEmbed
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "https://www.youtube.com/watch?v=$randomYouTubeId".toUri()
+                        )
+                    )
                 },
             )
         },

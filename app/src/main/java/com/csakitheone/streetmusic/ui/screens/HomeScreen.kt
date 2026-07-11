@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.carousel.CarouselDefaults
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
@@ -678,6 +679,8 @@ fun HomeSectionTomorrow(repository: DataRepository) {
 
 @Composable
 fun HomeSectionThisYear(repository: DataRepository) {
+    val context = LocalContext.current
+    val backStack = LocalNavBackStack.current
     val artists by repository.artists.collectAsState(initial = emptyList())
     val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
 
@@ -695,8 +698,41 @@ fun HomeSectionThisYear(repository: DataRepository) {
 
     Text(text = "This year on Utcazene", style = MaterialTheme.typography.titleLarge)
 
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            val randomYouTubeId =
+                artists.filter { !it.youtubeEmbed.isNullOrBlank() }.random().youtubeEmbed
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    "https://www.youtube.com/watch?v=$randomYouTubeId".toUri()
+                )
+            )
+        },
+    ) {
+        Icon(
+            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+            painter = painterResource(R.drawable.ic_youtube),
+            contentDescription = null,
+        )
+        Text("I'm feeling lucky")
+    }
+
     if (favoriteArtists.isNotEmpty()) {
-        Text(text = "Favorite artists", style = MaterialTheme.typography.titleMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Favorite artists", style = MaterialTheme.typography.titleMedium)
+
+            TextButton(
+                onClick = { backStack.add(Destination.FavoritesSync) },
+            ) {
+                Text("Manage/Export")
+            }
+        }
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { favoriteArtists.size },
             preferredItemWidth = 280.dp,

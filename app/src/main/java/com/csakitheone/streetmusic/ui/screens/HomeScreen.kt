@@ -6,19 +6,23 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -39,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,6 +64,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -125,44 +135,59 @@ fun HomeScreen() {
         }
     }
 
-    Scaffold { padding ->
+    Surface {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                ),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.size(padding.calculateTopPadding()))
-
-            Box(
-                contentAlignment = Alignment.TopEnd,
-            ) {
-                Image(
+            Column {
+                Column(
+                    modifier = Modifier
+                        .background(Color(0xFFb5bdd1)),
+                ) {
+                    Box(
+                        modifier = Modifier.statusBarsPadding(),
+                        contentAlignment = Alignment.TopEnd,
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(5f / 2f),
+                            painter = painterResource(id = R.drawable.header_2026),
+                            contentDescription = null,
+                            contentScale = ContentScale.FillWidth,
+                        )
+                        FilledIconButton(
+                            modifier = Modifier.padding(16.dp),
+                            onClick = { backStack.add(Destination.Settings) },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_settings),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(5f / 2f)
-                        .clip(MaterialTheme.shapes.large),
-                    painter = painterResource(id = R.drawable.header_2026),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillWidth,
+                        .height(8.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFFb5bdd1),
+                                    Color.Transparent
+                                )
+                            )
+                        )
                 )
-                FilledIconButton(
-                    modifier = Modifier.padding(8.dp),
-                    onClick = { backStack.add(Destination.Settings) },
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_settings),
-                        contentDescription = null
-                    )
-                }
             }
 
             updateInfo?.let { info ->
                 Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                     ),
@@ -215,7 +240,9 @@ fun HomeScreen() {
                 }
                 return@Column
             } else if (!hasData) {
-                Card {
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -268,6 +295,7 @@ fun HomeScreen() {
                 )
             } else {
                 Grid(
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     config = {
                         column(.5f)
                         column(.5f)
@@ -329,7 +357,9 @@ fun HomeScreen() {
             }
 
             AnimatedVisibility(nearbyFeatures) {
-                Card {
+                Card(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -353,12 +383,15 @@ fun HomeScreen() {
 
             HomeSectionThisYear(repository)
 
-            Text(text = "Parallel events", style = MaterialTheme.typography.titleLarge)
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = "Parallel events",
+                style = MaterialTheme.typography.titleLarge,
+            )
 
             Card(
-                onClick = {
-                    backStack.add(Destination.Imu)
-                },
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onClick = { backStack.add(Destination.Imu) },
             ) {
                 ListItem(
                     leadingContent = {
@@ -379,9 +412,8 @@ fun HomeScreen() {
             }
 
             OutlinedCard(
-                onClick = {
-                    backStack.add(Destination.Gyarkert)
-                },
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onClick = { backStack.add(Destination.Gyarkert) },
             ) {
                 ListItem(
                     leadingContent = {
@@ -402,9 +434,8 @@ fun HomeScreen() {
             }
 
             OutlinedCard(
-                onClick = {
-                    backStack.add(Destination.UnlockFest)
-                },
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onClick = { backStack.add(Destination.UnlockFest) },
             ) {
                 Box(
                     contentAlignment = Alignment.BottomStart,
@@ -426,7 +457,11 @@ fun HomeScreen() {
                 }
             }
 
-            Text(text = "Utcazene socials", style = MaterialTheme.typography.titleLarge)
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = "Utcazene socials",
+                style = MaterialTheme.typography.titleLarge,
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -488,7 +523,9 @@ fun HomeScreen() {
                 )
             }
 
-            Column {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
                 Text(text = "UZ App was made by Csáki", style = MaterialTheme.typography.titleLarge)
                 Text(
                     text = "With excitement since 2023",
@@ -497,7 +534,9 @@ fun HomeScreen() {
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.Bottom,
             ) {
                 Image(
@@ -526,7 +565,11 @@ fun HomeScreen() {
                 }
             }
 
-            Spacer(modifier = Modifier.size(padding.calculateBottomPadding()))
+            Spacer(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(16.dp)
+            )
         }
     }
 }
@@ -634,17 +677,29 @@ fun HomeSectionToday(repository: DataRepository) {
 
     if (upcomingStarred.isEmpty() && nowPlaying.isEmpty()) return
 
-    Text(text = "Today", style = MaterialTheme.typography.titleLarge)
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "Today",
+        style = MaterialTheme.typography.titleLarge,
+    )
 
     if (upcomingStarred.isNotEmpty()) {
-        Text(text = "Today's plan", style = MaterialTheme.typography.titleMedium)
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = "Today's plan",
+            style = MaterialTheme.typography.titleMedium,
+        )
         upcomingStarred.forEach { event ->
             CombinedDisplay(data = event)
         }
     }
 
     if (nowPlaying.isNotEmpty()) {
-        Text(text = "Now playing", style = MaterialTheme.typography.titleMedium)
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = "Now playing",
+            style = MaterialTheme.typography.titleMedium,
+        )
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(nowPlaying) { event ->
                 EventCard(modifier = Modifier.width(280.dp), event = event)
@@ -668,9 +723,17 @@ fun HomeSectionTomorrow(repository: DataRepository) {
 
     if (tomorrowStarred.isEmpty()) return
 
-    Text(text = "Tomorrow", style = MaterialTheme.typography.titleLarge)
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "Tomorrow",
+        style = MaterialTheme.typography.titleLarge,
+    )
 
-    Text(text = "Tomorrow's plan", style = MaterialTheme.typography.titleMedium)
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "Tomorrow's plan",
+        style = MaterialTheme.typography.titleMedium,
+    )
 
     tomorrowStarred.forEach { event ->
         CombinedDisplay(data = event)
@@ -696,10 +759,16 @@ fun HomeSectionThisYear(repository: DataRepository) {
 
     if (favoriteArtists.isEmpty() && headliners.isEmpty() && competitors.isEmpty()) return
 
-    Text(text = "This year on Utcazene", style = MaterialTheme.typography.titleLarge)
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "This year on Utcazene",
+        style = MaterialTheme.typography.titleLarge,
+    )
 
     Button(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
         onClick = {
             val randomYouTubeId =
                 artists.filter { !it.youtubeEmbed.isNullOrBlank() }.random().youtubeEmbed
@@ -725,7 +794,11 @@ fun HomeSectionThisYear(repository: DataRepository) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = "Favorite artists", style = MaterialTheme.typography.titleMedium)
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = "Favorite artists",
+                style = MaterialTheme.typography.titleMedium,
+            )
 
             TextButton(
                 onClick = { backStack.add(Destination.FavoritesSync) },
@@ -737,6 +810,7 @@ fun HomeSectionThisYear(repository: DataRepository) {
             state = rememberCarouselState(initialItem = 0) { favoriteArtists.size },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
+            contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
             val artist = favoriteArtists[index]
@@ -745,11 +819,16 @@ fun HomeSectionThisYear(repository: DataRepository) {
     }
 
     if (headliners.isNotEmpty()) {
-        Text(text = "From around the world", style = MaterialTheme.typography.titleMedium)
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = "From around the world",
+            style = MaterialTheme.typography.titleMedium,
+        )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { headliners.size },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
+            contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
             val artist = headliners[index]
@@ -758,11 +837,16 @@ fun HomeSectionThisYear(repository: DataRepository) {
     }
 
     if (competitors.isNotEmpty()) {
-        Text(text = "This year's competitors", style = MaterialTheme.typography.titleMedium)
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = "This year's competitors",
+            style = MaterialTheme.typography.titleMedium,
+        )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { competitors.size },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
+            contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
             val artist = competitors[index]

@@ -196,7 +196,7 @@ class DataRepository(
             return DownloadResult.SUCCESS
         }
 
-        if (hasData) {
+        if (hasData && !force) {
             return DownloadResult.ALREADY_HAS_DATA
         }
 

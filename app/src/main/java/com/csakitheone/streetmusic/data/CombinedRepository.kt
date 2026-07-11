@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.data
 
+import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.model.ExternalEvent
 import java.time.LocalDateTime
@@ -59,6 +60,7 @@ class CombinedRepository {
 
         fun getSlugForAny(any: Any): String {
             return when (any) {
+                is Artist -> any.slug
                 is Event -> "${any.artistSlug} at ${any.startTime}"
                 is ExternalEvent -> any.slug
                 else -> throw IllegalArgumentException("Unknown type")

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.ExternalEvent
 import com.csakitheone.streetmusic.data.model.Event
 
@@ -26,8 +27,10 @@ fun CombinedDisplay(
     onClick: (() -> Unit)? = null,
 ) {
     when (data) {
+        is Artist -> ArtistCard(modifier = modifier, artist = data)
+
         is Event -> EventCard(modifier = modifier, event = data)
-        
+
         is ExternalEvent -> Card(
             modifier = modifier,
             onClick = onClick ?: {},

@@ -20,22 +20,32 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.CombinedRepository
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -53,6 +63,8 @@ fun SettingsScreen() {
     val artists by repository.artists.collectAsState(initial = emptyList())
     val events by repository.events.collectAsState(initial = emptyList())
     val userFavorites by repository.userFavorites.collectAsState()
+
+    var favoritesString by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -207,9 +219,66 @@ fun SettingsScreen() {
                         style = MaterialTheme.typography.titleMedium
                     )
 
+                    PrimaryTabRow(
+                        selectedTabIndex = if (favoritesString == userFavorites.joinToString(",")) 0 else 1,
+                        containerColor = Color.Transparent,
+                        divider = {},
+                    ) {
+                        Tab(
+                            selected = favoritesString == userFavorites.joinToString(","),
+                            onClick = { favoritesString = userFavorites.joinToString(",") },
+                            text = { Text("My favorites") },
+                        )
+                        Tab(
+                            selected = favoritesString != userFavorites.joinToString(","),
+                            onClick = { favoritesString = "" },
+                            text = { Text("Import favorites") },
+                        )
+                    }
+
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = favoritesString,
+                        onValueChange = { favoritesString = it },
+                        label = { Text("Favorites string") },
+                        placeholder = { Text("Comma-separated slugs") },
+                        minLines = 3,
+                    )
+
+                    AnimatedContent(targetState = favoritesString) { targetFavoritesString ->
+                        val favorites by remember(targetFavoritesString) {
+                            derivedStateOf {
+                                val slugs = targetFavoritesString.split(",")
+                                (CombinedRepository.getCombinedEvents(events) + artists)
+                                    .filter { slugs.contains(CombinedRepository.getSlugForAny(it)) }
+                            }
+                        }
+                        OutlinedCard {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                if (targetFavoritesString.isBlank()) {
+                                    Text("Ask a friend to copy their favorites string and paste it here.")
+                                }
+                                favorites.forEach {
+                                    CombinedDisplay(data = it)
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            Card {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
                     Text(
                         text = "Raw data for debugging",
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleMedium
                     )
 
                     userFavorites.sorted().forEach { slug ->

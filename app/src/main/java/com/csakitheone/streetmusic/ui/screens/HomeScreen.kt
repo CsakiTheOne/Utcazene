@@ -23,9 +23,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -42,7 +39,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -62,13 +58,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -291,7 +283,9 @@ fun HomeScreen() {
                 }
 
                 ToggleNearbyFriendsCard(
-                    modifier = Modifier.align(Alignment.End),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .align(Alignment.End),
                 )
             } else {
                 Grid(
@@ -529,7 +523,7 @@ fun HomeScreen() {
                 Text(text = "UZ App was made by Csáki", style = MaterialTheme.typography.titleLarge)
                 Text(
                     text = "With excitement since 2023",
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
 
@@ -643,9 +637,15 @@ fun ToggleNearbyFriendsCard(
 @Composable
 fun HomeSectionToday(repository: DataRepository) {
     val events by repository.events.collectAsState(initial = emptyList())
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+
+    if (events.none { LocalDate.parse(it.startTime.substring(0, 10)).isEqual(now.toLocalDate()) }) {
+        return
+    }
+
+    val backStack = LocalNavBackStack.current
     val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
     LaunchedEffect(Unit) {
         while (true) {
             delay(30.seconds)
@@ -653,14 +653,11 @@ fun HomeSectionToday(repository: DataRepository) {
         }
     }
 
-    val upcomingStarred by remember(now, events, allFavs) {
+    val upcomingStarred by remember(events, allFavs) {
         derivedStateOf {
-            val todayDay = now.dayOfMonth
-            CombinedRepository.getCombinedEventsForDay(todayDay, events)
-                .filter {
-                    allFavs.contains(CombinedRepository.getSlugForAny(it)) &&
-                            CombinedRepository.getIsAfterAny(it, now)
-                }
+            val today = LocalDate.now().dayOfMonth
+            CombinedRepository.getCombinedEventsForDay(today, events)
+                .filter { allFavs.contains(CombinedRepository.getSlugForAny(it)) }
         }
     }
     val nowPlaying by remember(now) {
@@ -675,35 +672,45 @@ fun HomeSectionToday(repository: DataRepository) {
         }
     }
 
-    if (upcomingStarred.isEmpty() && nowPlaying.isEmpty()) return
-
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "Today",
         style = MaterialTheme.typography.titleLarge,
     )
 
-    if (upcomingStarred.isNotEmpty()) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Today's plan",
-            style = MaterialTheme.typography.titleMedium,
-        )
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "Where do we go now",
+        style = MaterialTheme.typography.titleMedium,
+    )
+
+    if (upcomingStarred.isEmpty()) {
+        Button(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            onClick = { backStack.add(Destination.Calendar) },
+        ) {
+            Text("Plan something for today")
+        }
+    } else {
         upcomingStarred.forEach { event ->
-            CombinedDisplay(data = event)
+            CombinedDisplay(modifier = Modifier.padding(horizontal = 16.dp), data = event)
         }
     }
 
     if (nowPlaying.isNotEmpty()) {
-        Text(
+        Column(
             modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Now playing",
-            style = MaterialTheme.typography.titleMedium,
-        )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(nowPlaying) { event ->
-                EventCard(modifier = Modifier.width(280.dp), event = event)
-            }
+        ) {
+            Text(text = "Now playing", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "External events not included",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+        nowPlaying.forEach { event ->
+            EventCard(modifier = Modifier.padding(horizontal = 16.dp), event = event)
         }
     }
 }
@@ -725,18 +732,12 @@ fun HomeSectionTomorrow(repository: DataRepository) {
 
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = "Tomorrow",
+        text = "Tomorrow's plan",
         style = MaterialTheme.typography.titleLarge,
     )
 
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = "Tomorrow's plan",
-        style = MaterialTheme.typography.titleMedium,
-    )
-
     tomorrowStarred.forEach { event ->
-        CombinedDisplay(data = event)
+        CombinedDisplay(modifier = Modifier.padding(horizontal = 16.dp), data = event)
     }
 }
 
@@ -807,14 +808,29 @@ fun HomeSectionThisYear(repository: DataRepository) {
             }
         }
         HorizontalMultiBrowseCarousel(
-            state = rememberCarouselState(initialItem = 0) { favoriteArtists.size },
+            state = rememberCarouselState(initialItem = 0) { favoriteArtists.size + 1 },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
-            val artist = favoriteArtists[index]
-            ArtistCard(artist = artist)
+            val artist = favoriteArtists.getOrNull(index)
+            if (artist != null) ArtistCard(artist = artist)
+            else {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = { backStack.add(Destination.Artists) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                ) {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = "Browse artists to find some favorites",
+                    )
+                }
+            }
         }
     }
 
@@ -825,14 +841,29 @@ fun HomeSectionThisYear(repository: DataRepository) {
             style = MaterialTheme.typography.titleMedium,
         )
         HorizontalMultiBrowseCarousel(
-            state = rememberCarouselState(initialItem = 0) { headliners.size },
+            state = rememberCarouselState(initialItem = 0) { headliners.size + 1 },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
-            val artist = headliners[index]
-            ArtistCard(artist = artist)
+            val artist = headliners.getOrNull(index)
+            if (artist != null) ArtistCard(artist = artist)
+            else {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = { backStack.add(Destination.Artists) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                ) {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = "All artists",
+                    )
+                }
+            }
         }
     }
 
@@ -843,14 +874,29 @@ fun HomeSectionThisYear(repository: DataRepository) {
             style = MaterialTheme.typography.titleMedium,
         )
         HorizontalMultiBrowseCarousel(
-            state = rememberCarouselState(initialItem = 0) { competitors.size },
+            state = rememberCarouselState(initialItem = 0) { competitors.size + 1 },
             preferredItemWidth = 280.dp,
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
-            val artist = competitors[index]
-            ArtistCard(artist = artist)
+            val artist = competitors.getOrNull(index)
+            if (artist != null) ArtistCard(artist = artist)
+            else {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = { backStack.add(Destination.Artists) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                ) {
+                    Text(
+                        modifier = Modifier.padding(16.dp),
+                        text = "All artists",
+                    )
+                }
+            }
         }
     }
 }

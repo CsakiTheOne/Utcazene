@@ -21,7 +21,7 @@ class CombinedRepository {
                         val id = externalEvent.description.substringAfter("#").substringBefore(".")
                         val utcazeneEvent = utcazeneEvents.find { it.id == id.toInt() }
                         if (utcazeneEvent != null) {
-                            return@map utcazeneEvent.toExternalEvent()
+                            return@map utcazeneEvent
                         } else {
                             return@map externalEvent
                         }
@@ -49,7 +49,7 @@ class CombinedRepository {
                         val id = externalEvent.description.substringAfter("#").substringBefore(".")
                         val utcazeneEvent = utcazeneEvents.find { it.id == id.toInt() }
                         if (utcazeneEvent != null) {
-                            return@map utcazeneEvent.toExternalEvent()
+                            return@map utcazeneEvent
                         } else {
                             return@map externalEvent
                         }

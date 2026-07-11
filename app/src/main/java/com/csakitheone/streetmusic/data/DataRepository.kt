@@ -213,7 +213,7 @@ class DataRepository(
      */
     suspend fun downloadData() = withContext(Dispatchers.IO) {
         val yearFilter = 2026
-        val emulateFirstDayOfEvent = false
+        val emulateFirstDayOfEvent = true
 
         isDownloading = true
 
@@ -331,6 +331,4 @@ class DataRepository(
 
     fun getAllArtistEntities(): Flow<List<ArtistEntity>> = database.artistDao().getAll()
     fun getAllEventEntities(): Flow<List<EventEntity>> = database.eventDao().getAll()
-    fun getEventEntitiesByArtist(artistSlug: String): Flow<List<EventEntity>> =
-        database.eventDao().getEventsByArtist(artistSlug)
 }

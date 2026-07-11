@@ -32,7 +32,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -67,9 +69,7 @@ fun EventDetailScreen(eventId: Int) {
     val event by repository.getEvent(eventId).collectAsState(initial = null)
     val artist by (event?.let { repository.getArtist(it.artistSlug) }
         ?: flowOf(null)).collectAsState(initial = null)
-    val otherEvents by (event?.let { repository.getEventsByArtist(it.artistSlug) } ?: flowOf(
-        emptyList()
-    )).collectAsState(initial = emptyList())
+    val allEvents by repository.events.collectAsState(initial = emptyList())
 
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -162,53 +162,60 @@ fun EventDetailScreen(eventId: Int) {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Event Details
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            modifier = Modifier.padding(end = 16.dp),
-                            painter = painterResource(R.drawable.shortcut_places),
-                            contentDescription = null,
-                        )
-                        Text(
-                            text = event?.place ?: "",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-
-                    event?.let { e ->
-                        val startTime = LocalDateTime.parse(e.startTime)
-                        val endTime = LocalDateTime.parse(e.endTime)
-                        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                modifier = Modifier.padding(end = 16.dp),
-                                painter = painterResource(R.drawable.shortcut_events),
-                                contentDescription = null,
-                            )
-                            val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, EEEE")
-                            Text(
-                                text = startTime.format(dateFormatter),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = "${startTime.format(timeFormatter)} - ${
-                                endTime.format(
-                                    timeFormatter
+                Card {
+                    SelectionContainer {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(32.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    modifier = Modifier.padding(end = 16.dp),
+                                    painter = painterResource(R.drawable.shortcut_places),
+                                    contentDescription = null,
                                 )
-                            }",
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center,
-                        )
+                                Text(
+                                    text = event?.place ?: "",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+
+                            event?.let { e ->
+                                val startTime = LocalDateTime.parse(e.startTime)
+                                val endTime = LocalDateTime.parse(e.endTime)
+                                val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        modifier = Modifier.padding(end = 16.dp),
+                                        painter = painterResource(R.drawable.shortcut_events),
+                                        contentDescription = null,
+                                    )
+                                    val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, EEEE")
+                                    Text(
+                                        text = startTime.format(dateFormatter),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "${startTime.format(timeFormatter)} - ${
+                                        endTime.format(
+                                            timeFormatter
+                                        )
+                                    }",
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
                     }
                 }
 
                 // Button to Artist Detail
-                OutlinedButton(
+                Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         event?.artistSlug?.let {
@@ -225,19 +232,50 @@ fun EventDetailScreen(eventId: Int) {
                 }
 
                 // Other events
-                val otherTimes = otherEvents.filter { it.id != eventId }
-                if (otherTimes.isNotEmpty()) {
+                val otherEvents by remember(event, allEvents) {
+                    derivedStateOf { allEvents.filter { it.artistSlug == event?.artistSlug && it.id != eventId } }
+                }
+                if (otherEvents.isNotEmpty()) {
                     Text(
-                        text = "Other performances",
+                        text = "${event?.artistName} also plays at",
                         style = MaterialTheme.typography.titleLarge
                     )
-                    otherTimes.forEach { otherEvent ->
-                        val date = LocalDate.parse(otherEvent.startTime.substringBefore("T"))
-                        val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, EEEE")
-                        Text(
-                            text = date.format(dateFormatter),
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    otherEvents.forEach { otherEvent ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = otherEvent.startTime.substring(8, 10),
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            EventCard(
+                                modifier = Modifier.weight(1f),
+                                event = otherEvent,
+                            )
+                        }
+                    }
+                }
+
+                val nextHereEvents by remember(event, allEvents) {
+                    derivedStateOf {
+                        allEvents.filter {
+                            val samePlace = it.place == event?.place
+                            val isSameDay =
+                                it.startTime.substring(0, 10) == event?.startTime?.substring(0, 10)
+                            val isAfter =
+                                LocalDateTime.parse(it.startTime) > LocalDateTime.parse(event?.startTime)
+                            samePlace && isSameDay && isAfter
+                        }.sortedBy { LocalDateTime.parse(it.startTime) }
+                    }
+                }
+                if (nextHereEvents.isNotEmpty()) {
+                    Text(
+                        text = "After this at ${event?.place}",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    nextHereEvents.forEach { otherEvent ->
                         EventCard(event = otherEvent)
                     }
                 }

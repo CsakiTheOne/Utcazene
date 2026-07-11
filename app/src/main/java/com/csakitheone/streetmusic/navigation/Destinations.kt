@@ -22,6 +22,8 @@ sealed interface Destination : NavKey {
     @Serializable
     data object DataSync : Destination
     @Serializable
+    data object FavoritesSync : Destination
+    @Serializable
     data class ArtistDetail(val artistSlug: String) : Destination
     @Serializable
     data class EventDetail(val eventId: Int) : Destination

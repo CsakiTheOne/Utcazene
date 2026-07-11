@@ -36,6 +36,7 @@ import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
 import com.csakitheone.streetmusic.ui.screens.CalendarScreen
 import com.csakitheone.streetmusic.ui.screens.DataSyncScreen
 import com.csakitheone.streetmusic.ui.screens.EventDetailScreen
+import com.csakitheone.streetmusic.ui.screens.FavoritesSyncScreen
 import com.csakitheone.streetmusic.ui.screens.GyarkertScreen
 import com.csakitheone.streetmusic.ui.screens.HomeScreen
 import com.csakitheone.streetmusic.ui.screens.ImuScreen
@@ -178,6 +179,17 @@ class MainActivity : ComponentActivity() {
                                             )
                                         ) {
                                             DataSyncScreen()
+                                        }
+                                    }
+
+                                    Destination.FavoritesSync -> NavEntry(key) {
+                                        CompositionLocalProvider(
+                                            LocalSharedTransitionContext provides SharedTransitionContext(
+                                                sharedTransitionScope = this,
+                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                            )
+                                        ) {
+                                            FavoritesSyncScreen()
                                         }
                                     }
 

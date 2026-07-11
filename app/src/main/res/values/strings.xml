@@ -3,4 +3,6 @@
     <string name="shortcut_calendar_label">Calendar</string>
     <string name="shortcut_artists_label">Artists</string>
     <string name="shortcut_places_label">Places</string>
+    <string name="today_plan_widget_description">Shows your starred events for today</string>
+    <string name="now_playing_widget_description">Shows currently happening events</string>
 </resources>

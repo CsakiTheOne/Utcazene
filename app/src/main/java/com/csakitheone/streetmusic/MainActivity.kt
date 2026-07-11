@@ -54,19 +54,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val repository = remember {
-                val db = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "utcazene.db"
-                ).fallbackToDestructiveMigration(true).build()
-                val connectivityManager =
-                    context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-                val prefs = context.getSharedPreferences("favorites", Context.MODE_PRIVATE)
-                val nearbyManager = NearbyManager(context.applicationContext, lifecycleScope)
-                DataRepository(UtcazeneApi(), db, connectivityManager, prefs, nearbyManager)
-            }
-
+            val repository = remember { (context.applicationContext as UZApp).repository }
 
             val backStack = rememberNavBackStack(Destination.Home) as NavBackStack<Destination>
 

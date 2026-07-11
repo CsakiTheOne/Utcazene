@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.data
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.util.Log
@@ -15,6 +16,8 @@ import com.csakitheone.streetmusic.data.local.EventEntity
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
+import com.csakitheone.streetmusic.ui.widgets.WidgetUpdateHelper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
@@ -30,12 +34,20 @@ val LocalRepository = staticCompositionLocalOf<DataRepository> {
 }
 
 class DataRepository(
+    private val context: Context,
     private val api: UtcazeneApi,
     private val database: AppDatabase,
     private val connectivityManager: ConnectivityManager,
     private val prefs: SharedPreferences,
     val nearbyManager: NearbyManager
 ) {
+    private val scope = CoroutineScope(Dispatchers.Main)
+
+    private fun triggerWidgetUpdate() {
+        scope.launch {
+            WidgetUpdateHelper.updateAllWidgets(context)
+        }
+    }
 
     private val _nickname = MutableStateFlow(prefs.getString("nickname", "Friend") ?: "Friend")
     val nickname: StateFlow<String> = _nickname.asStateFlow()
@@ -86,6 +98,7 @@ class DataRepository(
         prefs.edit { putStringSet("fav_slugs", current) }
         _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
+        triggerWidgetUpdate()
     }
 
     fun toggleFavorite(slug: String) {
@@ -95,12 +108,14 @@ class DataRepository(
         prefs.edit { putStringSet("fav_slugs", current) }
         _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
+        triggerWidgetUpdate()
     }
 
     fun clearFavorites() {
         prefs.edit { putStringSet("fav_slugs", emptySet()) }
         _userFavorites.value = emptySet()
         nearbyManager.updateLocalFavorites(emptySet())
+        triggerWidgetUpdate()
     }
 
     init {
@@ -213,7 +228,7 @@ class DataRepository(
      */
     suspend fun downloadData() = withContext(Dispatchers.IO) {
         val yearFilter = 2026
-        val emulateFirstDayOfEvent = false
+        val emulateFirstDayOfEvent = true
 
         isDownloading = true
 

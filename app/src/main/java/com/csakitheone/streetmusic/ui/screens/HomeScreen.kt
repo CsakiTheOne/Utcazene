@@ -821,8 +821,6 @@ fun HomeSectionThisYear(repository: DataRepository) {
         derivedStateOf { artists.filter { it.tags.contains("competitor") } }
     }
 
-    if (favoriteArtists.isEmpty() && headliners.isEmpty() && competitors.isEmpty()) return
-
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "This year on Utcazene",
@@ -834,8 +832,13 @@ fun HomeSectionThisYear(repository: DataRepository) {
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         onClick = {
-            val randomYouTubeId =
-                artists.filter { !it.youtubeEmbed.isNullOrBlank() }.random().youtubeEmbed
+            val artistsWithYoutube = artists.filter { !it.youtubeEmbed.isNullOrBlank() }
+            if (artistsWithYoutube.isEmpty()) {
+                Toast.makeText(context, "No artists with youtube links found", Toast.LENGTH_SHORT)
+                    .show()
+                return@Button
+            }
+            val randomYouTubeId = artistsWithYoutube.random().youtubeEmbed
             context.startActivity(
                 Intent(
                     Intent.ACTION_VIEW,
@@ -852,48 +855,46 @@ fun HomeSectionThisYear(repository: DataRepository) {
         Text("I'm feeling lucky")
     }
 
-    if (favoriteArtists.isNotEmpty()) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Favorite artists",
-                style = MaterialTheme.typography.headlineSmall,
-            )
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "Favorite artists",
+            style = MaterialTheme.typography.headlineSmall,
+        )
 
-            TextButton(
-                onClick = { backStack.add(Destination.FavoritesSync) },
-            ) {
-                Text("Manage/Export")
-            }
+        TextButton(
+            onClick = { backStack.add(Destination.FavoritesSync) },
+        ) {
+            Text("Manage/Export")
         }
-        HorizontalMultiBrowseCarousel(
-            state = rememberCarouselState(initialItem = 0) { favoriteArtists.size + 1 },
-            preferredItemWidth = 280.dp,
-            itemSpacing = 8.dp,
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
-        ) { index ->
-            val artist = favoriteArtists.getOrNull(index)
-            if (artist != null) ArtistCard(artist = artist)
-            else {
-                Card(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { backStack.add(Destination.Artists) },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ),
-                ) {
-                    Text(
-                        modifier = Modifier.padding(16.dp),
-                        text = "Browse artists to find some favorites",
-                    )
-                }
+    }
+    HorizontalMultiBrowseCarousel(
+        state = rememberCarouselState(initialItem = 0) { favoriteArtists.size + 1 },
+        preferredItemWidth = 280.dp,
+        itemSpacing = 8.dp,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
+    ) { index ->
+        val artist = favoriteArtists.getOrNull(index)
+        if (artist != null) ArtistCard(artist = artist)
+        else {
+            Card(
+                modifier = Modifier.fillMaxSize(),
+                onClick = { backStack.add(Destination.Artists) },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+            ) {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Browse artists to find some favorites",
+                )
             }
         }
     }

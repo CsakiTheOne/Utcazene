@@ -58,12 +58,12 @@ class DataRepository(
         nearbyManager.updateLocalNickname(value)
     }
 
-    private val _nearbyFeatures = MutableStateFlow(prefs.getBoolean("nearby_features", false))
-    val nearbyFeatures: StateFlow<Boolean> = _nearbyFeatures.asStateFlow()
-    fun setNearbyFeatures(value: Boolean) {
+    private val _isNearbyFriendsActive = MutableStateFlow(prefs.getBoolean("nearby_features", false))
+    val isNearbyFriendsActive: StateFlow<Boolean> = _isNearbyFriendsActive.asStateFlow()
+    fun setIsNearbyFriendsActive(value: Boolean) {
         prefs.edit { putBoolean("nearby_features", value) }
-        _nearbyFeatures.value = value
-        nearbyManager.setNearbyActive(value)
+        _isNearbyFriendsActive.value = value
+        nearbyManager.setNearbyFriendsActive(value)
     }
 
     private val _showImagesOnMetered =
@@ -149,7 +149,7 @@ class DataRepository(
     }
 
     init {
-        nearbyManager.setNearbyActive(_nearbyFeatures.value)
+        nearbyManager.setNearbyFriendsActive(_isNearbyFriendsActive.value)
         nearbyManager.updateLocalFavorites(_userFavorites.value)
         nearbyManager.updateLocalNickname(_nickname.value)
     }

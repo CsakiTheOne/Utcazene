@@ -97,7 +97,7 @@ fun HomeScreen() {
     val scope = rememberCoroutineScope()
     val backStack = LocalNavBackStack.current
     val hasData by repository.hasData.collectAsState(initial = false)
-    val nearbyFeatures by repository.nearbyFeatures.collectAsState()
+    val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
 
     val appUpdateManager = remember { AppUpdateManagerFactory.create(context) }
     var updateInfo by remember {
@@ -583,13 +583,13 @@ fun ToggleNearbyFriendsCard(
     val context = LocalContext.current
     val repository = LocalRepository.current
 
-    val nearbyFeatures by repository.nearbyFeatures.collectAsState()
+    val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.values.all { it }) {
-            repository.setNearbyFeatures(true)
+            repository.setIsNearbyFriendsActive(true)
         } else {
             Toast.makeText(context, "Permissions required for nearby features", Toast.LENGTH_SHORT)
                 .show()
@@ -603,7 +603,7 @@ fun ToggleNearbyFriendsCard(
             if (!nearbyFeatures) {
                 permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
             } else {
-                repository.setNearbyFeatures(false)
+                repository.setIsNearbyFriendsActive(false)
             }
         },
     ) {
@@ -620,7 +620,7 @@ fun ToggleNearbyFriendsCard(
                     if (checked) {
                         permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
                     } else {
-                        repository.setNearbyFeatures(false)
+                        repository.setIsNearbyFriendsActive(false)
                     }
                 },
             )

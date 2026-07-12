@@ -1,6 +1,7 @@
 package com.csakitheone.streetmusic.data.nearby
 
 import android.util.Log
+import com.csakitheone.streetmusic.navigation.Destination
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -13,7 +14,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @Serializable
 data class FriendsPayload(
     val nickname: String,
-    val favoriteSlugs: Set<String>
+    val destination: Destination,
+    val favoriteSlugs: Set<String>,
 )
 
 class FriendsFeature(
@@ -32,6 +34,7 @@ class FriendsFeature(
 
     private var isActive = false
     private var localNickname = "Friend"
+    private var localDestination: Destination = Destination.Home
     private var localFavorites = emptySet<String>()
 
     private val connectingEndpoints = mutableSetOf<String>()
@@ -47,18 +50,26 @@ class FriendsFeature(
         }
     }
 
-    fun updateLocalFavorites(favorites: Set<String>) {
-        localFavorites = favorites
-        if (isActive) {
-            broadcastFavorites()
-        }
-    }
-
     fun updateLocalNickname(nickname: String) {
         val changed = localNickname != nickname
         localNickname = nickname
         if (isActive && changed) {
             restart()
+        }
+    }
+
+    fun updateLocalDestination(destination: Destination) {
+        val changed = localDestination != destination
+        localDestination = destination
+        if (isActive && changed) {
+            broadcastFavorites()
+        }
+    }
+
+    fun updateLocalFavorites(favorites: Set<String>) {
+        localFavorites = favorites
+        if (isActive) {
+            broadcastFavorites()
         }
     }
 
@@ -96,7 +107,8 @@ class FriendsFeature(
     }
 
     private fun broadcastFavorites() {
-        val payloadData = Json.encodeToString(FriendsPayload(localNickname, localFavorites))
+        val payloadData =
+            Json.encodeToString(FriendsPayload(localNickname, localDestination, localFavorites))
         val payload = Payload.fromBytes(payloadData.toByteArray())
 
         _connectedFriends.value.keys.forEach { endpointId ->
@@ -108,11 +120,14 @@ class FriendsFeature(
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             val (peerName, peerId) = nearbyManager.unpackName(info.endpointName)
             if (peerId == nearbyManager.localId) return
-            
+
             Log.d("FriendsFeature", "Friend found: $endpointId ($peerName)")
-            
+
             synchronized(connectingEndpoints) {
-                if (_connectedFriends.value.containsKey(endpointId) || connectingEndpoints.contains(endpointId)) {
+                if (_connectedFriends.value.containsKey(endpointId) || connectingEndpoints.contains(
+                        endpointId
+                    )
+                ) {
                     return
                 }
                 connectingEndpoints.add(endpointId)
@@ -160,7 +175,11 @@ class FriendsFeature(
             }
 
             if (result.status.isSuccess) {
-                _connectedFriends.value += (endpointId to FriendsPayload(peerName, emptySet()))
+                _connectedFriends.value += (endpointId to FriendsPayload(
+                    peerName,
+                    Destination.Home,
+                    emptySet()
+                ))
                 broadcastFavorites()
             }
         }

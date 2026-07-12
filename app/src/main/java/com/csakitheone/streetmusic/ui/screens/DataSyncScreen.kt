@@ -1,16 +1,12 @@
 package com.csakitheone.streetmusic.ui.screens
 
-import android.Manifest
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -18,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -27,7 +22,6 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,11 +72,11 @@ fun DataSyncScreen() {
     }
 
     DisposableEffect(Unit) {
-        repository.setNearbyFeatures(false)
+        repository.setIsNearbyFriendsActive(false)
 
         onDispose {
             repository.nearbyManager.dataSync.stop()
-            repository.setNearbyFeatures(repository.nearbyFeatures.value)
+            repository.setIsNearbyFriendsActive(repository.isNearbyFriendsActive.value)
         }
     }
 

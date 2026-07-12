@@ -1,23 +1,27 @@
 package com.csakitheone.streetmusic.ui.components
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.navigation.Destination
 
 @Composable
 fun NearbyConnectionsDisplay(
@@ -32,13 +37,53 @@ fun NearbyConnectionsDisplay(
 ) {
     val context = LocalContext.current
     val repository = LocalRepository.current
-    val nearbyFeatures by repository.nearbyFeatures.collectAsState()
+    val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
+
+    var showDialog by remember { mutableStateOf(false) }
 
     AnimatedVisibility(nearbyFeatures) {
         val connectedFriends by repository.nearbyManager.friends.connectedFriends.collectAsState()
 
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("Close")
+                    }
+                },
+                title = { Text("Nearby Friends") },
+                text = {
+                    LazyColumn {
+                        items(connectedFriends.values.toList()) { friend ->
+                            ListItem(
+                                leadingContent = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = friend.nickname.firstOrNull()?.toString() ?: "?",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                        )
+                                    }
+                                },
+                                supportingContent = { Text("At: ${friend.destination.label()}") }
+                            ) {
+                                Text(friend.nickname)
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
         Row(
-            modifier = modifier,
+            modifier = modifier.clickable { showDialog = true },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (connectedFriends.isEmpty()) {
@@ -56,10 +101,7 @@ fun NearbyConnectionsDisplay(
                             .padding(16.dp)
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .clickable {
-                                Toast.makeText(context, name, Toast.LENGTH_SHORT).show()
-                            },
+                            .background(MaterialTheme.colorScheme.primary),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -72,4 +114,20 @@ fun NearbyConnectionsDisplay(
             }
         }
     }
+}
+
+private fun Destination.label(): String = when (this) {
+    Destination.Home -> "Home"
+    Destination.Calendar -> "Calendar"
+    Destination.Artists -> "Artists"
+    Destination.Places -> "Places"
+    Destination.Map -> "Map"
+    Destination.Settings -> "Settings"
+    Destination.DataSync -> "Data Sync"
+    Destination.FavoritesSync -> "Favorites Sync"
+    is Destination.ArtistDetail -> "Artist Detail"
+    is Destination.EventDetail -> "Event Detail"
+    Destination.UnlockFest -> "Unlock Festival"
+    Destination.Gyarkert -> "Gyárkert"
+    Destination.Imu -> "Imu"
 }

@@ -1,9 +1,6 @@
 package com.csakitheone.streetmusic
 
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
@@ -28,12 +24,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.navigation3.ui.NavDisplay
-import androidx.room.Room
-import com.csakitheone.streetmusic.data.DataRepository
 import com.csakitheone.streetmusic.data.LocalRepository
-import com.csakitheone.streetmusic.data.api.UtcazeneApi
-import com.csakitheone.streetmusic.data.local.AppDatabase
-import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
@@ -104,14 +95,19 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    val nearbyFeatures = repository.nearbyFeatures.value
-                    repository.nearbyManager.setNearbyActive(nearbyFeatures)
+                    val nearbyFeatures = repository.isNearbyFriendsActive.value
+                    repository.nearbyManager.setNearbyFriendsActive(nearbyFeatures)
                     try {
                         awaitCancellation()
                     } finally {
-                        repository.nearbyManager.setNearbyActive(false)
+                        repository.nearbyManager.setNearbyFriendsActive(false)
                     }
                 }
+            }
+            
+            LaunchedEffect(backStack.lastOrNull()) {
+                val currentScreen = backStack.lastOrNull() ?: Destination.Home
+                repository.nearbyManager.updateLocalDestination(currentScreen)
             }
 
             SharedTransitionLayout {

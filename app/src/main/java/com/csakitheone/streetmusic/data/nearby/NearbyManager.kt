@@ -8,6 +8,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.csakitheone.streetmusic.navigation.Destination
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
@@ -43,7 +44,7 @@ class NearbyManager(
         _error.value = null
     }
 
-    fun setNearbyActive(active: Boolean) {
+    fun setNearbyFriendsActive(active: Boolean) {
         if (!active) {
             dataSync.stop()
         }
@@ -55,6 +56,10 @@ class NearbyManager(
 
     fun updateLocalFavorites(favorites: Set<String>) {
         friends.updateLocalFavorites(favorites)
+    }
+
+    fun updateLocalDestination(currentScreen: Destination) {
+        friends.updateLocalDestination(currentScreen)
     }
 
     fun updateLocalNickname(nickname: String) {

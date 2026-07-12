@@ -215,7 +215,7 @@ class DataRepository(
                     it.startTime, it.endTime, it.place,
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
-            }
+            }.sortedBy { it.startTime }
         }
 
     val hasData: Flow<Boolean> = database.artistDao().getCount()
@@ -350,8 +350,9 @@ class DataRepository(
                 val events = database.eventDao().getEventsByArtist(artist.slug).first()
                 val tags = artist.tags.split(",").map { it.trim() }.toMutableSet()
 
-                if (events.size < eventDays.size && events.size == 1) {
-                    tags.add("onechance")
+                if (events.size < eventDays.size) {
+                    if (events.size == 1) tags.add("onechance")
+                    else if (events.size == 2) tags.add("twoshot")
                 } else if (events.size > eventDays.size) {
                     tags.add("encore")
                 }

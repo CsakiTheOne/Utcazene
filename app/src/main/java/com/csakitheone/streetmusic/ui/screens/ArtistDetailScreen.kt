@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -41,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -57,6 +59,7 @@ import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.data.model.tagInfo
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
@@ -78,6 +81,21 @@ fun ArtistDetailScreen(artistSlug: String) {
 
     var selectedTabIndex by rememberSaveable(events) {
         mutableIntStateOf(if (events.isEmpty()) 1 else 0)
+    }
+
+    var selectedTag by remember { mutableStateOf("") }
+
+    if (selectedTag.isNotBlank()) {
+        AlertDialog(
+            onDismissRequest = { selectedTag = "" },
+            title = { Text(selectedTag) },
+            text = { Text(tagInfo[selectedTag] ?: "") },
+            confirmButton = {
+                Button(onClick = { selectedTag = "" }) {
+                    Text("OK")
+                }
+            },
+        )
     }
 
     Scaffold(
@@ -236,7 +254,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                             ) {
                                 it.tags.forEach { tag ->
                                     SuggestionChip(
-                                        onClick = { },
+                                        onClick = { selectedTag = tag },
                                         label = { Text(tag) }
                                     )
                                 }
@@ -280,6 +298,27 @@ fun ArtistDetailScreen(artistSlug: String) {
                                         ?: "").ifBlank { "Waiting for Utcazene to finish artist details..." },
                                     style = MaterialTheme.typography.bodySmall,
                                 )
+                            }
+                        }
+
+                        if (artist?.tags?.contains("competitor") == true) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            "https://utcazene.hu/".toUri()
+                                        )
+                                    )
+                                }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                    painter = painterResource(R.drawable.ic_vote),
+                                    contentDescription = null,
+                                )
+                                Text("Vote for this artist on the official website")
                             }
                         }
                     }

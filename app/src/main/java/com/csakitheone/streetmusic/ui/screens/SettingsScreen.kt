@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
@@ -38,11 +40,13 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen() {
-    val repository = LocalRepository.current
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
     val showImagesOnMetered by repository.showImagesOnMetered.collectAsState(initial = false)
+    val useHighPowerDiscovery by repository.useHighPowerDiscovery.collectAsState(initial = false)
     val nickname by repository.nickname.collectAsState()
 
     val artists by repository.artists.collectAsState(initial = emptyList())
@@ -114,6 +118,39 @@ fun SettingsScreen() {
                         modifier = Modifier.padding(8.dp),
                         text = "Show images and videos on metered connections",
                     )
+                }
+            }
+
+            Card(
+                onClick = {
+                    repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
+                    if (repository.isNearbyFriendsActive.value) {
+                        Toast.makeText(context, "Restart nearby friends to apply changes", Toast.LENGTH_SHORT).show()
+                    }
+                },
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        modifier = Modifier.padding(8.dp),
+                        checked = useHighPowerDiscovery,
+                        onCheckedChange = {
+                            repository.setUseHighPowerDiscovery(it)
+                        }
+                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .weight(1f)
+                    ) {
+                        Text(text = "High-power discovery")
+                        Text(
+                            text = "Faster discovery in crowded areas, but uses more battery.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                 }
             }
 

@@ -3,12 +3,10 @@ package com.csakitheone.streetmusic.data.nearby
 import android.util.Log
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.time.Duration.Companion.milliseconds
 
 @Serializable
 data class FriendsPayload(
@@ -66,8 +64,9 @@ class FriendsFeature(
     }
 
     fun updateLocalFavorites(favorites: Set<String>) {
+        val changed = localFavorites != favorites
         localFavorites = favorites
-        if (isActive) {
+        if (isActive && changed) {
             broadcastFavorites()
         }
     }
@@ -120,7 +119,13 @@ class FriendsFeature(
             val (peerName, peerId) = nearbyManager.unpackName(info.endpointName)
             if (peerId == nearbyManager.localId) return
 
-            Log.d("FriendsFeature", "Friend found: $endpointId ($peerName)")
+            // Deterministic Initiator: Only the device with the smaller ID initiates the connection
+            if (nearbyManager.localId >= peerId) {
+                Log.d("FriendsFeature", "Found $peerName ($peerId), waiting for them to initiate.")
+                return
+            }
+
+            Log.d("FriendsFeature", "Friend found: $endpointId ($peerName). Initiating...")
 
             synchronized(connectingEndpoints) {
                 if (_connectedFriends.value.containsKey(endpointId) || connectingEndpoints.contains(
@@ -134,7 +139,6 @@ class FriendsFeature(
             }
 
             scope.launch {
-                delay(((20..100).random() * 10).milliseconds)
                 if (!isActive || _connectedFriends.value.containsKey(endpointId)) {
                     synchronized(connectingEndpoints) { connectingEndpoints.remove(endpointId) }
                     return@launch

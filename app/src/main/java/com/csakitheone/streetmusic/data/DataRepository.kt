@@ -74,6 +74,15 @@ class DataRepository(
         _showImagesOnMetered.value = value
     }
 
+    private val _useHighPowerDiscovery =
+        MutableStateFlow(prefs.getBoolean("high_power_discovery", false))
+    val useHighPowerDiscovery: StateFlow<Boolean> = _useHighPowerDiscovery.asStateFlow()
+    fun setUseHighPowerDiscovery(value: Boolean) {
+        prefs.edit { putBoolean("high_power_discovery", value) }
+        _useHighPowerDiscovery.value = value
+        nearbyManager.useHighPowerDiscovery = value
+    }
+
     fun shouldShowImage(): Boolean {
         return !connectivityManager.isActiveNetworkMetered || _showImagesOnMetered.value
     }
@@ -152,6 +161,7 @@ class DataRepository(
         nearbyManager.setNearbyFriendsActive(_isNearbyFriendsActive.value)
         nearbyManager.updateLocalFavorites(_userFavorites.value)
         nearbyManager.updateLocalNickname(_nickname.value)
+        nearbyManager.useHighPowerDiscovery = _useHighPowerDiscovery.value
     }
 
     var isDownloading by mutableStateOf(false)

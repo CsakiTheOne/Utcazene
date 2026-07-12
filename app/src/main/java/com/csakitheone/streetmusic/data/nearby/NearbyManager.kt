@@ -39,6 +39,8 @@ class NearbyManager(
     private var advertisingRetryCount = 0
     private var discoveryRetryCount = 0
 
+    var useHighPowerDiscovery = false
+
     fun clearError() {
         _error.value = null
     }
@@ -118,7 +120,10 @@ class NearbyManager(
         activeAdvertiser = requester
         activeStrategy = strategy
 
-        val options = AdvertisingOptions.Builder().setStrategy(strategy).build()
+        val options = AdvertisingOptions.Builder()
+            .setStrategy(strategy)
+            .setLowPower(!useHighPowerDiscovery)
+            .build()
         connectionsClient.startAdvertising(endpointName, serviceId, callback, options)
             .addOnSuccessListener {
                 Log.i("NearbyManager", "Advertising started for ${requester::class.simpleName}")
@@ -195,7 +200,10 @@ class NearbyManager(
         activeDiscoverer = requester
         activeStrategy = strategy
 
-        val options = DiscoveryOptions.Builder().setStrategy(strategy).build()
+        val options = DiscoveryOptions.Builder()
+            .setStrategy(strategy)
+            .setLowPower(!useHighPowerDiscovery)
+            .build()
         connectionsClient.startDiscovery(serviceId, callback, options)
             .addOnSuccessListener {
                 Log.i("NearbyManager", "Discovery started for ${requester::class.simpleName}")

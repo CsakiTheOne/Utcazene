@@ -47,6 +47,7 @@ import com.csakitheone.streetmusic.ui.screens.UnlockFestScreen
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.collectLatest
+import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
                         Log.d("MainActivity", "Deep link to event: $eventId")
                         if (eventId != -1) Destination.EventDetail(eventId) else null
                     }
+
                     else -> null
                 }
                 if (startDestination != null) {
@@ -106,7 +108,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            
+
             LaunchedEffect(backStack.lastOrNull()) {
                 val currentScreen = backStack.lastOrNull() ?: Destination.Home
                 when (currentScreen) {
@@ -120,8 +122,11 @@ class MainActivity : ComponentActivity() {
 
                     is Destination.EventDetail -> {
                         repository.getEvent(currentScreen.eventId).collectLatest { event ->
+                            val startTime = LocalDateTime.parse(
+                                event?.startTime ?: LocalDateTime.now().toString()
+                            )
                             val label =
-                                if (event != null) "Event: ${event.artistName} at ${event.startTime}" else "Event Detail"
+                                if (event != null) "Event: ${event.artistName} on ${startTime.dayOfMonth} at ${startTime.toLocalTime()}" else "Event Detail"
                             repository.nearbyManager.updateLocalScreen(label)
                         }
                     }

@@ -8,7 +8,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.csakitheone.streetmusic.navigation.Destination
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.*
@@ -58,8 +57,8 @@ class NearbyManager(
         friends.updateLocalFavorites(favorites)
     }
 
-    fun updateLocalDestination(currentScreen: Destination) {
-        friends.updateLocalDestination(currentScreen)
+    fun updateLocalScreen(screen: String) {
+        friends.updateLocalScreen(screen)
     }
 
     fun updateLocalNickname(nickname: String) {

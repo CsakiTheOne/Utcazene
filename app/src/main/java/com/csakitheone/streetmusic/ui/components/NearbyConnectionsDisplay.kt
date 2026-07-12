@@ -29,13 +29,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.data.LocalRepository
-import com.csakitheone.streetmusic.navigation.Destination
 
 @Composable
 fun NearbyConnectionsDisplay(
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val repository = LocalRepository.current
     val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
 
@@ -72,7 +70,7 @@ fun NearbyConnectionsDisplay(
                                         )
                                     }
                                 },
-                                supportingContent = { Text("At: ${friend.destination.label()}") }
+                                supportingContent = { Text("At: ${friend.screen}") }
                             ) {
                                 Text(friend.nickname)
                             }
@@ -114,20 +112,4 @@ fun NearbyConnectionsDisplay(
             }
         }
     }
-}
-
-private fun Destination.label(): String = when (this) {
-    Destination.Home -> "Home"
-    Destination.Calendar -> "Calendar"
-    Destination.Artists -> "Artists"
-    Destination.Places -> "Places"
-    Destination.Map -> "Map"
-    Destination.Settings -> "Settings"
-    Destination.DataSync -> "Data Sync"
-    Destination.FavoritesSync -> "Favorites Sync"
-    is Destination.ArtistDetail -> "Artist Detail"
-    is Destination.EventDetail -> "Event Detail"
-    Destination.UnlockFest -> "Unlock Festival"
-    Destination.Gyarkert -> "Gyárkert"
-    Destination.Imu -> "Imu"
 }

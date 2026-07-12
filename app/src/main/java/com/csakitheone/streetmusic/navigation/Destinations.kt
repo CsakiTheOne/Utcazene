@@ -35,6 +35,22 @@ sealed interface Destination : NavKey {
     data object Imu : Destination
 }
 
+fun Destination.label(): String = when (this) {
+    Destination.Home -> "Home"
+    Destination.Calendar -> "Calendar"
+    Destination.Artists -> "Artists"
+    Destination.Places -> "Places"
+    Destination.Map -> "Map"
+    Destination.Settings -> "Settings"
+    Destination.DataSync -> "Data Sync"
+    Destination.FavoritesSync -> "Favorites Sync"
+    is Destination.ArtistDetail -> "Artist Detail"
+    is Destination.EventDetail -> "Event Detail"
+    Destination.UnlockFest -> "Unlock Festival"
+    Destination.Gyarkert -> "Gyárkert"
+    Destination.Imu -> "Imu"
+}
+
 val LocalNavBackStack = staticCompositionLocalOf<NavBackStack<Destination>> {
     error("No NavBackStack provided")
 }

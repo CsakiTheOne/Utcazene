@@ -29,6 +29,7 @@ import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.navigation.SharedTransitionContext
+import com.csakitheone.streetmusic.navigation.label
 import com.csakitheone.streetmusic.notifications.NotificationHelper
 import com.csakitheone.streetmusic.ui.screens.ArtistDetailScreen
 import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
@@ -45,6 +46,7 @@ import com.csakitheone.streetmusic.ui.screens.SettingsScreen
 import com.csakitheone.streetmusic.ui.screens.UnlockFestScreen
 import com.csakitheone.streetmusic.ui.theme.UtcazeneTheme
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.collectLatest
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,7 +109,27 @@ class MainActivity : ComponentActivity() {
             
             LaunchedEffect(backStack.lastOrNull()) {
                 val currentScreen = backStack.lastOrNull() ?: Destination.Home
-                repository.nearbyManager.updateLocalDestination(currentScreen)
+                when (currentScreen) {
+                    is Destination.ArtistDetail -> {
+                        repository.getArtist(currentScreen.artistSlug).collectLatest { artist ->
+                            val label =
+                                if (artist != null) "Artist: ${artist.name}" else "Artist Detail"
+                            repository.nearbyManager.updateLocalScreen(label)
+                        }
+                    }
+
+                    is Destination.EventDetail -> {
+                        repository.getEvent(currentScreen.eventId).collectLatest { event ->
+                            val label =
+                                if (event != null) "Event: ${event.artistName} at ${event.startTime}" else "Event Detail"
+                            repository.nearbyManager.updateLocalScreen(label)
+                        }
+                    }
+
+                    else -> {
+                        repository.nearbyManager.updateLocalScreen(currentScreen.label())
+                    }
+                }
             }
 
             SharedTransitionLayout {

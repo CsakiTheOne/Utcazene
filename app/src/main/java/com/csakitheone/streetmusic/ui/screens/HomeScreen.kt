@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,6 +42,9 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SplitButtonDefaults
+import androidx.compose.material3.SplitButtonLayout
+import androidx.compose.material3.SplitButtonShapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -328,27 +333,43 @@ fun HomeScreen() {
                         )
                         Text("Artists")
                     }
-                    Button(
+                    SplitButtonLayout(
                         modifier = Modifier.fillMaxSize(),
-                        onClick = { backStack.add(Destination.Places) },
-                        shape = MaterialTheme.shapes.large,
-                    ) {
-                        Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                            painter = painterResource(R.drawable.shortcut_places),
-                            contentDescription = null
-                        )
-                        Text("Places")
-                        FilledTonalIconButton(
-                            modifier = Modifier.padding(start = ButtonDefaults.IconSpacing),
-                            onClick = { backStack.add(Destination.Map) }
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_map),
-                                contentDescription = null
-                            )
-                        }
-                    }
+                        leadingButton = {
+                            Button(
+                                modifier = Modifier.fillMaxHeight(),
+                                onClick = { backStack.add(Destination.Places) },
+                                shape = RoundedCornerShape(
+                                    topStart = MaterialTheme.shapes.large.topStart,
+                                    bottomStart = MaterialTheme.shapes.large.bottomStart,
+                                    topEnd = MaterialTheme.shapes.small.topEnd,
+                                    bottomEnd = MaterialTheme.shapes.small.bottomEnd,
+                                ),
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                    painter = painterResource(R.drawable.shortcut_places),
+                                    contentDescription = null
+                                )
+                                Text("Places")
+                            }
+                        },
+                        trailingButton = {
+                            SplitButtonDefaults.TrailingButton(
+                                modifier = Modifier.fillMaxHeight(),
+                                onClick = { backStack.add(Destination.Map) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                                ),
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_map),
+                                    contentDescription = null
+                                )
+                            }
+                        },
+                    )
                     ToggleNearbyFriendsCard(
                         modifier = Modifier.fillMaxSize(),
                     )

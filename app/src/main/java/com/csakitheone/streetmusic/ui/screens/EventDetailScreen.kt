@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
@@ -220,6 +221,15 @@ fun EventDetailScreen(eventId: Int) {
                                     text = event?.place ?: "",
                                     style = MaterialTheme.typography.titleMedium
                                 )
+                                FilledIconButton(
+                                    modifier = Modifier.padding(start = 16.dp),
+                                    onClick = { backStack.add(Destination.Map) }
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_map),
+                                        contentDescription = null,
+                                    )
+                                }
                             }
 
                             event?.let { e ->
@@ -316,12 +326,14 @@ fun EventDetailScreen(eventId: Int) {
                             try {
                                 val samePlace = it.place == event?.place
                                 val isSameDay =
-                                    it.startTime.substring(0, 10) == event?.startTime?.substring(0, 10)
+                                    it.startTime.substring(0, 10) == event?.startTime?.substring(
+                                        0,
+                                        10
+                                    )
                                 val isAfter =
                                     LocalDateTime.parse(it.startTime) > LocalDateTime.parse(event?.startTime)
                                 samePlace && isSameDay && isAfter
-                            }
-                            catch (e: Exception) {
+                            } catch (e: Exception) {
                                 false
                             }
                         }.sortedBy { LocalDateTime.parse(it.startTime) }

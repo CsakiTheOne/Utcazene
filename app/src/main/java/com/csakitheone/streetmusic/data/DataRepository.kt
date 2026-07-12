@@ -16,6 +16,7 @@ import com.csakitheone.streetmusic.data.local.EventEntity
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
+import com.csakitheone.streetmusic.notifications.AlarmScheduler
 import com.csakitheone.streetmusic.ui.widgets.WidgetUpdateHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,16 +100,45 @@ class DataRepository(
         _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
         triggerWidgetUpdate()
+
+        // Schedule/Cancel notification if it's an event slug
+        if (slug.contains(" at ")) {
+            scope.launch(Dispatchers.IO) {
+                val event = events.first().find { "${it.artistSlug} at ${it.startTime}" == slug }
+                if (event != null) {
+                    if (value) {
+                        AlarmScheduler.scheduleEventAlarm(context, event)
+                    } else {
+                        AlarmScheduler.cancelEventAlarm(context, event.id)
+                    }
+                }
+            }
+        }
     }
 
     fun toggleFavorite(slug: String) {
         val current = _userFavorites.value.toMutableSet()
-        if (current.contains(slug)) current.remove(slug) else current.add(slug)
+        val newValue = !current.contains(slug)
+        if (newValue) current.add(slug) else current.remove(slug)
 
         prefs.edit { putStringSet("fav_slugs", current) }
         _userFavorites.value = current
         nearbyManager.updateLocalFavorites(current)
         triggerWidgetUpdate()
+
+        // Schedule/Cancel notification if it's an event slug
+        if (slug.contains(" at ")) {
+            scope.launch(Dispatchers.IO) {
+                val event = events.first().find { "${it.artistSlug} at ${it.startTime}" == slug }
+                if (event != null) {
+                    if (newValue) {
+                        AlarmScheduler.scheduleEventAlarm(context, event)
+                    } else {
+                        AlarmScheduler.cancelEventAlarm(context, event.id)
+                    }
+                }
+            }
+        }
     }
 
     fun clearFavorites() {
@@ -270,8 +300,10 @@ class DataRepository(
                 artist.timeslots.mapNotNull { slot ->
                     val date = slot.eventStartTime ?: ""
                     if (!date.startsWith(yearFilter.toString())) return@mapNotNull null
+                    val eventId = slot.event ?: return@mapNotNull null
 
                     EventEntity(
+                        id = (artist.id * 1000) + eventId,
                         artistId = artist.id,
                         artistName = artist.name,
                         artistSlug = artist.slug,
@@ -328,6 +360,8 @@ class DataRepository(
             }
             database.artistDao().deleteAll()
             database.artistDao().insertAll(taggedArtists)
+
+            AlarmScheduler.rescheduleAll(context, this@DataRepository)
         }
         isDownloading = false
     }

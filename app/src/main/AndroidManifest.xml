@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Legacy Wi-Fi permissions (Install-time, safe to leave unbounded) -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -68,6 +71,15 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/now_playing_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".notifications.EventNotificationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.csakitheone.streetmusic.ACTION_NOTIFY_EVENT" />
+            </intent-filter>
         </receiver>
     </application>
 

@@ -20,7 +20,7 @@ data class ArtistEntity(
 @Entity(tableName = "events")
 @Serializable
 data class EventEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val id: Int,
     val artistId: Int,
     val artistSlug: String,
     val artistName: String,

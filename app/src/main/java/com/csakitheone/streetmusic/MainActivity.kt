@@ -1,16 +1,23 @@
 package com.csakitheone.streetmusic
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -31,6 +38,7 @@ import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.navigation.SharedTransitionContext
+import com.csakitheone.streetmusic.notifications.NotificationHelper
 import com.csakitheone.streetmusic.ui.screens.ArtistDetailScreen
 import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
 import com.csakitheone.streetmusic.ui.screens.CalendarScreen
@@ -58,16 +66,38 @@ class MainActivity : ComponentActivity() {
 
             val backStack = rememberNavBackStack(Destination.Home) as NavBackStack<Destination>
 
+            val permissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) {}
+
             LaunchedEffect(Unit) {
+                NotificationHelper.createNotificationChannel(context)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+
                 repository.tryDownloadData()
 
+                Log.d("MainActivity", "Received intent action: ${intent.action}")
                 val startDestination = when (intent.action) {
                     "com.csakitheone.streetmusic.ACTION_CALENDAR" -> Destination.Calendar
                     "com.csakitheone.streetmusic.ACTION_ARTISTS" -> Destination.Artists
                     "com.csakitheone.streetmusic.ACTION_PLACES" -> Destination.Places
+                    "com.csakitheone.streetmusic.ACTION_EVENT_DETAIL" -> {
+                        val eventId = intent.getIntExtra("eventId", -1)
+                        Log.d("MainActivity", "Deep link to event: $eventId")
+                        if (eventId != -1) Destination.EventDetail(eventId) else null
+                    }
                     else -> null
                 }
                 if (startDestination != null) {
+                    Log.d("MainActivity", "Navigating to: $startDestination")
                     backStack.add(startDestination)
                 }
             }

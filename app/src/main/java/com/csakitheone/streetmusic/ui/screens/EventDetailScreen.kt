@@ -1,6 +1,7 @@
 package com.csakitheone.streetmusic.ui.screens
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -312,12 +313,17 @@ fun EventDetailScreen(eventId: Int) {
                 val nextHereEvents by remember(event, allEvents) {
                     derivedStateOf {
                         allEvents.filter {
-                            val samePlace = it.place == event?.place
-                            val isSameDay =
-                                it.startTime.substring(0, 10) == event?.startTime?.substring(0, 10)
-                            val isAfter =
-                                LocalDateTime.parse(it.startTime) > LocalDateTime.parse(event?.startTime)
-                            samePlace && isSameDay && isAfter
+                            try {
+                                val samePlace = it.place == event?.place
+                                val isSameDay =
+                                    it.startTime.substring(0, 10) == event?.startTime?.substring(0, 10)
+                                val isAfter =
+                                    LocalDateTime.parse(it.startTime) > LocalDateTime.parse(event?.startTime)
+                                samePlace && isSameDay && isAfter
+                            }
+                            catch (e: Exception) {
+                                false
+                            }
                         }.sortedBy { LocalDateTime.parse(it.startTime) }
                     }
                 }
@@ -330,6 +336,13 @@ fun EventDetailScreen(eventId: Int) {
                         EventCard(event = otherEvent)
                     }
                 }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "ID: $eventId",
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }

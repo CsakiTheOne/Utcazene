@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import com.csakitheone.streetmusic.data.GyarkertRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -89,16 +91,7 @@ fun GyarkertScreen() {
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            uriHandler.openUri(GyarkertRepository.url)
-                        },
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_web),
-                            contentDescription = "Website"
-                        )
-                    }
+                    NearbyConnectionsDisplay()
                 },
             )
         },
@@ -226,6 +219,20 @@ fun GyarkertScreen() {
                         )
                         FavoritesIndicator(slug = "gyarkert_day25")
                     }
+                }
+            }
+
+            item {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { uriHandler.openUri(GyarkertRepository.url) }
+                ) {
+                    Icon(
+                        modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                        painter = painterResource(R.drawable.ic_web),
+                        contentDescription = null,
+                    )
+                    Text("Visit Gyárkert's website")
                 }
             }
         }

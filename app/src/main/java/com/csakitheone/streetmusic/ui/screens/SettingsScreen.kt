@@ -24,7 +24,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +53,12 @@ fun SettingsScreen() {
 
     val artists by repository.artists.collectAsState(initial = emptyList())
     val events by repository.events.collectAsState(initial = emptyList())
+
+    val incompleteArtistsCount by remember(artists) {
+        derivedStateOf {
+            artists.count { it.description.isEmpty() || it.image.isNullOrBlank() || it.youtubeEmbed.isNullOrBlank() }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -125,7 +133,11 @@ fun SettingsScreen() {
                 onClick = {
                     repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
                     if (repository.isNearbyFriendsActive.value) {
-                        Toast.makeText(context, "Restart nearby friends to apply changes", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Restart nearby friends to apply changes",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
             ) {
@@ -169,7 +181,7 @@ fun SettingsScreen() {
                                     .align(Alignment.CenterHorizontally),
                             )
                         } else {
-                            Text(text = "${artists.size} artists\n${events.size} events")
+                            Text(text = "${artists.size} artists${if (incompleteArtistsCount > 0) " ($incompleteArtistsCount incomplete)" else ""}\n${events.size} events")
                         }
                     }
 

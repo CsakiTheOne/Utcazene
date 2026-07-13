@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -664,7 +666,7 @@ fun ToggleNearbyFriendsCard(
 }
 
 @Composable
-fun HomeSectionToday(repository: DataRepository) {
+fun ColumnScope.HomeSectionToday(repository: DataRepository) {
     val context = LocalContext.current
     val events by repository.events.collectAsState(initial = emptyList())
     var now by remember { mutableStateOf(LocalDateTime.now()) }
@@ -715,10 +717,10 @@ fun HomeSectionToday(repository: DataRepository) {
     )
 
     if (upcomingStarred.isEmpty()) {
-        Button(
+        TextButton(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
+                .align(Alignment.CenterHorizontally),
             onClick = { backStack.add(Destination.Calendar) },
         ) {
             Text("Plan something for today")
@@ -779,7 +781,12 @@ fun HomeSectionToday(repository: DataRepository) {
 }
 
 @Composable
-fun HomeSectionTomorrow(repository: DataRepository) {
+fun ColumnScope.HomeSectionTomorrow(repository: DataRepository) {
+    val eventDays by repository.eventDates.collectAsState(initial = emptyList())
+
+    if (eventDays.isEmpty() || !eventDays.contains(LocalDate.now().plusDays(1).toString())) return
+
+    val backStack = LocalNavBackStack.current
     val events by repository.events.collectAsState(initial = emptyList())
     val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
@@ -791,21 +798,30 @@ fun HomeSectionTomorrow(repository: DataRepository) {
         }
     }
 
-    if (tomorrowStarred.isEmpty()) return
-
     Text(
         modifier = Modifier.padding(horizontal = 16.dp),
         text = "Tomorrow's plan",
         style = MaterialTheme.typography.headlineLarge,
     )
 
-    tomorrowStarred.forEach { event ->
-        CombinedDisplay(modifier = Modifier.padding(horizontal = 16.dp), data = event)
+    if (tomorrowStarred.isEmpty()) {
+        TextButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .align(Alignment.CenterHorizontally),
+            onClick = { backStack.add(Destination.Calendar) },
+        ) {
+            Text("Plan something for tomorrow")
+        }
+    } else {
+        tomorrowStarred.forEach { event ->
+            CombinedDisplay(modifier = Modifier.padding(horizontal = 16.dp), data = event)
+        }
     }
 }
 
 @Composable
-fun HomeSectionThisYear(repository: DataRepository) {
+fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
     val context = LocalContext.current
     val backStack = LocalNavBackStack.current
     val artists by repository.artists.collectAsState(initial = emptyList())
@@ -827,16 +843,16 @@ fun HomeSectionThisYear(repository: DataRepository) {
         style = MaterialTheme.typography.headlineLarge,
     )
 
-    Button(
+    ExtendedFloatingActionButton(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
+            .align(Alignment.CenterHorizontally),
         onClick = {
             val artistsWithYoutube = artists.filter { !it.youtubeEmbed.isNullOrBlank() }
             if (artistsWithYoutube.isEmpty()) {
                 Toast.makeText(context, "No artists with youtube links found", Toast.LENGTH_SHORT)
                     .show()
-                return@Button
+                return@ExtendedFloatingActionButton
             }
             val randomYouTubeId = artistsWithYoutube.random().youtubeEmbed
             context.startActivity(
@@ -846,14 +862,14 @@ fun HomeSectionThisYear(repository: DataRepository) {
                 )
             )
         },
-    ) {
-        Icon(
-            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-            painter = painterResource(R.drawable.ic_youtube),
-            contentDescription = null,
-        )
-        Text("I'm feeling lucky")
-    }
+        text = { Text("I'm feeling lucky") },
+        icon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_youtube),
+                contentDescription = null,
+            )
+        },
+    )
 
     Row(
         modifier = Modifier

@@ -9,11 +9,28 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
@@ -31,6 +48,7 @@ import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.navigation.SharedTransitionContext
 import com.csakitheone.streetmusic.navigation.label
 import com.csakitheone.streetmusic.notifications.NotificationHelper
+import com.csakitheone.streetmusic.ui.components.UniversalSearchOverlay
 import com.csakitheone.streetmusic.ui.screens.ArtistDetailScreen
 import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
 import com.csakitheone.streetmusic.ui.screens.CalendarScreen
@@ -63,6 +81,8 @@ class MainActivity : ComponentActivity() {
             val permissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
             ) {}
+
+            var isUniversalSearchOverlayVisible by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
                 NotificationHelper.createNotificationChannel(context)
@@ -141,167 +161,209 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     LocalNavBackStack provides backStack,
                     LocalRepository provides repository,
+                    LocalSharedTransitionContext provides null,
                 ) {
                     UtcazeneTheme {
-                        NavDisplay(
-                            backStack = backStack,
-                            onBack = {
-                                if (backStack.size > 1) {
-                                    backStack.removeAt(backStack.lastIndex)
-                                } else {
-                                    finish()
+                        Box {
+                            NavDisplay(
+                                backStack = backStack,
+                                onBack = {
+                                    if (backStack.size > 1) {
+                                        backStack.removeAt(backStack.lastIndex)
+                                    } else {
+                                        finish()
+                                    }
+                                },
+                                entryDecorators = listOf(
+                                    rememberSaveableStateHolderNavEntryDecorator(),
+                                ),
+                                entryProvider = { key ->
+                                    when (key) {
+                                        Destination.Home -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                HomeScreen(
+                                                    onRequestSearch = {
+                                                        isUniversalSearchOverlayVisible = true
+                                                    },
+                                                )
+                                            }
+                                        }
+
+                                        Destination.Calendar -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                CalendarScreen(
+                                                    onRequestSearch = {
+                                                        isUniversalSearchOverlayVisible = true
+                                                    },
+                                                )
+                                            }
+                                        }
+
+                                        Destination.Artists -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                ArtistsScreen(
+                                                    onRequestSearch = {
+                                                        isUniversalSearchOverlayVisible = true
+                                                    },
+                                                )
+                                            }
+                                        }
+
+                                        Destination.Places -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                PlacesScreen(
+                                                    onRequestSearch = {
+                                                        isUniversalSearchOverlayVisible = true
+                                                    },
+                                                )
+                                            }
+                                        }
+
+                                        Destination.Map -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                MapScreen()
+                                            }
+                                        }
+
+                                        Destination.Settings -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                SettingsScreen()
+                                            }
+                                        }
+
+                                        Destination.DataSync -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                DataSyncScreen()
+                                            }
+                                        }
+
+                                        Destination.FavoritesSync -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                FavoritesSyncScreen()
+                                            }
+                                        }
+
+                                        is Destination.ArtistDetail -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                ArtistDetailScreen(key.artistSlug)
+                                            }
+                                        }
+
+                                        is Destination.EventDetail -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                EventDetailScreen(key.eventId)
+                                            }
+                                        }
+
+                                        is Destination.UnlockFest -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                UnlockFestScreen()
+                                            }
+                                        }
+
+                                        Destination.Gyarkert -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                GyarkertScreen()
+                                            }
+                                        }
+
+                                        Destination.Imu -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                ImuScreen()
+                                            }
+                                        }
+                                    }
                                 }
-                            },
-                            entryDecorators = listOf(
-                                rememberSaveableStateHolderNavEntryDecorator(),
-                            ),
-                            entryProvider = { key ->
-                                when (key) {
-                                    Destination.Home -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            HomeScreen()
+                            )
+                            AnimatedVisibility(
+                                visible = isUniversalSearchOverlayVisible,
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.5f))
+                                        .clickable { isUniversalSearchOverlayVisible = false },
+                                ) {
+                                    UniversalSearchOverlay(
+                                        modifier = Modifier
+                                            .systemBarsPadding()
+                                            .imePadding()
+                                            .padding(8.dp)
+                                            .fillMaxWidth(),
+                                        onDismissRequest = {
+                                            isUniversalSearchOverlayVisible = false
                                         }
-                                    }
-
-                                    Destination.Calendar -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            CalendarScreen()
-                                        }
-                                    }
-
-                                    Destination.Artists -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            ArtistsScreen()
-                                        }
-                                    }
-
-                                    Destination.Places -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            PlacesScreen()
-                                        }
-                                    }
-
-                                    Destination.Map -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            MapScreen()
-                                        }
-                                    }
-
-                                    Destination.Settings -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            SettingsScreen()
-                                        }
-                                    }
-
-                                    Destination.DataSync -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            DataSyncScreen()
-                                        }
-                                    }
-
-                                    Destination.FavoritesSync -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            FavoritesSyncScreen()
-                                        }
-                                    }
-
-                                    is Destination.ArtistDetail -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            ArtistDetailScreen(key.artistSlug)
-                                        }
-                                    }
-
-                                    is Destination.EventDetail -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            EventDetailScreen(key.eventId)
-                                        }
-                                    }
-
-                                    is Destination.UnlockFest -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            UnlockFestScreen()
-                                        }
-                                    }
-
-                                    Destination.Gyarkert -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            GyarkertScreen()
-                                        }
-                                    }
-
-                                    Destination.Imu -> NavEntry(key) {
-                                        CompositionLocalProvider(
-                                            LocalSharedTransitionContext provides SharedTransitionContext(
-                                                sharedTransitionScope = this,
-                                                animatedVisibilityScope = LocalNavAnimatedContentScope.current,
-                                            )
-                                        ) {
-                                            ImuScreen()
-                                        }
-                                    }
+                                    )
                                 }
                             }
-                        )
+                        }
                     }
                 }
             }

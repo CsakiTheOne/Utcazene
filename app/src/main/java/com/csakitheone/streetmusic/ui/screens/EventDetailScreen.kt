@@ -119,22 +119,26 @@ fun EventDetailScreen(eventId: Int) {
         topBar = {
             Box {
                 if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
-                    with(sharedTransition.sharedTransitionScope) {
-                        AsyncImage(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .alpha(1f - scrollBehavior.state.collapsedFraction)
-                                .sharedElement(
-                                    sharedTransition.sharedTransitionScope.rememberSharedContentState(
-                                        "image-${artist?.slug}"
-                                    ),
-                                    sharedTransition.animatedVisibilityScope,
-                                ),
-                            model = artist?.image,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
+                    AsyncImage(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .alpha(1f - scrollBehavior.state.collapsedFraction)
+                            .also {
+                                if (sharedTransition != null) {
+                                    with(sharedTransition.sharedTransitionScope) {
+                                        Modifier.sharedElement(
+                                            sharedTransition.sharedTransitionScope.rememberSharedContentState(
+                                                "image-${artist?.slug}"
+                                            ),
+                                            sharedTransition.animatedVisibilityScope,
+                                        )
+                                    }
+                                }
+                            },
+                        model = artist?.image,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                    )
                 }
                 LargeTopAppBar(
                     title = {

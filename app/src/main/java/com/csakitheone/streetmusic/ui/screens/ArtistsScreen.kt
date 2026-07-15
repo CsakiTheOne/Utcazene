@@ -37,7 +37,9 @@ import com.csakitheone.streetmusic.ui.components.ArtistCard
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 
 @Composable
-fun ArtistsScreen() {
+fun ArtistsScreen(
+    onRequestSearch: () -> Unit,
+) {
     val context = LocalContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
@@ -88,6 +90,14 @@ fun ArtistsScreen() {
                 },
                 actions = {
                     NearbyConnectionsDisplay()
+                    IconButton(
+                        onClick = { onRequestSearch() }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "Search"
+                        )
+                    }
                 },
             )
         },

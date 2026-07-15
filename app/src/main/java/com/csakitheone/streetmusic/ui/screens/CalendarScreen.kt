@@ -42,7 +42,9 @@ import java.time.LocalTime
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(
+    onRequestSearch: () -> Unit,
+) {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -132,6 +134,14 @@ fun CalendarScreen() {
                 },
                 actions = {
                     NearbyConnectionsDisplay()
+                    IconButton(
+                        onClick = { onRequestSearch() }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "Search"
+                        )
+                    }
                 },
             )
         },

@@ -98,7 +98,9 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalGridApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onRequestSearch: () -> Unit,
+) {
     val repository = LocalRepository.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -160,14 +162,27 @@ fun HomeScreen() {
                             contentDescription = null,
                             contentScale = ContentScale.FillWidth,
                         )
-                        FilledIconButton(
-                            modifier = Modifier.padding(16.dp),
-                            onClick = { backStack.add(Destination.Settings) },
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_settings),
-                                contentDescription = null
-                            )
+                            FilledIconButton(
+                                onClick = { onRequestSearch() },
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_search),
+                                    contentDescription = null
+                                )
+                            }
+                            FilledIconButton(
+                                onClick = { backStack.add(Destination.Settings) },
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_settings),
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
                 }

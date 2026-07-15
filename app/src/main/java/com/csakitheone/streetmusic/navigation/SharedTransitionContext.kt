@@ -9,6 +9,6 @@ data class SharedTransitionContext(
     val animatedVisibilityScope: AnimatedContentScope,
 )
 
-val LocalSharedTransitionContext = staticCompositionLocalOf<SharedTransitionContext> {
+val LocalSharedTransitionContext = staticCompositionLocalOf<SharedTransitionContext?> {
     error("No SharedTransitionContext provided")
 }

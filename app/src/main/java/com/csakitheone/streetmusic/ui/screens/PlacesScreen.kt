@@ -49,7 +49,9 @@ import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlacesScreen() {
+fun PlacesScreen(
+    onRequestSearch: () -> Unit,
+) {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -121,6 +123,14 @@ fun PlacesScreen() {
                 },
                 actions = {
                     NearbyConnectionsDisplay()
+                    IconButton(
+                        onClick = { onRequestSearch() }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = "Search"
+                        )
+                    }
                 },
             )
         },

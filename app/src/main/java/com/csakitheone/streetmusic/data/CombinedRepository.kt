@@ -1,13 +1,35 @@
 package com.csakitheone.streetmusic.data
 
+import android.content.Context
+import android.widget.Toast
+import androidx.navigation3.runtime.NavBackStack
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.model.ExternalEvent
+import com.csakitheone.streetmusic.navigation.Destination
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 class CombinedRepository {
     companion object {
+        /**
+         * Returns a list of [Artist]s, [Event]s and [ExternalEvent]s combined from multiple sources.
+         */
+        fun getEverything(utcazeneArtists: List<Artist>, utcazeneEvents: List<Event>): List<Any> {
+            return utcazeneArtists + utcazeneEvents + GyarkertRepository.pontOttPartiEvents + ImuRepository.events
+        }
+
+        fun filterEverything(everything: List<Any>, query: String): List<Any> {
+            return everything.filter { any ->
+                when (any) {
+                    is Artist -> any.name.contains(query, ignoreCase = true)
+                    is Event -> any.artistName.contains(query, ignoreCase = true)
+                    is ExternalEvent -> any.name.contains(query, ignoreCase = true)
+                    else -> false
+                }
+            }
+        }
+
         /**
          * Returns a list of [Event]s and [ExternalEvent]s combined from multiple sources.
          */
@@ -56,6 +78,32 @@ class CombinedRepository {
                     }
                     return@map externalEvent
                 }
+        }
+
+        fun getClickActionForAny(
+            context: Context,
+            backStack: NavBackStack<Destination>,
+            any: Any,
+        ): () -> Unit {
+            return {
+                when (any) {
+                    is ExternalEvent -> {
+                        when (any.slug.substringBefore("_")) {
+                            "gyarkert" -> backStack.add(Destination.Gyarkert)
+                            "imu" -> backStack.add(Destination.Imu)
+                            "terem" -> backStack.add(Destination.UnlockFest)
+                            else -> Toast.makeText(
+                                context,
+                                "Not implemented yet",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    else -> Toast.makeText(context, "Not implemented yet", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
         }
 
         fun getSlugForAny(any: Any): String {

@@ -50,20 +50,26 @@ fun ArtistCard(
                 .height(IntrinsicSize.Min)
         ) {
             if (repository.shouldShowImage() && !artist.image.isNullOrBlank()) {
-                with(sharedTransition.sharedTransitionScope) {
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16 / 9f)
-                            .sharedElement(
-                                sharedTransition.sharedTransitionScope.rememberSharedContentState("image-${artist.slug}"),
-                                sharedTransition.animatedVisibilityScope,
-                            ),
-                        model = artist.image,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
-                }
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                        .also {
+                            if (sharedTransition != null) {
+                                with(sharedTransition.sharedTransitionScope) {
+                                    Modifier.sharedElement(
+                                        sharedTransition.sharedTransitionScope.rememberSharedContentState(
+                                            "image-${artist.slug}"
+                                        ),
+                                        sharedTransition.animatedVisibilityScope,
+                                    )
+                                }
+                            }
+                        },
+                    model = artist.image,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                )
             }
             Column(
                 modifier = Modifier

@@ -308,13 +308,16 @@ class DataRepository(
                 )
                 Log.d("DataRepository", "Added artist: ${artist.name}")
 
-                artist.timeslots.mapNotNull { slot ->
+                artist.timeslots.mapIndexedNotNull { index, slot ->
                     val date = slot.eventStartTime ?: ""
-                    if (!date.startsWith(yearFilter.toString())) return@mapNotNull null
-                    val eventId = slot.event ?: return@mapNotNull null
+                    if (!date.startsWith(yearFilter.toString())) return@mapIndexedNotNull null
+                    val eventId = slot.event ?: return@mapIndexedNotNull null
+
+                    val compoundId =
+                        (artist.id * 1000) + (index * 100) + eventId
 
                     EventEntity(
-                        id = (artist.id * 1000) + eventId,
+                        id = compoundId,
                         artistId = artist.id,
                         artistName = artist.name,
                         artistSlug = artist.slug,

@@ -43,5 +43,7 @@ val tagInfo = mapOf(
     "competitor" to "This artist participates in Utcazene's competition. If you like them, you can vote for them on the official website.",
     "onechance" to "This artist only performs once during the whole event. Don't miss the party!",
     "twoshot" to "This artist performs twice during the whole event.",
-    "encore" to "This artist performs more than the number of days the event lasts."
+    "encore" to "This artist performs more than the number of days the event lasts.",
+    "complete" to "This artist has a description, image and YouTube URL.",
+    "incomplete" to "This artist doesn't have a description, image and/or YouTube URL.",
 )

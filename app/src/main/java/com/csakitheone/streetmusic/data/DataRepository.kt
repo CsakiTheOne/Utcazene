@@ -58,7 +58,8 @@ class DataRepository(
         nearbyManager.updateLocalNickname(value)
     }
 
-    private val _isNearbyFriendsActive = MutableStateFlow(prefs.getBoolean("nearby_features", false))
+    private val _isNearbyFriendsActive =
+        MutableStateFlow(prefs.getBoolean("nearby_features", false))
     val isNearbyFriendsActive: StateFlow<Boolean> = _isNearbyFriendsActive.asStateFlow()
     fun setIsNearbyFriendsActive(value: Boolean) {
         prefs.edit { putBoolean("nearby_features", value) }
@@ -356,6 +357,9 @@ class DataRepository(
 
             val eventDays = database.eventDao().getDistinctDates().first()
             val artists = database.artistDao().getAll().first()
+            val completeArtists = artists.filter {
+                it.description.isNotBlank() && !it.image.isNullOrBlank() && !it.youtubeEmbed.isNullOrBlank()
+            }
             val taggedArtists = artists.map { artist ->
                 val events = database.eventDao().getEventsByArtist(artist.slug).first()
                 val tags = artist.tags.split(",").map { it.trim() }.toMutableSet()
@@ -365,6 +369,13 @@ class DataRepository(
                     else if (events.size == 2) tags.add("twoshot")
                 } else if (events.size > eventDays.size) {
                     tags.add("encore")
+                }
+
+                if (completeArtists.size != artists.size) {
+                    tags.add(
+                        if (artist.slug in completeArtists.map { it.slug }) "complete"
+                        else "incomplete"
+                    )
                 }
 
                 artist.copy(tags = tags.joinToString(","))

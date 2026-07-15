@@ -49,7 +49,7 @@ fun ArtistCard(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            if (repository.shouldShowImage()) {
+            if (repository.shouldShowImage() && !artist.image.isNullOrBlank()) {
                 with(sharedTransition.sharedTransitionScope) {
                     AsyncImage(
                         modifier = Modifier

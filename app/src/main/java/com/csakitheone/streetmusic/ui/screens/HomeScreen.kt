@@ -82,6 +82,7 @@ import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.data.CombinedRepository
+import com.csakitheone.streetmusic.data.UnlockFestRepository
 import com.csakitheone.streetmusic.ui.components.ArtistCard
 import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.EventCard
@@ -430,79 +431,7 @@ fun HomeScreen(
 
             HomeSectionThisYear(repository)
 
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = "Parallel events",
-                style = MaterialTheme.typography.headlineLarge,
-            )
-
-            Card(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = { backStack.add(Destination.Imu) },
-            ) {
-                ListItem(
-                    leadingContent = {
-                        Image(
-                            modifier = Modifier.size(64.dp),
-                            painter = painterResource(R.drawable.imu),
-                            contentDescription = null,
-                        )
-                    },
-                    content = { Text("Íródeák Művészeti Udvar") },
-                    supportingContent = { Text("Full schedule") },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        supportingColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                )
-            }
-
-            OutlinedCard(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = { backStack.add(Destination.Gyarkert) },
-            ) {
-                ListItem(
-                    leadingContent = {
-                        Image(
-                            modifier = Modifier.size(64.dp),
-                            painter = painterResource(R.drawable.gyarkert_logo),
-                            contentDescription = null,
-                        )
-                    },
-                    content = { Text("Gyárkert") },
-                    supportingContent = { Text("Pont Ott Parti and more") },
-                    colors = ListItemDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        headlineColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        supportingColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ),
-                )
-            }
-
-            OutlinedCard(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = { backStack.add(Destination.UnlockFest) },
-            ) {
-                Box(
-                    contentAlignment = Alignment.BottomStart,
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.unlock_fest_banner),
-                        contentDescription = null,
-                    )
-                    Card(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .alpha(.9f),
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = "Unlock Fest Vol. VII - TEREM",
-                        )
-                    }
-                }
-            }
+            HomeSectionParallelEvents()
 
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -1013,5 +942,113 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ColumnScope.HomeSectionParallelEvents() {
+    val context = LocalContext.current
+    val backStack = LocalNavBackStack.current
+
+    Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = "Parallel events",
+        style = MaterialTheme.typography.headlineLarge,
+    )
+
+    Card(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        onClick = { backStack.add(Destination.Imu) },
+    ) {
+        ListItem(
+            leadingContent = {
+                Image(
+                    modifier = Modifier.size(64.dp),
+                    painter = painterResource(R.drawable.imu),
+                    contentDescription = null,
+                )
+            },
+            content = { Text("Íródeák Művészeti Udvar") },
+            supportingContent = { Text("Full schedule") },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                supportingColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+        )
+    }
+
+    OutlinedCard(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        onClick = { backStack.add(Destination.Gyarkert) },
+    ) {
+        ListItem(
+            leadingContent = {
+                Image(
+                    modifier = Modifier.size(64.dp),
+                    painter = painterResource(R.drawable.gyarkert_logo),
+                    contentDescription = null,
+                )
+            },
+            content = { Text("Gyárkert") },
+            supportingContent = { Text("Pont Ott Parti and more") },
+            colors = ListItemDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                headlineColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                supportingColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
+        )
+    }
+
+    OutlinedCard(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        onClick = { backStack.add(Destination.UnlockFest) },
+    ) {
+        Box(
+            contentAlignment = Alignment.BottomStart,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.unlock_fest_banner),
+                contentDescription = null,
+            )
+            Card(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .alpha(.9f),
+            ) {
+                Text(
+                    modifier = Modifier.padding(8.dp),
+                    text = "Unlock Fest Vol. VII - TEREM",
+                )
+            }
+        }
+    }
+
+    Button(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .align(Alignment.CenterHorizontally),
+        onClick = {
+            val urls = UnlockFestRepository.events.mapNotNull { it.url }
+
+            if (urls.isEmpty()) {
+                Toast.makeText(context, "No events found", Toast.LENGTH_SHORT).show()
+                return@Button
+            }
+
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    urls.random().toUri()
+                )
+            )
+        },
+    ) {
+        Icon(
+            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+            painter = painterResource(R.drawable.ic_web),
+            contentDescription = null,
+        )
+        Text("I'm feeling lucky, but in TEREM")
     }
 }

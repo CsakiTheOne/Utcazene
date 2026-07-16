@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ import com.csakitheone.streetmusic.data.ImuRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import com.csakitheone.streetmusic.ui.components.NowIndicator
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -93,16 +95,7 @@ fun ImuScreen() {
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            uriHandler.openUri(ImuRepository.imuFacebookUrl)
-                        },
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_facebook),
-                            contentDescription = "Facebook"
-                        )
-                    }
+                    NearbyConnectionsDisplay()
                 },
             )
         },
@@ -120,6 +113,18 @@ fun ImuScreen() {
                         }
                     )
                 }
+            }
+        },
+        floatingActionButton = {
+            SmallFloatingActionButton(
+                onClick = {
+                    uriHandler.openUri(ImuRepository.imuFacebookUrl)
+                },
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_facebook),
+                    contentDescription = "Facebook"
+                )
             }
         },
     ) { paddingValues ->

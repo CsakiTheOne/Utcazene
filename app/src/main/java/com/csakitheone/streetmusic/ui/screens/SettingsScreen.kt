@@ -25,6 +25,8 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SplitButtonDefaults
+import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -194,11 +196,11 @@ fun SettingsScreen() {
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Button(
-                            modifier = Modifier.weight(1f),
+                        SplitButtonDefaults.LeadingButton(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = SplitButtonDefaults.Spacing),
                             onClick = {
                                 shareApp(context, true)
                             },
@@ -208,9 +210,9 @@ fun SettingsScreen() {
                                 painter = painterResource(R.drawable.ic_send),
                                 contentDescription = null,
                             )
-                            Text("Send app with Quick Share")
+                            Text("Send app")
                         }
-                        Button(
+                        SplitButtonDefaults.TrailingButton(
                             onClick = {
                                 shareApp(context)
                             },
@@ -335,7 +337,6 @@ private fun shareApp(context: Context, quickShareOnly: Boolean = false) {
         }
 
         if (quickShareOnly) {
-            // Explicitly send app to Quick Share
             context.startActivity(
                 intent.setClassName(
                     "com.google.android.gms",

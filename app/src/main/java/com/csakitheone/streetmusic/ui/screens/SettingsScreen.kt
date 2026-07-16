@@ -1,7 +1,12 @@
 package com.csakitheone.streetmusic.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -185,6 +190,38 @@ fun SettingsScreen() {
                         }
                     }
 
+                    Text(text = "Sharing is caring", style = MaterialTheme.typography.titleSmall)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                shareApp(context, true)
+                            },
+                        ) {
+                            Icon(
+                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                painter = painterResource(R.drawable.ic_send),
+                                contentDescription = null,
+                            )
+                            Text("Send app with Quick Share")
+                        }
+                        Button(
+                            onClick = {
+                                shareApp(context)
+                            },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_share),
+                                contentDescription = null,
+                            )
+                        }
+                    }
+
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
@@ -230,6 +267,8 @@ fun SettingsScreen() {
                         Text("Redownload data")
                     }
 
+                    Text(text = "Free up space", style = MaterialTheme.typography.titleMedium)
+
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
@@ -272,5 +311,42 @@ fun SettingsScreen() {
                 }
             }
         }
+    }
+}
+
+private fun shareApp(context: Context, quickShareOnly: Boolean = false) {
+    try {
+        val appFile = File(context.applicationInfo.sourceDir)
+        val cacheFile = File(context.cacheDir, "Utcazene.apk")
+
+        // Copy the APK to cache to ensure it's accessible via FileProvider
+        appFile.copyTo(cacheFile, overwrite = true)
+
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            cacheFile
+        )
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/vnd.android.package-archive"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        if (quickShareOnly) {
+            // Explicitly send app to Quick Share
+            context.startActivity(
+                intent.setClassName(
+                    "com.google.android.gms",
+                    "com.google.android.gms.nearby.sharing.main.MainActivity"
+                )
+            )
+        } else {
+            context.startActivity(Intent.createChooser(intent, "Share app via"))
+        }
+    } catch (e: Exception) {
+        Log.e("SettingsScreen", "Failed to share app", e)
+        Toast.makeText(context, "Failed to share app: ${e.message}", Toast.LENGTH_LONG).show()
     }
 }

@@ -33,6 +33,8 @@ sealed interface Destination : NavKey {
     data object Gyarkert : Destination
     @Serializable
     data object Imu : Destination
+    @Serializable
+    data class Chat(val rootNodeId: String = "main") : Destination
 }
 
 fun Destination.label(): String = when (this) {
@@ -49,6 +51,7 @@ fun Destination.label(): String = when (this) {
     Destination.UnlockFest -> "Unlock Festival"
     Destination.Gyarkert -> "Gyárkert"
     Destination.Imu -> "Imu"
+    is Destination.Chat -> "Chat"
 }
 
 val LocalNavBackStack = staticCompositionLocalOf<NavBackStack<Destination>> {

@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.ui.components
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ fun FavoritesIndicator(
         favoritedBy.forEach { payload ->
             Icon(
                 modifier = Modifier
+                    .padding(start = 8.dp)
                     .size(16.dp)
                     .clickable {
                         Toast.makeText(context, payload.nickname, Toast.LENGTH_SHORT).show()

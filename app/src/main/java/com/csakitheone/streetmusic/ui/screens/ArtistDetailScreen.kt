@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -65,6 +66,7 @@ import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
+import com.csakitheone.streetmusic.ui.screens.ChatScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -196,22 +198,34 @@ fun ArtistDetailScreen(artistSlug: String) {
                     },
                     label = { Text("Info") }
                 )
+                NavigationBarItem(
+                    selected = selectedTabIndex == 2,
+                    onClick = { selectedTabIndex = 2 },
+                    icon = {
+                        Icon(
+                            painterResource(R.drawable.ic_chat_bubble),
+                            contentDescription = "Chat"
+                        )
+                    },
+                    label = { Text("Chat") }
+                )
             }
         },
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState()),
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                when (selectedTabIndex) {
-                    0 -> {
+            when (selectedTabIndex) {
+                0 -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         if (events.isEmpty()) {
                             Text("Waiting for Utcazene to upload events...")
                         } else {
@@ -233,8 +247,16 @@ fun ArtistDetailScreen(artistSlug: String) {
                             }
                         }
                     }
+                }
 
-                    1 -> {
+                1 -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         artist?.let {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -326,6 +348,16 @@ fun ArtistDetailScreen(artistSlug: String) {
                             }
                         }
                     }
+                }
+
+                2 -> {
+                    ChatScreen(
+                        initialRootNodeId = artistSlug,
+                        headlessModifier = Modifier
+                            .fillMaxSize()
+                            .imePadding(),
+                        isHeadless = true,
+                    )
                 }
             }
         }

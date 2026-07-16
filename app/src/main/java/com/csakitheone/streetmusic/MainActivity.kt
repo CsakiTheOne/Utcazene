@@ -52,6 +52,7 @@ import com.csakitheone.streetmusic.ui.components.UniversalSearchOverlay
 import com.csakitheone.streetmusic.ui.screens.ArtistDetailScreen
 import com.csakitheone.streetmusic.ui.screens.ArtistsScreen
 import com.csakitheone.streetmusic.ui.screens.CalendarScreen
+import com.csakitheone.streetmusic.ui.screens.ChatScreen
 import com.csakitheone.streetmusic.ui.screens.DataSyncScreen
 import com.csakitheone.streetmusic.ui.screens.EventDetailScreen
 import com.csakitheone.streetmusic.ui.screens.FavoritesSyncScreen
@@ -335,6 +336,17 @@ class MainActivity : ComponentActivity() {
                                                 )
                                             ) {
                                                 ImuScreen()
+                                            }
+                                        }
+
+                                        is Destination.Chat -> NavEntry(key) {
+                                            CompositionLocalProvider(
+                                                LocalSharedTransitionContext provides SharedTransitionContext(
+                                                    sharedTransitionScope = this@SharedTransitionLayout,
+                                                    animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                                                )
+                                            ) {
+                                                ChatScreen(initialRootNodeId = key.rootNodeId)
                                             }
                                         }
                                     }

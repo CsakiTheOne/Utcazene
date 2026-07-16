@@ -158,6 +158,10 @@ class DataRepository(
         triggerWidgetUpdate()
     }
 
+    fun clearMessages() {
+        nearbyManager.friends.clearMessages()
+    }
+
     init {
         nearbyManager.setNearbyFriendsActive(_isNearbyFriendsActive.value)
         nearbyManager.updateLocalFavorites(_userFavorites.value)

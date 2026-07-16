@@ -9,10 +9,31 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+data class ThreadNode(
+    val id: String,
+    val parentId: String,
+    val senderName: String,
+    val content: String,
+) {
+    companion object {
+
+        val MAIN = ThreadNode(
+            id = "main",
+            parentId = "",
+            senderName = "UZ App",
+            content = "Welcome to the main thread!",
+        )
+
+    }
+}
+
+@Serializable
 data class FriendsPayload(
     val nickname: String,
     val screen: String,
     val favoriteSlugs: Set<String>,
+    val threadNodes: Set<ThreadNode> = emptySet(),
+    val peerId: String = "",
 )
 
 class FriendsFeature(
@@ -24,6 +45,18 @@ class FriendsFeature(
 
     private val _connectedFriends = MutableStateFlow<Map<String, FriendsPayload>>(emptyMap())
     val connectedFriends: StateFlow<Map<String, FriendsPayload>> = _connectedFriends.asStateFlow()
+
+    private val _localThreadNodes = MutableStateFlow<Set<ThreadNode>>(setOf(ThreadNode.MAIN))
+    val localThreadNodes: StateFlow<Set<ThreadNode>> = _localThreadNodes.asStateFlow()
+
+    val allThreadNodes: StateFlow<Set<ThreadNode>> = combine(
+        _localThreadNodes,
+        _connectedFriends
+    ) { local, connected ->
+        val all = local.toMutableSet()
+        connected.values.forEach { all.addAll(it.threadNodes) }
+        all
+    }.stateIn(scope, SharingStarted.Eagerly, setOf(ThreadNode.MAIN))
 
     val nearbyFavorites: StateFlow<Map<String, Set<String>>> = _connectedFriends
         .map { it.mapValues { entry -> entry.value.favoriteSlugs } }
@@ -71,6 +104,26 @@ class FriendsFeature(
         }
     }
 
+    fun sendMessage(parentId: String, content: String) {
+        val newNode = ThreadNode(
+            id = System.currentTimeMillis().toString(36),
+            parentId = parentId,
+            senderName = localNickname,
+            content = content.take(280),
+        )
+        _localThreadNodes.value += newNode
+        if (isActive) {
+            broadcastFavorites()
+        }
+    }
+
+    fun clearMessages() {
+        _localThreadNodes.value = setOf(ThreadNode.MAIN)
+        if (isActive) {
+            broadcastFavorites()
+        }
+    }
+
     private fun start() {
         nearbyManager.requestAdvertising(
             this,
@@ -90,6 +143,8 @@ class FriendsFeature(
     }
 
     private fun stop() {
+        isActive = false
+        nearbyManager.connectionsClient.stopAllEndpoints()
         nearbyManager.releaseAdvertising(this)
         nearbyManager.releaseDiscovery(this)
         _connectedFriends.value = emptyMap()
@@ -105,8 +160,15 @@ class FriendsFeature(
     }
 
     private fun broadcastFavorites() {
-        val payloadData =
-            Json.encodeToString(FriendsPayload(localNickname, localScreen, localFavorites))
+        val payloadData = Json.encodeToString(
+            FriendsPayload(
+                localNickname,
+                localScreen,
+                localFavorites,
+                _localThreadNodes.value,
+                nearbyManager.localId
+            )
+        )
         val payload = Payload.fromBytes(payloadData.toByteArray())
 
         _connectedFriends.value.keys.forEach { endpointId ->
@@ -118,6 +180,12 @@ class FriendsFeature(
         override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
             val (peerName, peerId) = nearbyManager.unpackName(info.endpointName)
             if (peerId == nearbyManager.localId) return
+
+            // Avoid connecting to the same device multiple times
+            if (_connectedFriends.value.values.any { it.peerId == peerId }) {
+                Log.d("FriendsFeature", "Already connected to peer $peerId, ignoring endpoint $endpointId")
+                return
+            }
 
             // Deterministic Initiator: Only the device with the smaller ID initiates the connection
             if (nearbyManager.localId >= peerId) {
@@ -132,6 +200,7 @@ class FriendsFeature(
                         endpointId
                     )
                 ) {
+                    Log.d("FriendsFeature", "Already connecting or connected to $endpointId")
                     return
                 }
                 connectingEndpoints.add(endpointId)
@@ -139,16 +208,33 @@ class FriendsFeature(
             }
 
             scope.launch {
+                kotlinx.coroutines.delay(500)
                 if (!isActive || _connectedFriends.value.containsKey(endpointId)) {
-                    synchronized(connectingEndpoints) { connectingEndpoints.remove(endpointId) }
+                    synchronized(connectingEndpoints) {
+                        connectingEndpoints.remove(endpointId)
+                        pendingNames.remove(endpointId)
+                    }
                     return@launch
                 }
                 nearbyManager.connectionsClient.requestConnection(
                     nearbyManager.packName(localNickname),
                     endpointId,
                     connectionLifecycleCallback
-                ).addOnFailureListener {
-                    synchronized(connectingEndpoints) { connectingEndpoints.remove(endpointId) }
+                ).addOnSuccessListener {
+                    Log.d("FriendsFeature", "Connection request sent to $peerName ($endpointId)")
+                }.addOnFailureListener { e ->
+                    val statusCode = (e as? com.google.android.gms.common.api.ApiException)?.statusCode
+                    if (statusCode == ConnectionsStatusCodes.STATUS_ALREADY_CONNECTED_TO_ENDPOINT) {
+                        Log.w("FriendsFeature", "Already connected to $peerName ($endpointId). Waiting for callbacks...")
+                        // Don't remove from connectingEndpoints, let onConnectionResult handle it
+                        return@addOnFailureListener
+                    }
+                    
+                    Log.e("FriendsFeature", "Connection request failed to $peerName ($endpointId): ${e.message}")
+                    synchronized(connectingEndpoints) {
+                        connectingEndpoints.remove(endpointId)
+                        pendingNames.remove(endpointId)
+                    }
                 }
             }
         }
@@ -163,12 +249,25 @@ class FriendsFeature(
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
-            val (_, peerId) = nearbyManager.unpackName(info.endpointName)
+            val (peerName, peerId) = nearbyManager.unpackName(info.endpointName)
+            Log.d("FriendsFeature", "Connection initiated with $peerName ($peerId, $endpointId). Incoming: ${info.isIncomingConnection}")
+
             if (peerId == nearbyManager.localId) {
+                Log.w("FriendsFeature", "Rejecting connection from self.")
                 nearbyManager.connectionsClient.rejectConnection(endpointId)
                 return
             }
+
+            if (_connectedFriends.value.values.any { it.peerId == peerId }) {
+                Log.d("FriendsFeature", "Already connected to peer $peerId, allowing new connection $endpointId")
+                // We allow it, but we might want to clean up the old one later if it doesn't disconnect
+            }
+
+            Log.d("FriendsFeature", "Accepting connection from $peerName ($endpointId)")
             nearbyManager.connectionsClient.acceptConnection(endpointId, payloadCallback)
+                .addOnFailureListener { e ->
+                    Log.e("FriendsFeature", "Failed to accept connection from $peerName ($endpointId)", e)
+                }
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
@@ -178,16 +277,22 @@ class FriendsFeature(
             }
 
             if (result.status.isSuccess) {
+                Log.i("FriendsFeature", "Successfully connected to $peerName ($endpointId)")
+                // We don't have peerId here easily unless we store it in another map, 
+                // but it will be updated soon by the payload.
                 _connectedFriends.value += (endpointId to FriendsPayload(
                     peerName,
                     "Home",
                     emptySet()
                 ))
                 broadcastFavorites()
+            } else {
+                Log.e("FriendsFeature", "Connection failed to $peerName ($endpointId): ${result.status.statusMessage} (${result.status.statusCode})")
             }
         }
 
         override fun onDisconnected(endpointId: String) {
+            Log.i("FriendsFeature", "Disconnected from $endpointId")
             _connectedFriends.value -= endpointId
         }
     }
@@ -199,6 +304,8 @@ class FriendsFeature(
                 try {
                     val friendsPayload = Json.decodeFromString<FriendsPayload>(data)
                     _connectedFriends.value += (endpointId to friendsPayload)
+                    // Merge incoming thread nodes into local set
+                    _localThreadNodes.value += friendsPayload.threadNodes
                 } catch (e: Exception) {
                     Log.e("FriendsFeature", "Error decoding payload", e)
                 }

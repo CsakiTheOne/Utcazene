@@ -251,6 +251,24 @@ fun SettingsScreen() {
                         )
                         Text("Remove data from device")
                     }
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            repository.clearMessages()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_delete_forever),
+                            contentDescription = null,
+                        )
+                        Text("Remove all messages from device")
+                    }
                 }
             }
         }

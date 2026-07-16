@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -410,6 +411,15 @@ fun HomeScreen(
                             style = MaterialTheme.typography.headlineSmall,
                         )
                         NearbyConnectionsDisplay()
+                        FilledTonalIconButton(
+                            modifier = Modifier.padding(end = 8.dp),
+                            onClick = { backStack.add(Destination.Chat()) },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_chat_bubble),
+                                contentDescription = "Chat",
+                            )
+                        }
                     }
                 }
             }
@@ -906,13 +916,16 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
     }
     HorizontalMultiBrowseCarousel(
         state = rememberCarouselState(initialItem = 0) { favoriteArtists.size + 1 },
-        preferredItemWidth = 280.dp,
+        preferredItemWidth = 320.dp,
         itemSpacing = 8.dp,
         contentPadding = PaddingValues(horizontal = 16.dp),
         flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
     ) { index ->
         val artist = favoriteArtists.getOrNull(index)
-        if (artist != null) ArtistCard(artist = artist)
+        if (artist != null) ArtistCard(
+            modifier = Modifier.widthIn(min = 320.dp),
+            artist = artist,
+        )
         else {
             Card(
                 modifier = Modifier.fillMaxSize(),
@@ -938,13 +951,16 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
         )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { headliners.size + 1 },
-            preferredItemWidth = 280.dp,
+            preferredItemWidth = 320.dp,
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
             val artist = headliners.getOrNull(index)
-            if (artist != null) ArtistCard(artist = artist)
+            if (artist != null) ArtistCard(
+                modifier = Modifier.widthIn(min = 320.dp),
+                artist = artist
+            )
             else {
                 Card(
                     modifier = Modifier.fillMaxSize(),
@@ -971,13 +987,16 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
         )
         HorizontalMultiBrowseCarousel(
             state = rememberCarouselState(initialItem = 0) { competitors.size + 1 },
-            preferredItemWidth = 280.dp,
+            preferredItemWidth = 320.dp,
             itemSpacing = 8.dp,
             contentPadding = PaddingValues(horizontal = 16.dp),
             flingBehavior = CarouselDefaults.noSnapFlingBehavior(),
         ) { index ->
             val artist = competitors.getOrNull(index)
-            if (artist != null) ArtistCard(artist = artist)
+            if (artist != null) ArtistCard(
+                modifier = Modifier.widthIn(min = 320.dp),
+                artist = artist
+            )
             else {
                 Card(
                     modifier = Modifier.fillMaxSize(),

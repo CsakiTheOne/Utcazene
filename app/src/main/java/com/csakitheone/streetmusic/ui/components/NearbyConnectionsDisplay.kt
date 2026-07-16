@@ -13,9 +13,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -34,13 +36,18 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.navigation.Destination
+import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 
 @Composable
 fun NearbyConnectionsDisplay(
     modifier: Modifier = Modifier,
 ) {
+    val backStack = LocalNavBackStack.current
     val repository = LocalRepository.current
     val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
 
@@ -65,20 +72,21 @@ fun NearbyConnectionsDisplay(
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 dismissButton = {
-                    TextButton(
+                    Button(
                         onClick = {
                             repository.setIsNearbyFriendsActive(false)
                             showDialog = false
                         },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
                         ),
                     ) {
                         Text("Turn off")
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showDialog = false }) {
+                    Button(onClick = { showDialog = false }) {
                         Text("Close")
                     }
                 },
@@ -125,6 +133,22 @@ fun NearbyConnectionsDisplay(
                                 ),
                             ) {
                                 Text(friend.nickname)
+                            }
+                        }
+                        item {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    backStack.add(Destination.Chat())
+                                    showDialog = false
+                                },
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                    painter = painterResource(R.drawable.ic_chat_bubble),
+                                    contentDescription = null
+                                )
+                                Text("Chat with friends")
                             }
                         }
                     }

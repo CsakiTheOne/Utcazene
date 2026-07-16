@@ -25,7 +25,8 @@ class NearbyManager(
     private val scope: CoroutineScope
 ) {
     internal val connectionsClient get() = Nearby.getConnectionsClient(context)
-    internal val localId = System.currentTimeMillis().toString(36).takeLast(4)
+    internal val localId = (System.currentTimeMillis() % 1000000).toString(36).padStart(4, '0') + 
+                           (0..99).random().toString(36)
 
     val friends = FriendsFeature(this, scope)
     val dataSync = DataSyncFeature(this, scope)

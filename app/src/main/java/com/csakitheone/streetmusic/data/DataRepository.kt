@@ -75,6 +75,14 @@ class DataRepository(
         _showImagesOnMetered.value = value
     }
 
+    private val _autoUpdateOnUnmetered =
+        MutableStateFlow(prefs.getBoolean("auto_update_on_unmetered", true))
+    val autoUpdateOnUnmetered: StateFlow<Boolean> = _autoUpdateOnUnmetered.asStateFlow()
+    fun setAutoUpdateOnUnmetered(value: Boolean) {
+        prefs.edit { putBoolean("auto_update_on_unmetered", value) }
+        _autoUpdateOnUnmetered.value = value
+    }
+
     private val _useHighPowerDiscovery =
         MutableStateFlow(prefs.getBoolean("high_power_discovery", false))
     val useHighPowerDiscovery: StateFlow<Boolean> = _useHighPowerDiscovery.asStateFlow()
@@ -252,8 +260,11 @@ class DataRepository(
         if (connectivityManager.activeNetwork == null) return DownloadResult.NO_CONNECTION
 
         if (!isMetered) {
-            downloadData()
-            return DownloadResult.SUCCESS
+            if (_autoUpdateOnUnmetered.value || !hasData || force) {
+                downloadData()
+                return DownloadResult.SUCCESS
+            }
+            return DownloadResult.ALREADY_HAS_DATA
         }
 
         if (hasData && !force) {

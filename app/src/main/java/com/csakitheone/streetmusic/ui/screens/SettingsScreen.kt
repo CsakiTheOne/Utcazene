@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.clickable
 import androidx.core.content.FileProvider
 import java.io.File
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +56,7 @@ fun SettingsScreen() {
     val backStack = LocalNavBackStack.current
 
     val showImagesOnMetered by repository.showImagesOnMetered.collectAsState(initial = false)
+    val autoUpdateOnUnmetered by repository.autoUpdateOnUnmetered.collectAsState(initial = true)
     val useHighPowerDiscovery by repository.useHighPowerDiscovery.collectAsState(initial = false)
     val nickname by repository.nickname.collectAsState()
 
@@ -90,66 +92,35 @@ fun SettingsScreen() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card {
-                Column(
+                Text(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(
-                        text = "Profile for nearby friends",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = nickname,
-                        onValueChange = { repository.setNickname(it) },
-                        label = { Text("Nickname") },
-                        placeholder = { Text("Friend") },
-                        singleLine = true,
-                    )
-                    Text(
-                        text = "Your nickname will be visible to nearby devices.",
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
-
-            Card(
-                onClick = {
-                    repository.setShowImagesOnMetered(!showImagesOnMetered)
-                },
-            ) {
+                    text = "Nearby features",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    value = nickname,
+                    onValueChange = { repository.setNickname(it) },
+                    label = { Text("Nickname") },
+                    placeholder = { Text("Friend") },
+                    singleLine = true,
+                    supportingText = { Text("Your nickname will be visible to nearby devices.") },
+                )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        modifier = Modifier.padding(8.dp),
-                        checked = showImagesOnMetered,
-                        onCheckedChange = {
-                            repository.setShowImagesOnMetered(it)
-                        }
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "Show images and videos on metered connections",
-                    )
-                }
-            }
-
-            Card(
-                onClick = {
-                    repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
-                    if (repository.isNearbyFriendsActive.value) {
-                        Toast.makeText(
-                            context,
-                            "Restart nearby friends to apply changes",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                },
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
+                            if (repository.isNearbyFriendsActive.value) {
+                                Toast.makeText(
+                                    context,
+                                    "Restart nearby friends to apply changes",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(
@@ -170,6 +141,59 @@ fun SettingsScreen() {
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
+                }
+            }
+
+            Card {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Data usage",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            repository.setAutoUpdateOnUnmetered(!autoUpdateOnUnmetered)
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        modifier = Modifier.padding(8.dp),
+                        checked = autoUpdateOnUnmetered,
+                        onCheckedChange = {
+                            repository.setAutoUpdateOnUnmetered(it)
+                        }
+                    )
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Auto-update app data on unmetered connections")
+                        Text(
+                            text = "App may start up slower.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            repository.setShowImagesOnMetered(!showImagesOnMetered)
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        modifier = Modifier.padding(8.dp),
+                        checked = showImagesOnMetered,
+                        onCheckedChange = {
+                            repository.setShowImagesOnMetered(it)
+                        }
+                    )
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = "Show images and videos on metered connections",
+                    )
                 }
             }
 

@@ -54,18 +54,16 @@ fun ArtistCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(16 / 9f)
-                        .also {
+                        .then(
                             if (sharedTransition != null) {
                                 with(sharedTransition.sharedTransitionScope) {
                                     Modifier.sharedElement(
-                                        sharedTransition.sharedTransitionScope.rememberSharedContentState(
-                                            "image-${artist.slug}"
-                                        ),
+                                        rememberSharedContentState("image-${artist.slug}"),
                                         sharedTransition.animatedVisibilityScope,
                                     )
                                 }
-                            }
-                        },
+                            } else Modifier
+                        ),
                     model = artist.image,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

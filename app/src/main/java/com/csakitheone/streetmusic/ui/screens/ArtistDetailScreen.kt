@@ -109,18 +109,16 @@ fun ArtistDetailScreen(artistSlug: String) {
                         modifier = Modifier
                             .matchParentSize()
                             .alpha(1f - scrollBehavior.state.collapsedFraction)
-                            .also {
+                            .then(
                                 if (sharedTransition != null) {
                                     with(sharedTransition.sharedTransitionScope) {
                                         Modifier.sharedElement(
-                                            sharedTransition.sharedTransitionScope.rememberSharedContentState(
-                                                "image-${artist?.slug}"
-                                            ),
+                                            rememberSharedContentState("image-${artist?.slug}"),
                                             sharedTransition.animatedVisibilityScope,
                                         )
                                     }
-                                }
-                            },
+                                } else Modifier
+                            ),
                         model = artist?.image,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

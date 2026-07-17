@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +40,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
@@ -433,72 +435,6 @@ fun HomeScreen(
 
             HomeSectionParallelEvents()
 
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = "Utcazene socials",
-                style = MaterialTheme.typography.headlineLarge,
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://utcazene.hu/".toUri()
-                            )
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_web),
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text("Website") },
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://www.instagram.com/utcazene/".toUri()
-                            )
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_instagram),
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text("Instagram") },
-                )
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                "https://www.facebook.com/utcazene/".toUri()
-                            )
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_facebook),
-                            contentDescription = null,
-                        )
-                    },
-                    label = { Text("Facebook") },
-                )
-            }
-
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
@@ -797,33 +733,88 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
         style = MaterialTheme.typography.headlineLarge,
     )
 
-    ExtendedFloatingActionButton(
+    Row(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .align(Alignment.CenterHorizontally),
-        onClick = {
-            val artistsWithYoutube = artists.filter { !it.youtubeEmbed.isNullOrBlank() }
-            if (artistsWithYoutube.isEmpty()) {
-                Toast.makeText(context, "No artists with youtube links found", Toast.LENGTH_SHORT)
-                    .show()
-                return@ExtendedFloatingActionButton
-            }
-            val randomYouTubeId = artistsWithYoutube.random().youtubeEmbed
-            context.startActivity(
-                Intent(
-                    Intent.ACTION_VIEW,
-                    "https://www.youtube.com/watch?v=$randomYouTubeId".toUri()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "https://utcazene.hu/".toUri()
+                    )
                 )
-            )
-        },
-        text = { Text("I'm feeling lucky") },
-        icon = {
+            },
+        ) {
             Icon(
-                painter = painterResource(R.drawable.ic_youtube),
+                painter = painterResource(R.drawable.ic_web),
                 contentDescription = null,
             )
-        },
-    )
+        }
+        IconButton(
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "https://www.instagram.com/utcazene/".toUri()
+                    )
+                )
+            },
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_instagram),
+                contentDescription = null,
+            )
+        }
+        IconButton(
+            onClick = {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "https://www.facebook.com/utcazene/".toUri()
+                    )
+                )
+            },
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_facebook),
+                contentDescription = null,
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        ExtendedFloatingActionButton(
+            onClick = {
+                val artistsWithYoutube = artists.filter { !it.youtubeEmbed.isNullOrBlank() }
+                if (artistsWithYoutube.isEmpty()) {
+                    Toast.makeText(
+                        context,
+                        "No artists with youtube links found",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    return@ExtendedFloatingActionButton
+                }
+                val randomYouTubeId = artistsWithYoutube.random().youtubeEmbed
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        "https://www.youtube.com/watch?v=$randomYouTubeId".toUri()
+                    )
+                )
+            },
+            text = { Text("I'm feeling lucky") },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_youtube),
+                    contentDescription = null,
+                )
+            },
+        )
+    }
 
     Row(
         modifier = Modifier

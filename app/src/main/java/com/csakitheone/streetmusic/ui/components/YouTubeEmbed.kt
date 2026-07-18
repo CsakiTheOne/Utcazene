@@ -1,13 +1,24 @@
 package com.csakitheone.streetmusic.ui.components
 
+import android.app.PictureInPictureParams
+import android.os.Build
+import android.util.Log
+import android.util.Rational
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toAndroidRectF
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.toRect
+import com.csakitheone.streetmusic.findActivity
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -17,8 +28,43 @@ fun YouTubeEmbed(
     modifier: Modifier = Modifier,
     videoId: String,
 ) {
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    Card(modifier = modifier) {
+
+    val pipModifier = modifier.onGloballyPositioned { layoutCoordinates ->
+        val builder = PictureInPictureParams.Builder()
+        val sourceRect = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
+        builder.setSourceRectHint(sourceRect)
+        builder.setAspectRatio(
+            Rational(16, 9)
+        )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setAutoEnterEnabled(true)
+        }
+        context.findActivity().setPictureInPictureParams(builder.build())
+    }
+
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        DisposableEffect(context) {
+            val onUserLeaveBehavior = Runnable {
+                context.findActivity()
+                    .enterPictureInPictureMode(PictureInPictureParams.Builder().build())
+            }
+            context.findActivity().addOnUserLeaveHintListener(
+                onUserLeaveBehavior
+            )
+            onDispose {
+                context.findActivity().removeOnUserLeaveHintListener(
+                    onUserLeaveBehavior
+                )
+            }
+        }
+    } else {
+        Log.i("PiP info", "API does not support PiP")
+    }
+
+    Card(modifier = modifier.then(pipModifier)) {
         key(videoId) {
             AndroidView(
                 modifier = Modifier

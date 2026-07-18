@@ -18,8 +18,10 @@ import com.csakitheone.streetmusic.data.api.UtcazeneApi
 import com.csakitheone.streetmusic.data.local.AppDatabase
 import com.csakitheone.streetmusic.data.local.ArtistEntity
 import com.csakitheone.streetmusic.data.local.EventEntity
+import com.csakitheone.streetmusic.data.local.VenueEntity
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
+import com.csakitheone.streetmusic.data.model.Venue
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.notifications.AlarmScheduler
 import com.csakitheone.streetmusic.ui.widgets.WidgetUpdateHelper
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -239,6 +242,10 @@ class DataRepository(
 
     val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates()
 
+    val venues: Flow<List<Venue>> = database.venueDao().getAll().map { entities ->
+        entities.map { Venue(it.id, it.name, it.address) }.sortedBy { it.name }
+    }
+
     fun getArtist(slug: String): Flow<Artist?> =
         database.artistDao().getBySlug(slug).combine(userFavorites) { entity, favs ->
             entity?.let {
@@ -270,6 +277,11 @@ class DataRepository(
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
             }.sortedBy { it.startTime }
+        }
+
+    fun getVenueByName(name: String): Flow<Venue?> =
+        database.venueDao().getByName(name).map { entity ->
+            entity?.let { Venue(it.id, it.name, it.address) }
         }
 
     val hasData: Flow<Boolean> = database.artistDao().getCount()
@@ -318,6 +330,21 @@ class DataRepository(
         val emulateFirstDayOfEvent = false
 
         isDownloading = true
+
+        val apiVenues = try {
+            api.fetchVenues()
+        } catch (e: Exception) {
+            Log.e("DataRepository", "Error fetching venues: ${e.message}")
+            emptyList()
+        }
+
+        if (apiVenues.isNotEmpty()) {
+            database.venueDao().deleteAll()
+            database.venueDao().insertAll(apiVenues.map {
+                VenueEntity(it.id, it.name, it.address)
+            })
+            Log.d("DataRepository", "Added ${apiVenues.size} venues.")
+        }
 
         val apiArtists = try {
             api.fetchArtists()
@@ -441,14 +468,20 @@ class DataRepository(
         database.clearAllTables()
     }
 
-    suspend fun syncData(artists: List<ArtistEntity>, events: List<EventEntity>) =
-        withContext(Dispatchers.IO) {
-            database.artistDao().deleteAll()
-            database.artistDao().insertAll(artists)
-            database.eventDao().deleteAll()
-            database.eventDao().insertAll(events)
-        }
+    suspend fun syncData(
+        artists: List<ArtistEntity>,
+        events: List<EventEntity>,
+        venues: List<VenueEntity>
+    ) = withContext(Dispatchers.IO) {
+        database.artistDao().deleteAll()
+        database.artistDao().insertAll(artists)
+        database.eventDao().deleteAll()
+        database.eventDao().insertAll(events)
+        database.venueDao().deleteAll()
+        database.venueDao().insertAll(venues)
+    }
 
     fun getAllArtistEntities(): Flow<List<ArtistEntity>> = database.artistDao().getAll()
     fun getAllEventEntities(): Flow<List<EventEntity>> = database.eventDao().getAll()
+    fun getAllVenueEntities(): Flow<List<VenueEntity>> = database.venueDao().getAll()
 }

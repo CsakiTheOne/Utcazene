@@ -29,6 +29,14 @@ data class EventEntity(
     val place: String
 )
 
+@Entity(tableName = "venues")
+@Serializable
+data class VenueEntity(
+    @PrimaryKey val id: Int,
+    val name: String,
+    val address: String
+)
+
 @Entity(tableName = "thread_nodes")
 @Serializable
 data class ThreadNode(

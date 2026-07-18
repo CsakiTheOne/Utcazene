@@ -3,6 +3,7 @@ package com.csakitheone.streetmusic.data.nearby
 import android.util.Log
 import com.csakitheone.streetmusic.data.local.ArtistEntity
 import com.csakitheone.streetmusic.data.local.EventEntity
+import com.csakitheone.streetmusic.data.local.VenueEntity
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class DataSyncPayload(
     val artists: List<ArtistEntity>,
-    val events: List<EventEntity>
+    val events: List<EventEntity>,
+    val venues: List<VenueEntity> = emptyList()
 )
 
 @Serializable
@@ -82,8 +84,13 @@ class DataSyncFeature(
         )
     }
 
-    fun sendData(endpointId: String, artists: List<ArtistEntity>, events: List<EventEntity>) {
-        val payloadData = Json.encodeToString(DataSyncPayload(artists, events))
+    fun sendData(
+        endpointId: String,
+        artists: List<ArtistEntity>,
+        events: List<EventEntity>,
+        venues: List<VenueEntity>
+    ) {
+        val payloadData = Json.encodeToString(DataSyncPayload(artists, events, venues))
         val payload = Payload.fromBytes(payloadData.toByteArray())
         nearbyManager.connectionsClient.sendPayload(endpointId, payload)
     }

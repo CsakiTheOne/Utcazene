@@ -58,6 +58,7 @@ fun PlacesScreen(
     val backStack = LocalNavBackStack.current
 
     val events by repository.events.collectAsState(initial = emptyList())
+    val venues by repository.venues.collectAsState(initial = emptyList())
     val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
     val dates by repository.eventDates.collectAsState(initial = emptyList())
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
@@ -215,12 +216,27 @@ fun PlacesScreen(
                 }
             }
             items(eventsByPlace.keys.toList()) { placeName ->
+                val venueAddress = remember(venues, placeName) {
+                    venues.find { it.name == placeName }?.address
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        text = placeName,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = placeName,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        if (!venueAddress.isNullOrBlank()) {
+                            Text(
+                                text = venueAddress,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                     HorizontalMultiBrowseCarousel(
                         state = rememberCarouselState(initialItem = 0) {
                             eventsByPlace[placeName]?.size ?: 0

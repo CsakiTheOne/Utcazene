@@ -19,6 +19,8 @@ class UtcazeneApi {
 
     suspend fun fetchArtists(): List<ApiArtist> = fetch("$baseUrl/artists/")
 
+    suspend fun fetchVenues(): List<ApiVenue> = fetch("$baseUrl/venues/")
+
     /**
      * Creates an OkHttpClient that trusts all certificates.
      * WARNING: This is highly insecure.

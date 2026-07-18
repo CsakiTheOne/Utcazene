@@ -33,6 +33,7 @@ fun DataSyncScreen() {
 
     val artists by repository.getAllArtistEntities().collectAsState(initial = emptyList())
     val events by repository.getAllEventEntities().collectAsState(initial = emptyList())
+    val venues by repository.getAllVenueEntities().collectAsState(initial = emptyList())
     val discoveredEndpoints by repository.nearbyManager.dataSync.discoveredEndpoints.collectAsState()
     val connectedEndpoints by repository.nearbyManager.dataSync.connectedEndpoints.collectAsState()
     val incomingData by repository.nearbyManager.dataSync.incomingData.collectAsState()
@@ -53,7 +54,7 @@ fun DataSyncScreen() {
 
     LaunchedEffect(incomingData) {
         incomingData?.let { data ->
-            repository.syncData(data.artists, data.events)
+            repository.syncData(data.artists, data.events, data.venues)
             Toast.makeText(context, "Data synced successfully!", Toast.LENGTH_LONG).show()
             repository.nearbyManager.dataSync.clearIncomingData()
             if (backStack.size > 1) {
@@ -146,13 +147,9 @@ fun DataSyncScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text("Your Local Data", style = MaterialTheme.typography.titleMedium)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(modifier = Modifier.weight(1f), text = "Artists: ${artists.size}")
-                        Text(modifier = Modifier.weight(1f), text = "Events: ${events.size}")
-                    }
+                    Text("Artists: ${artists.size}")
+                    Text("Events: ${events.size}")
+                    Text("Venues: ${venues.size}")
                 }
             }
 
@@ -220,7 +217,12 @@ fun DataSyncScreen() {
                         items(connectedEndpoints.toList()) { (id, payload) ->
                             ListItem(
                                 modifier = Modifier.clickable {
-                                    repository.nearbyManager.dataSync.sendData(id, artists, events)
+                                    repository.nearbyManager.dataSync.sendData(
+                                        id,
+                                        artists,
+                                        events,
+                                        venues
+                                    )
                                     Toast.makeText(context, "Sending data...", Toast.LENGTH_SHORT)
                                         .show()
                                 },

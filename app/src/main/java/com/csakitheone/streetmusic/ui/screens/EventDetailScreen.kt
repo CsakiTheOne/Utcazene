@@ -77,6 +77,8 @@ fun EventDetailScreen(eventId: Int) {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val event by repository.getEvent(eventId).collectAsState(initial = null)
+    val venue by (event?.let { repository.getVenueByName(it.place) }
+        ?: flowOf(null)).collectAsState(initial = null)
     val artist by (event?.let { repository.getArtist(it.artistSlug) }
         ?: flowOf(null)).collectAsState(initial = null)
     val allEvents by repository.events.collectAsState(initial = emptyList())
@@ -221,10 +223,19 @@ fun EventDetailScreen(eventId: Int) {
                                     painter = painterResource(R.drawable.shortcut_places),
                                     contentDescription = null,
                                 )
-                                Text(
-                                    text = event?.place ?: "",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = event?.place ?: "",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    if (!venue?.address.isNullOrBlank()) {
+                                        Text(
+                                            text = venue?.address ?: "",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                                 FilledIconButton(
                                     modifier = Modifier.padding(start = 16.dp),
                                     onClick = { backStack.add(Destination.Map) }

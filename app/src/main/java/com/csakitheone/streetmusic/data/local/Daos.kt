@@ -53,6 +53,21 @@ interface EventDao {
 }
 
 @Dao
+interface VenueDao {
+    @Query("SELECT * FROM venues")
+    fun getAll(): Flow<List<VenueEntity>>
+
+    @Query("SELECT * FROM venues WHERE name = :name LIMIT 1")
+    fun getByName(name: String): Flow<VenueEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(venues: List<VenueEntity>)
+
+    @Query("DELETE FROM venues")
+    suspend fun deleteAll()
+}
+
+@Dao
 interface ThreadNodeDao {
     @Query("SELECT * FROM thread_nodes")
     fun getAll(): Flow<List<ThreadNode>>

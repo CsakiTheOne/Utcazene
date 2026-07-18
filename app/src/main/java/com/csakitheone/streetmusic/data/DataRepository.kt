@@ -1,13 +1,18 @@
 package com.csakitheone.streetmusic.data
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
+import android.os.PowerManager
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.csakitheone.streetmusic.data.api.UtcazeneApi
 import com.csakitheone.streetmusic.data.local.AppDatabase
@@ -43,6 +48,26 @@ class DataRepository(
     val nearbyManager: NearbyManager
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
+
+    private val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+    private val _isBatterySaverEnabled = MutableStateFlow(powerManager.isPowerSaveMode)
+    val isBatterySaverEnabled: StateFlow<Boolean> = _isBatterySaverEnabled.asStateFlow()
+
+    private val batterySaverReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) {
+                val isEnabled = powerManager.isPowerSaveMode
+                _isBatterySaverEnabled.value = isEnabled
+                if (isEnabled) {
+                    setUseHighPowerDiscovery(false)
+                    setIsNearbyFriendsActive(false)
+                    setAutoUpdateOnUnmetered(false)
+                    setShowImagesOnMetered(false)
+                }
+            }
+        }
+    }
 
     private fun triggerWidgetUpdate() {
         scope.launch {
@@ -171,6 +196,12 @@ class DataRepository(
     }
 
     init {
+        ContextCompat.registerReceiver(
+            context,
+            batterySaverReceiver,
+            IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
         nearbyManager.setNearbyFriendsActive(_isNearbyFriendsActive.value)
         nearbyManager.updateLocalFavorites(_userFavorites.value)
         nearbyManager.updateLocalNickname(_nickname.value)

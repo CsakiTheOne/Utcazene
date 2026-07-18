@@ -24,11 +24,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -58,6 +61,7 @@ fun SettingsScreen() {
     val showImagesOnMetered by repository.showImagesOnMetered.collectAsState(initial = false)
     val autoUpdateOnUnmetered by repository.autoUpdateOnUnmetered.collectAsState(initial = true)
     val useHighPowerDiscovery by repository.useHighPowerDiscovery.collectAsState(initial = false)
+    val isBatterySaverEnabled by repository.isBatterySaverEnabled.collectAsState()
     val nickname by repository.nickname.collectAsState()
 
     val artists by repository.artists.collectAsState(initial = emptyList())
@@ -81,6 +85,9 @@ fun SettingsScreen() {
                         )
                     }
                 },
+                actions = {
+                    NearbyConnectionsDisplay()
+                },
             )
         },
     ) { paddingValues ->
@@ -91,6 +98,62 @@ fun SettingsScreen() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            Card {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(
+                        text = "Battery",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    if (isBatterySaverEnabled) {
+                        Text(
+                            text = "Battery saver is active. Some features are disabled to save energy.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            repository.setUseHighPowerDiscovery(false)
+                            repository.setIsNearbyFriendsActive(false)
+                            repository.setAutoUpdateOnUnmetered(false)
+                            repository.setShowImagesOnMetered(false)
+                            Toast.makeText(
+                                context,
+                                "Settings applied for best battery life",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        },
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_battery_android_frame_plus),
+                            contentDescription = null,
+                        )
+                        Text("Apply settings best for battery")
+                    }
+
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            context.startActivity(Intent(android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS))
+                        },
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_settings),
+                            contentDescription = null,
+                        )
+                        Text("Battery saver settings")
+                    }
+                }
+            }
+
             Card {
                 Text(
                     modifier = Modifier.padding(16.dp),
@@ -114,9 +177,10 @@ fun SettingsScreen() {
                         .clickable {
                             repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
                             if (repository.isNearbyFriendsActive.value) {
+                                repository.setIsNearbyFriendsActive(false)
                                 Toast.makeText(
                                     context,
-                                    "Restart nearby friends to apply changes",
+                                    "Turned off nearby friends to apply changes",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -216,6 +280,23 @@ fun SettingsScreen() {
                         }
                     }
 
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !repository.isDownloading,
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                repository.tryDownloadData(force = true)
+                            }
+                        },
+                    ) {
+                        Icon(
+                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                            painter = painterResource(R.drawable.ic_download),
+                            contentDescription = null,
+                        )
+                        Text("Redownload data")
+                    }
+
                     Text(text = "Sharing is caring", style = MaterialTheme.typography.titleSmall)
 
                     Row(
@@ -276,24 +357,25 @@ fun SettingsScreen() {
                         Text("Import/Export favorites")
                     }
 
+                    Text(text = "Free up space", style = MaterialTheme.typography.titleSmall)
+
                     Button(
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !repository.isDownloading,
                         onClick = {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                repository.tryDownloadData(force = true)
-                            }
+                            repository.clearMessages()
                         },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError,
+                        ),
                     ) {
                         Icon(
                             modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                            painter = painterResource(R.drawable.ic_download),
+                            painter = painterResource(R.drawable.ic_delete_forever),
                             contentDescription = null,
                         )
-                        Text("Redownload data")
+                        Text("Remove all messages from device")
                     }
-
-                    Text(text = "Free up space", style = MaterialTheme.typography.titleMedium)
 
                     Button(
                         modifier = Modifier.fillMaxWidth(),
@@ -314,25 +396,7 @@ fun SettingsScreen() {
                             painter = painterResource(R.drawable.ic_delete_forever),
                             contentDescription = null,
                         )
-                        Text("Remove data from device")
-                    }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            repository.clearMessages()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
-                        ),
-                    ) {
-                        Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                            painter = painterResource(R.drawable.ic_delete_forever),
-                            contentDescription = null,
-                        )
-                        Text("Remove all messages from device")
+                        Text("Remove artist and event data from device")
                     }
                 }
             }

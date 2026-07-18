@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,7 @@ import androidx.core.app.PictureInPictureModeChangedInfo
 import androidx.core.graphics.toRect
 import androidx.core.util.Consumer
 import com.csakitheone.streetmusic.findActivity
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -38,27 +40,33 @@ fun YouTubeEmbed(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val pipModifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-        val builder = PictureInPictureParams.Builder()
-        val sourceRect = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
-        builder.setSourceRectHint(sourceRect)
-        builder.setAspectRatio(
-            Rational(16, 9)
-        )
+    var isPlaying by remember { mutableStateOf(false) }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            builder.setAutoEnterEnabled(true)
+    val pipModifier by remember(isPlaying) {
+        derivedStateOf {
+            Modifier.onGloballyPositioned { layoutCoordinates ->
+                val builder = PictureInPictureParams.Builder()
+                val sourceRect = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
+                builder.setSourceRectHint(sourceRect)
+                builder.setAspectRatio(
+                    Rational(16, 9)
+                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    builder.setAutoEnterEnabled(isPlaying)
+                }
+                context.findActivity().setPictureInPictureParams(builder.build())
+            }
         }
-        context.findActivity().setPictureInPictureParams(builder.build())
     }
 
-    DisposableEffect(context) {
+    DisposableEffect(context, isPlaying) {
         val activity = context.findActivity()
         val onUserLeaveBehavior = Runnable {
             activity.enterPictureInPictureMode(PictureInPictureParams.Builder().build())
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && isPlaying) {
             activity.addOnUserLeaveHintListener(onUserLeaveBehavior)
         }
 
@@ -99,6 +107,13 @@ fun YouTubeEmbed(
                         addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
                             override fun onReady(youTubePlayer: YouTubePlayer) {
                                 youTubePlayer.cueVideo(videoId, 0f)
+                            }
+
+                            override fun onStateChange(
+                                youTubePlayer: YouTubePlayer,
+                                state: PlayerConstants.PlayerState
+                            ) {
+                                isPlaying = state == PlayerConstants.PlayerState.PLAYING
                             }
                         })
                     }

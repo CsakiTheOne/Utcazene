@@ -220,27 +220,38 @@ class DataRepository(
 
     val artists: Flow<List<Artist>> =
         database.artistDao().getAll().combine(userFavorites) { entities, favs ->
-            entities.map {
+            val dbArtists = entities.map {
                 Artist(
                     it.id, it.name, it.country, it.description, it.image, it.slug,
                     it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
                     isStarred = favs.contains(it.slug)
                 )
-            }.sortedBy { it.name }
+            }
+            val friendArtists = FriendRepository.artists.map {
+                it.copy(isStarred = favs.contains(it.slug))
+            }
+            (dbArtists + friendArtists).sortedBy { it.name }
         }
 
     val events: Flow<List<Event>> =
         database.eventDao().getAll().combine(userFavorites) { entities, favs ->
-            entities.map {
+            val dbEvents = entities.map {
                 Event(
                     it.id, it.artistId, it.artistSlug, it.artistName,
                     it.startTime, it.endTime, it.place,
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
             }
+            val friendEvents = FriendRepository.events.map {
+                it.copy(isStarred = favs.contains("${it.artistSlug} at ${it.startTime}"))
+            }
+            dbEvents + friendEvents
         }
 
-    val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates()
+    val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates().map { dbDates ->
+        val friendDates = FriendRepository.events.map { it.startTime.substring(0, 10) }
+        (dbDates + friendDates).distinct().sorted()
+    }
 
     val venues: Flow<List<Venue>> = database.venueDao().getAll().map { entities ->
         entities.map { Venue(it.id, it.name, it.address) }.sortedBy { it.name }
@@ -254,7 +265,9 @@ class DataRepository(
                     it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
                     isStarred = favs.contains(it.slug)
                 )
-            }
+            } ?: FriendRepository.artists.find { it.slug == slug }?.copy(
+                isStarred = favs.contains(slug)
+            )
         }
 
     fun getEvent(id: Int): Flow<Event?> =
@@ -265,18 +278,24 @@ class DataRepository(
                     it.startTime, it.endTime, it.place,
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
+            } ?: FriendRepository.events.find { it.id == id }?.let {
+                it.copy(isStarred = favs.contains("${it.artistSlug} at ${it.startTime}"))
             }
         }
 
     fun getEventsByArtist(artistSlug: String): Flow<List<Event>> =
         database.eventDao().getEventsByArtist(artistSlug).combine(userFavorites) { entities, favs ->
-            entities.map {
+            val dbEvents = entities.map {
                 Event(
                     it.id, it.artistId, it.artistSlug, it.artistName,
                     it.startTime, it.endTime, it.place,
                     isStarred = favs.contains("${it.artistSlug} at ${it.startTime}")
                 )
-            }.sortedBy { it.startTime }
+            }
+            val friendEvents = FriendRepository.events.filter { it.artistSlug == artistSlug }.map {
+                it.copy(isStarred = favs.contains("${it.artistSlug} at ${it.startTime}"))
+            }
+            (dbEvents + friendEvents).sortedBy { it.startTime }
         }
 
     fun getVenueByName(name: String): Flow<Venue?> =

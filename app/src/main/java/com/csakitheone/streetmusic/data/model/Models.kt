@@ -12,7 +12,11 @@ data class Artist(
     val youtubeEmbed: String?,
     val tags: List<String> = emptyList(),
     val isStarred: Boolean = false
-)
+) {
+    companion object {
+        const val TAG_FRIEND = "friend"
+    }
+}
 
 data class Event(
     val id: Int,
@@ -52,4 +56,5 @@ val tagInfo = mapOf(
     "encore" to "This artist performs more than the number of days the event lasts.",
     "complete" to "This artist has a description, image and YouTube URL.",
     "incomplete" to "This artist doesn't have a description, image and/or YouTube URL.",
+    Artist.TAG_FRIEND to "This artist is a friend of the developer and performs outside the official event. Check them out!",
 )

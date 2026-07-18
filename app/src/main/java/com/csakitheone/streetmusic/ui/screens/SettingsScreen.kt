@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -174,7 +175,7 @@ fun SettingsScreen() {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .clickable(enabled = !isBatterySaverEnabled) {
                             repository.setUseHighPowerDiscovery(!useHighPowerDiscovery)
                             if (repository.isNearbyFriendsActive.value) {
                                 repository.setIsNearbyFriendsActive(false)
@@ -189,15 +190,17 @@ fun SettingsScreen() {
                 ) {
                     Checkbox(
                         modifier = Modifier.padding(8.dp),
+                        enabled = !isBatterySaverEnabled,
                         checked = useHighPowerDiscovery,
                         onCheckedChange = {
                             repository.setUseHighPowerDiscovery(it)
-                        }
+                        },
                     )
                     Column(
                         modifier = Modifier
                             .padding(8.dp)
                             .weight(1f)
+                            .alpha(if (isBatterySaverEnabled) 0.5f else 1f),
                     ) {
                         Text(text = "High-power discovery")
                         Text(

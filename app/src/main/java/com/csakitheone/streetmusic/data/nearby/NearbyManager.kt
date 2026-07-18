@@ -22,13 +22,14 @@ import kotlin.time.Duration.Companion.seconds
 
 class NearbyManager(
     private val context: Context,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val threadNodeDao: com.csakitheone.streetmusic.data.local.ThreadNodeDao
 ) {
     internal val connectionsClient get() = Nearby.getConnectionsClient(context)
     internal val localId = (System.currentTimeMillis() % 1000000).toString(36).padStart(4, '0') + 
                            (0..99).random().toString(36)
 
-    val friends = FriendsFeature(this, scope)
+    val friends = FriendsFeature(this, scope, threadNodeDao)
     val dataSync = DataSyncFeature(this, scope)
 
     private val _error = MutableStateFlow<String?>(null)

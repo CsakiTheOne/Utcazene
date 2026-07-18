@@ -51,3 +51,18 @@ interface EventDao {
     @Query("SELECT * FROM events WHERE artistSlug = :artistSlug")
     fun getEventsByArtist(artistSlug: String): Flow<List<EventEntity>>
 }
+
+@Dao
+interface ThreadNodeDao {
+    @Query("SELECT * FROM thread_nodes")
+    fun getAll(): Flow<List<ThreadNode>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(nodes: List<ThreadNode>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(node: ThreadNode)
+
+    @Query("DELETE FROM thread_nodes")
+    suspend fun deleteAll()
+}

@@ -28,3 +28,23 @@ data class EventEntity(
     val endTime: String,
     val place: String
 )
+
+@Entity(tableName = "thread_nodes")
+@Serializable
+data class ThreadNode(
+    @PrimaryKey val id: String,
+    val parentId: String,
+    val senderName: String,
+    val content: String,
+) {
+    companion object {
+
+        val MAIN = ThreadNode(
+            id = "main",
+            parentId = "",
+            senderName = "UZ App",
+            content = "Here you can chat with nearby friends and comment to artist profiles without internet. You can send messages even when nobody's connected.",
+        )
+
+    }
+}

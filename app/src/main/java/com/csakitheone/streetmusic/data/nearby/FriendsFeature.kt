@@ -1,31 +1,15 @@
 package com.csakitheone.streetmusic.data.nearby
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import android.util.Log
+import com.csakitheone.streetmusic.data.local.ThreadNode
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-
-@Serializable
-data class ThreadNode(
-    val id: String,
-    val parentId: String,
-    val senderName: String,
-    val content: String,
-) {
-    companion object {
-
-        val MAIN = ThreadNode(
-            id = "main",
-            parentId = "",
-            senderName = "UZ App",
-            content = "Here you can chat with nearby friends and comment to artist profiles without internet. You can send messages even when nobody's connected.",
-        )
-
-    }
-}
 
 @Serializable
 data class FriendsPayload(
@@ -38,7 +22,8 @@ data class FriendsPayload(
 
 class FriendsFeature(
     private val nearbyManager: NearbyManager,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val threadNodeDao: com.csakitheone.streetmusic.data.local.ThreadNodeDao
 ) {
     private val serviceId = "com.csakitheone.streetmusic.NEARBY_GANG"
     private val strategy = Strategy.P2P_CLUSTER
@@ -46,11 +31,12 @@ class FriendsFeature(
     private val _connectedFriends = MutableStateFlow<Map<String, FriendsPayload>>(emptyMap())
     val connectedFriends: StateFlow<Map<String, FriendsPayload>> = _connectedFriends.asStateFlow()
 
-    private val _localThreadNodes = MutableStateFlow<Set<ThreadNode>>(setOf(ThreadNode.MAIN))
-    val localThreadNodes: StateFlow<Set<ThreadNode>> = _localThreadNodes.asStateFlow()
+    val localThreadNodes: StateFlow<Set<ThreadNode>> = threadNodeDao.getAll()
+        .map { it.toSet() + ThreadNode.MAIN }
+        .stateIn(scope, SharingStarted.Eagerly, setOf(ThreadNode.MAIN))
 
     val allThreadNodes: StateFlow<Set<ThreadNode>> = combine(
-        _localThreadNodes,
+        localThreadNodes,
         _connectedFriends
     ) { local, connected ->
         val all = local.toMutableSet()
@@ -111,16 +97,20 @@ class FriendsFeature(
             senderName = localNickname,
             content = content.take(280),
         )
-        _localThreadNodes.value += newNode
-        if (isActive) {
-            broadcastFavorites()
+        scope.launch {
+            threadNodeDao.insert(newNode)
+            if (isActive) {
+                broadcastFavorites()
+            }
         }
     }
 
     fun clearMessages() {
-        _localThreadNodes.value = setOf(ThreadNode.MAIN)
-        if (isActive) {
-            broadcastFavorites()
+        scope.launch {
+            threadNodeDao.deleteAll()
+            if (isActive) {
+                broadcastFavorites()
+            }
         }
     }
 
@@ -160,19 +150,22 @@ class FriendsFeature(
     }
 
     private fun broadcastFavorites() {
-        val payloadData = Json.encodeToString(
-            FriendsPayload(
-                localNickname,
-                localScreen,
-                localFavorites,
-                _localThreadNodes.value,
-                nearbyManager.localId
+        scope.launch {
+            val localNodes = threadNodeDao.getAll().first().toSet()
+            val payloadData = Json.encodeToString(
+                FriendsPayload(
+                    localNickname,
+                    localScreen,
+                    localFavorites,
+                    localNodes,
+                    nearbyManager.localId
+                )
             )
-        )
-        val payload = Payload.fromBytes(payloadData.toByteArray())
+            val payload = Payload.fromBytes(payloadData.toByteArray())
 
-        _connectedFriends.value.keys.forEach { endpointId ->
-            nearbyManager.connectionsClient.sendPayload(endpointId, payload)
+            _connectedFriends.value.keys.forEach { endpointId ->
+                nearbyManager.connectionsClient.sendPayload(endpointId, payload)
+            }
         }
     }
 
@@ -328,7 +321,9 @@ class FriendsFeature(
                     val friendsPayload = Json.decodeFromString<FriendsPayload>(data)
                     _connectedFriends.value += (endpointId to friendsPayload)
                     // Merge incoming thread nodes into local set
-                    _localThreadNodes.value += friendsPayload.threadNodes
+                    scope.launch {
+                        threadNodeDao.insertAll(friendsPayload.threadNodes.toList())
+                    }
                 } catch (e: Exception) {
                     Log.e("FriendsFeature", "Error decoding payload", e)
                 }

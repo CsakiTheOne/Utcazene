@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
-import com.csakitheone.streetmusic.data.nearby.ThreadNode
+import com.csakitheone.streetmusic.data.local.ThreadNode
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 

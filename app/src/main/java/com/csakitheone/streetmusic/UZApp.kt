@@ -28,7 +28,7 @@ class UZApp : Application(), SingletonImageLoader.Factory {
         val connectivityManager =
             getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         val prefs = getSharedPreferences("favorites", Context.MODE_PRIVATE)
-        val nearbyManager = NearbyManager(applicationContext, MainScope())
+        val nearbyManager = NearbyManager(applicationContext, MainScope(), db.threadNodeDao())
         DataRepository(applicationContext, UtcazeneApi(), db, connectivityManager, prefs, nearbyManager)
     }
 

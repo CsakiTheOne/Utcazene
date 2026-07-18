@@ -38,7 +38,7 @@ fun YouTubeEmbed(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    val pipModifier = modifier.onGloballyPositioned { layoutCoordinates ->
+    val pipModifier = Modifier.onGloballyPositioned { layoutCoordinates ->
         val builder = PictureInPictureParams.Builder()
         val sourceRect = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
         builder.setSourceRectHint(sourceRect)
@@ -52,23 +52,27 @@ fun YouTubeEmbed(
         context.findActivity().setPictureInPictureParams(builder.build())
     }
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-        DisposableEffect(context) {
-            val onUserLeaveBehavior = Runnable {
-                context.findActivity()
-                    .enterPictureInPictureMode(PictureInPictureParams.Builder().build())
-            }
-            context.findActivity().addOnUserLeaveHintListener(
-                onUserLeaveBehavior
-            )
-            onDispose {
-                context.findActivity().removeOnUserLeaveHintListener(
-                    onUserLeaveBehavior
+    DisposableEffect(context) {
+        val activity = context.findActivity()
+        val onUserLeaveBehavior = Runnable {
+            activity.enterPictureInPictureMode(PictureInPictureParams.Builder().build())
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            activity.addOnUserLeaveHintListener(onUserLeaveBehavior)
+        }
+
+        onDispose {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                activity.removeOnUserLeaveHintListener(onUserLeaveBehavior)
+            } else {
+                activity.setPictureInPictureParams(
+                    PictureInPictureParams.Builder()
+                        .setAutoEnterEnabled(false)
+                        .build()
                 )
             }
         }
-    } else {
-        Log.i("PiP info", "API does not support PiP")
     }
 
     DisposableEffect(context) {

@@ -87,6 +87,8 @@ fun ArtistDetailScreen(artistSlug: String) {
         mutableIntStateOf(if (events.isEmpty()) 1 else 0)
     }
 
+    var isInPipMode by rememberSaveable { mutableStateOf(false) }
+
     var selectedTag by remember { mutableStateOf("") }
 
     if (selectedTag.isNotBlank()) {
@@ -107,6 +109,7 @@ fun ArtistDetailScreen(artistSlug: String) {
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .imePadding(),
         topBar = {
+            if (isInPipMode) return@Scaffold
             Box {
                 if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
                     AsyncImage(
@@ -177,6 +180,7 @@ fun ArtistDetailScreen(artistSlug: String) {
             }
         },
         bottomBar = {
+            if (isInPipMode) return@Scaffold
             ShortNavigationBar {
                 ShortNavigationBarItem(
                     selected = selectedTabIndex == 0,
@@ -256,10 +260,10 @@ fun ArtistDetailScreen(artistSlug: String) {
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
+                            .padding(if (isInPipMode) 0.dp else 16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        artist?.let {
+                        if (!isInPipMode && artist != null) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -271,7 +275,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = it.country,
+                                    text = artist!!.country,
                                     style = MaterialTheme.typography.labelLarge
                                 )
                             }
@@ -280,7 +284,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                it.tags.forEach { tag ->
+                                artist!!.tags.forEach { tag ->
                                     SuggestionChip(
                                         onClick = { selectedTag = tag },
                                         label = { Text(tag) }
@@ -291,7 +295,10 @@ fun ArtistDetailScreen(artistSlug: String) {
 
                         if (!artist?.youtubeEmbed.isNullOrBlank()) {
                             if (repository.shouldShowImage()) {
-                                YouTubeEmbed(videoId = artist!!.youtubeEmbed!!)
+                                YouTubeEmbed(
+                                    videoId = artist!!.youtubeEmbed!!,
+                                    onPipChanged = { isInPipMode = it }
+                                )
                             } else {
                                 Button(
                                     modifier = Modifier.fillMaxWidth(),

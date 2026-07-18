@@ -21,7 +21,7 @@ data class ThreadNode(
             id = "main",
             parentId = "",
             senderName = "UZ App",
-            content = "Welcome to the main thread!",
+            content = "Here you can chat with nearby friends and comment to artist profiles without internet. You can send messages even when nobody's connected.",
         )
 
     }
@@ -183,7 +183,10 @@ class FriendsFeature(
 
             // Avoid connecting to the same device multiple times
             if (_connectedFriends.value.values.any { it.peerId == peerId }) {
-                Log.d("FriendsFeature", "Already connected to peer $peerId, ignoring endpoint $endpointId")
+                Log.d(
+                    "FriendsFeature",
+                    "Already connected to peer $peerId, ignoring endpoint $endpointId"
+                )
                 return
             }
 
@@ -223,14 +226,21 @@ class FriendsFeature(
                 ).addOnSuccessListener {
                     Log.d("FriendsFeature", "Connection request sent to $peerName ($endpointId)")
                 }.addOnFailureListener { e ->
-                    val statusCode = (e as? com.google.android.gms.common.api.ApiException)?.statusCode
+                    val statusCode =
+                        (e as? com.google.android.gms.common.api.ApiException)?.statusCode
                     if (statusCode == ConnectionsStatusCodes.STATUS_ALREADY_CONNECTED_TO_ENDPOINT) {
-                        Log.w("FriendsFeature", "Already connected to $peerName ($endpointId). Waiting for callbacks...")
+                        Log.w(
+                            "FriendsFeature",
+                            "Already connected to $peerName ($endpointId). Waiting for callbacks..."
+                        )
                         // Don't remove from connectingEndpoints, let onConnectionResult handle it
                         return@addOnFailureListener
                     }
-                    
-                    Log.e("FriendsFeature", "Connection request failed to $peerName ($endpointId): ${e.message}")
+
+                    Log.e(
+                        "FriendsFeature",
+                        "Connection request failed to $peerName ($endpointId): ${e.message}"
+                    )
                     synchronized(connectingEndpoints) {
                         connectingEndpoints.remove(endpointId)
                         pendingNames.remove(endpointId)
@@ -250,7 +260,10 @@ class FriendsFeature(
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             val (peerName, peerId) = nearbyManager.unpackName(info.endpointName)
-            Log.d("FriendsFeature", "Connection initiated with $peerName ($peerId, $endpointId). Incoming: ${info.isIncomingConnection}")
+            Log.d(
+                "FriendsFeature",
+                "Connection initiated with $peerName ($peerId, $endpointId). Incoming: ${info.isIncomingConnection}"
+            )
 
             if (peerId == nearbyManager.localId) {
                 Log.w("FriendsFeature", "Rejecting connection from self.")
@@ -259,14 +272,21 @@ class FriendsFeature(
             }
 
             if (_connectedFriends.value.values.any { it.peerId == peerId }) {
-                Log.d("FriendsFeature", "Already connected to peer $peerId, allowing new connection $endpointId")
+                Log.d(
+                    "FriendsFeature",
+                    "Already connected to peer $peerId, allowing new connection $endpointId"
+                )
                 // We allow it, but we might want to clean up the old one later if it doesn't disconnect
             }
 
             Log.d("FriendsFeature", "Accepting connection from $peerName ($endpointId)")
             nearbyManager.connectionsClient.acceptConnection(endpointId, payloadCallback)
                 .addOnFailureListener { e ->
-                    Log.e("FriendsFeature", "Failed to accept connection from $peerName ($endpointId)", e)
+                    Log.e(
+                        "FriendsFeature",
+                        "Failed to accept connection from $peerName ($endpointId)",
+                        e
+                    )
                 }
         }
 
@@ -287,7 +307,10 @@ class FriendsFeature(
                 ))
                 broadcastFavorites()
             } else {
-                Log.e("FriendsFeature", "Connection failed to $peerName ($endpointId): ${result.status.statusMessage} (${result.status.statusCode})")
+                Log.e(
+                    "FriendsFeature",
+                    "Connection failed to $peerName ($endpointId): ${result.status.statusMessage} (${result.status.statusCode})"
+                )
             }
         }
 

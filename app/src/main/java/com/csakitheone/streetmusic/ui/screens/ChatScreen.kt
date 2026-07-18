@@ -33,6 +33,8 @@ fun ChatScreen(
     val backStack = LocalNavBackStack.current
     val allNodes by repository.nearbyManager.friends.allThreadNodes.collectAsState()
 
+    val artist by repository.getArtist(initialRootNodeId).collectAsState(null)
+
     var focusNodeId by rememberSaveable(initialRootNodeId) { mutableStateOf(initialRootNodeId) }
 
     // Resolve the "effective" root node by following the single-child chain from the focus node.
@@ -57,8 +59,8 @@ fun ChatScreen(
     val effectiveRootNode = allNodes.find { it.id == effectiveRootNodeId } ?: ThreadNode(
         id = effectiveRootNodeId,
         parentId = "main",
-        senderName = "System",
-        content = "This thread hasn't started yet. Be the first to say something!",
+        senderName = artist?.name ?: "UZ App",
+        content = if (artist != null) "Welcome to my thread!" else "Welcome to the \"$initialRootNodeId\" thread!",
     )
 
     val parents = remember(effectiveRootNode, allNodes) {

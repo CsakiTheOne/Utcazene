@@ -123,7 +123,7 @@ fun EventDetailScreen(eventId: Int) {
                         modifier = Modifier
                             .matchParentSize()
                             .alpha(1f - scrollBehavior.state.collapsedFraction)
-                            .also {
+                            .then(
                                 if (sharedTransition != null) {
                                     with(sharedTransition.sharedTransitionScope) {
                                         Modifier.sharedElement(
@@ -133,8 +133,8 @@ fun EventDetailScreen(eventId: Int) {
                                             sharedTransition.animatedVisibilityScope,
                                         )
                                     }
-                                }
-                            },
+                                } else Modifier
+                            ),
                         model = artist?.image,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

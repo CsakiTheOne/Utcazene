@@ -33,16 +33,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 
 @Composable
 fun MapScreen() {
+    val sharedTransitionContext = LocalSharedTransitionContext.current
     val backStack = LocalNavBackStack.current
 
     val mapUrl =
         remember { "https://www.google.com/maps/d/embed?mid=12plW9qjTupsu26_lLGD-lnE4jqUczO4U&ehbc=2E312F" }
 
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(
+                if (sharedTransitionContext != null) with(sharedTransitionContext.sharedTransitionScope) {
+                    Modifier.sharedBounds(
+                        sharedTransitionContext.sharedTransitionScope.rememberSharedContentState("MapScreen"),
+                        sharedTransitionContext.animatedVisibilityScope
+                    )
+                }
+                else Modifier
+            ),
         // #2d2f2f
         color = Color(0xFF2d2f2f)
     ) {

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val sharedTransitionContext = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -75,6 +77,15 @@ fun SettingsScreen() {
     }
 
     Scaffold(
+        modifier = Modifier.then(
+            if (sharedTransitionContext != null) with(sharedTransitionContext.sharedTransitionScope) {
+                Modifier.sharedBounds(
+                    sharedTransitionContext.sharedTransitionScope.rememberSharedContentState("SettingsScreen"),
+                    sharedTransitionContext.animatedVisibilityScope
+                )
+            }
+            else Modifier
+        ),
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },

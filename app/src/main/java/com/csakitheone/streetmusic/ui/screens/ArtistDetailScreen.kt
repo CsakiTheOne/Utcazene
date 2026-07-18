@@ -33,6 +33,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -101,7 +103,9 @@ fun ArtistDetailScreen(artistSlug: String) {
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .imePadding(),
         topBar = {
             Box {
                 if (repository.shouldShowImage() && !artist?.image.isNullOrBlank()) {
@@ -173,8 +177,8 @@ fun ArtistDetailScreen(artistSlug: String) {
             }
         },
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
+            ShortNavigationBar {
+                ShortNavigationBarItem(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
                     icon = {
@@ -183,9 +187,9 @@ fun ArtistDetailScreen(artistSlug: String) {
                             contentDescription = "Performances"
                         )
                     },
-                    label = { Text("Performances") }
+                    label = { Text("Performances") },
                 )
-                NavigationBarItem(
+                ShortNavigationBarItem(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
                     icon = {
@@ -196,7 +200,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                     },
                     label = { Text("Info") }
                 )
-                NavigationBarItem(
+                ShortNavigationBarItem(
                     selected = selectedTabIndex == 2,
                     onClick = { selectedTabIndex = 2 },
                     icon = {
@@ -209,11 +213,11 @@ fun ArtistDetailScreen(artistSlug: String) {
                 )
             }
         },
-    ) { padding ->
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(paddingValues)
         ) {
             when (selectedTabIndex) {
                 0 -> {
@@ -351,9 +355,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                 2 -> {
                     ChatScreen(
                         initialRootNodeId = artistSlug,
-                        headlessModifier = Modifier
-                            .fillMaxSize()
-                            .imePadding(),
+                        headlessModifier = Modifier.fillMaxSize(),
                         isHeadless = true,
                     )
                 }

@@ -82,28 +82,29 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                reverseLayout = true,
             ) {
-                item {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "This is a highly unstable, experimental feature",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-
-                items(parents) { node ->
-                    ChatBubble(
-                        node = node,
-                        isParent = true,
-                        replyCount = allNodes.count { it.parentId == node.id },
-                        onClick = {
-                            focusNodeId = node.id
-                            effectiveRootNodeId = node.id
-                        }
-                    )
+                if (replies.isNotEmpty()) {
+                    items(replies.reversed()) { node ->
+                        ChatBubble(
+                            node = node,
+                            replyCount = allNodes.count { it.parentId == node.id },
+                            onClick = {
+                                focusNodeId = node.id
+                                effectiveRootNodeId = node.id
+                            }
+                        )
+                    }
+                    item {
+                        HorizontalDivider()
+                        Text(
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            text = "Replies",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
 
                 item {
@@ -118,26 +119,26 @@ fun ChatScreen(
                     )
                 }
 
-                if (replies.isNotEmpty()) {
-                    item {
-                        HorizontalDivider()
-                        Text(
-                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-                            text = "Replies",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    items(replies) { node ->
-                        ChatBubble(
-                            node = node,
-                            replyCount = allNodes.count { it.parentId == node.id },
-                            onClick = {
-                                focusNodeId = node.id
-                                effectiveRootNodeId = node.id
-                            }
-                        )
-                    }
+                items(parents.reversed()) { node ->
+                    ChatBubble(
+                        node = node,
+                        isParent = true,
+                        replyCount = allNodes.count { it.parentId == node.id },
+                        onClick = {
+                            focusNodeId = node.id
+                            effectiveRootNodeId = node.id
+                        }
+                    )
+                }
+
+                item {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "This is a highly unstable, experimental feature",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
 

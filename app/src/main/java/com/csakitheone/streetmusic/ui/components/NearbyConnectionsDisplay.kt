@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -128,6 +129,31 @@ fun NearbyConnectionsDisplay(
                                     }
                                 },
                                 supportingContent = { Text(friend.screen) },
+                                trailingContent = {
+                                    val colorScheme = MaterialTheme.colorScheme
+                                    val batteryContentColor by remember(friend.batteryLevel) {
+                                        derivedStateOf {
+                                            when (friend.batteryLevel) {
+                                                in 0..20 -> colorScheme.error
+                                                else -> colorScheme.onSurfaceVariant
+                                            }
+                                        }
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            modifier = Modifier.size(24.dp).padding(end = 8.dp),
+                                            painter = painterResource(R.drawable.ic_battery_android_frame_plus),
+                                            contentDescription = null,
+                                            tint = batteryContentColor
+                                        )
+                                        Text(
+                                            text = if (friend.batteryLevel == -1) "?"
+                                            else "${friend.batteryLevel}%",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = batteryContentColor
+                                        )
+                                    }
+                                },
                                 colors = ListItemDefaults.colors(
                                     containerColor = Color.Transparent,
                                 ),

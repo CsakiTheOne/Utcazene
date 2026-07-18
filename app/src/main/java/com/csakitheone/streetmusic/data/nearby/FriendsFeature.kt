@@ -18,6 +18,7 @@ data class FriendsPayload(
     val favoriteSlugs: Set<String>,
     val threadNodes: Set<ThreadNode> = emptySet(),
     val peerId: String = "",
+    val batteryLevel: Int = -1,
 )
 
 class FriendsFeature(
@@ -52,6 +53,7 @@ class FriendsFeature(
     private var localNickname = "Friend"
     private var localScreen = "Home"
     private var localFavorites = emptySet<String>()
+    private var localBatteryLevel = -1
 
     private val connectingEndpoints = mutableSetOf<String>()
     private val pendingNames = mutableMapOf<String, String>()
@@ -85,6 +87,14 @@ class FriendsFeature(
     fun updateLocalFavorites(favorites: Set<String>) {
         val changed = localFavorites != favorites
         localFavorites = favorites
+        if (isActive && changed) {
+            broadcastFavorites()
+        }
+    }
+
+    fun updateLocalBatteryLevel(batteryLevel: Int) {
+        val changed = localBatteryLevel != batteryLevel
+        localBatteryLevel = batteryLevel
         if (isActive && changed) {
             broadcastFavorites()
         }
@@ -158,7 +168,8 @@ class FriendsFeature(
                     localScreen,
                     localFavorites,
                     localNodes,
-                    nearbyManager.localId
+                    nearbyManager.localId,
+                    localBatteryLevel
                 )
             )
             val payload = Payload.fromBytes(payloadData.toByteArray())

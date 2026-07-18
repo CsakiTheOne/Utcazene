@@ -69,6 +69,10 @@ class NearbyManager(
         friends.updateLocalNickname(nickname)
     }
 
+    fun updateLocalBatteryLevel(batteryLevel: Int) {
+        friends.updateLocalBatteryLevel(batteryLevel)
+    }
+
     internal fun packName(name: String) = "${name.take(20)}|$localId"
     internal fun unpackName(packed: String): Pair<String, String> {
         val index = packed.lastIndexOf('|')

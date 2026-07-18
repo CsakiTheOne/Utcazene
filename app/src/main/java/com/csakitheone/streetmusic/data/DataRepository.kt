@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
+import android.os.BatteryManager
 import android.os.PowerManager
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -56,6 +57,23 @@ class DataRepository(
 
     private val _isBatterySaverEnabled = MutableStateFlow(powerManager.isPowerSaveMode)
     val isBatterySaverEnabled: StateFlow<Boolean> = _isBatterySaverEnabled.asStateFlow()
+
+    private val _batteryLevel = MutableStateFlow(-1)
+    val batteryLevel: StateFlow<Int> = _batteryLevel.asStateFlow()
+
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_BATTERY_CHANGED) {
+                val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+                if (level != -1 && scale != -1) {
+                    val batteryPct = (level * 100 / scale.toFloat()).toInt()
+                    _batteryLevel.value = batteryPct
+                    nearbyManager.updateLocalBatteryLevel(batteryPct)
+                }
+            }
+        }
+    }
 
     private val batterySaverReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -203,6 +221,12 @@ class DataRepository(
             context,
             batterySaverReceiver,
             IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        ContextCompat.registerReceiver(
+            context,
+            batteryReceiver,
+            IntentFilter(Intent.ACTION_BATTERY_CHANGED),
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
         nearbyManager.setNearbyFriendsActive(_isNearbyFriendsActive.value)

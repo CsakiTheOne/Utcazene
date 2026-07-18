@@ -313,34 +313,41 @@ fun SettingsScreen() {
 
                     Text(text = "Sharing is caring", style = MaterialTheme.typography.titleSmall)
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        SplitButtonDefaults.LeadingButton(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = SplitButtonDefaults.Spacing),
-                            onClick = {
-                                shareApp(context, true)
-                            },
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Icon(
-                                modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                                painter = painterResource(R.drawable.ic_send),
-                                contentDescription = null,
-                            )
-                            Text("Send app")
+                            SplitButtonDefaults.LeadingButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = SplitButtonDefaults.Spacing),
+                                onClick = {
+                                    shareApp(context, true)
+                                },
+                            ) {
+                                Icon(
+                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
+                                    painter = painterResource(R.drawable.ic_send),
+                                    contentDescription = null,
+                                )
+                                Text("Send app")
+                            }
+                            SplitButtonDefaults.TrailingButton(
+                                onClick = {
+                                    shareApp(context)
+                                },
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_share),
+                                    contentDescription = null,
+                                )
+                            }
                         }
-                        SplitButtonDefaults.TrailingButton(
-                            onClick = {
-                                shareApp(context)
-                            },
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_share),
-                                contentDescription = null,
-                            )
-                        }
+
+                        Text(
+                            text = "Sent apk may not work on the target device. Download UZ App from the Play Store if possible.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
                     }
 
                     Button(

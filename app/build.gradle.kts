@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.google.play.services.nearby)
     implementation(libs.okhttp)
-    implementation(libs.osm.androd.compose)
+    implementation(libs.osm.android.compose)
     implementation(libs.osmdroid.android)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

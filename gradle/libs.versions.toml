@@ -25,7 +25,7 @@ youtubePlayer = "13.0.0"
 glance = "1.1.1"
 foundation = "1.11.4"
 osmdroidAndroid = "6.1.20"
-osmAndrodCompose = "0.0.3"
+osmAndroidCompose = "0.0.5"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -66,7 +66,7 @@ androidx-glance-material3 = { group = "androidx.glance", name = "glance-material
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroidAndroid" }
-osm-androd-compose = { group = "tech.utsmankece", name = "osm-androd-compose", version.ref = "osmAndrodCompose" }
+osm-android-compose = { group = "tech.utsmankece", name = "osm-android-compose", version.ref = "osmAndroidCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

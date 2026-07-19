@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.retain.retain
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -103,17 +102,6 @@ fun MapScreen() {
     var selectedMapIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var now by remember { mutableStateOf(LocalDateTime.now()) }
-
-    // Workaround against crash when navigating
-    BackHandler {
-        if (selectedMapIndex != 0) {
-            backStack.removeLastOrNull()
-            return@BackHandler
-        }
-
-        selectedMapIndex = 1
-        backStack.removeLastOrNull()
-    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -209,12 +197,12 @@ fun MapScreen() {
                     Tab(
                         selected = selectedMapIndex == 0,
                         onClick = { selectedMapIndex = 0 },
-                        text = { Text("OSM") },
+                        text = { Text("by Csáki") },
                     )
                     Tab(
                         selected = selectedMapIndex == 1,
                         onClick = { selectedMapIndex = 1 },
-                        text = { Text("Google Maps") },
+                        text = { Text("by Utcazene") },
                     )
                 }
             }

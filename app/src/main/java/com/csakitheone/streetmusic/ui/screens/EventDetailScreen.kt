@@ -209,7 +209,7 @@ fun EventDetailScreen(eventId: Int) {
                                     painter = painterResource(R.drawable.shortcut_places),
                                     contentDescription = null,
                                 )
-                                Column(modifier = Modifier.weight(1f)) {
+                                Column {
                                     Text(
                                         text = event?.place ?: "",
                                         style = MaterialTheme.typography.titleMedium

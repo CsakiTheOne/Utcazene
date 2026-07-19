@@ -377,6 +377,7 @@ fun HomeScreen(
                         },
                         trailingButton = {
                             SplitButtonDefaults.TrailingButton(
+                                modifier = Modifier.fillMaxHeight(),
                                 onClick = { backStack.add(Destination.Map) },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.secondary,

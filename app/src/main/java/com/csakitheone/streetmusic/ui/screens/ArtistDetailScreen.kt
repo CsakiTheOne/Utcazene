@@ -201,7 +201,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                             contentDescription = "Chat"
                         )
                     },
-                    label = { Text("Chat") }
+                    label = { Text("Comments") }
                 )
             }
         },

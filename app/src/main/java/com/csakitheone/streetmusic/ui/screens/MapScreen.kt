@@ -4,6 +4,7 @@ import android.content.Intent
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -102,6 +103,17 @@ fun MapScreen() {
     var selectedMapIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var now by remember { mutableStateOf(LocalDateTime.now()) }
+
+    // Workaround against crash when navigating
+    BackHandler {
+        if (selectedMapIndex != 0) {
+            backStack.removeLastOrNull()
+            return@BackHandler
+        }
+
+        selectedMapIndex = 1
+        backStack.removeLastOrNull()
+    }
 
     LaunchedEffect(Unit) {
         while (true) {

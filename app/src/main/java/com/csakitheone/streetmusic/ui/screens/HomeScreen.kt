@@ -89,7 +89,6 @@ import com.csakitheone.streetmusic.ui.components.ArtistCard
 import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -108,7 +107,6 @@ fun HomeScreen(
 ) {
     val repository = LocalRepository.current
     val context = LocalContext.current
-    val sharedTransitionContext = LocalSharedTransitionContext.current
     val scope = rememberCoroutineScope()
     val backStack = LocalNavBackStack.current
     val hasData by repository.hasData.collectAsState(initial = false)
@@ -182,19 +180,6 @@ fun HomeScreen(
                                 )
                             }
                             FilledIconButton(
-                                modifier = Modifier.then(
-                                    if (sharedTransitionContext != null) with(
-                                        sharedTransitionContext.sharedTransitionScope
-                                    ) {
-                                        Modifier.sharedBounds(
-                                            sharedTransitionContext.sharedTransitionScope.rememberSharedContentState(
-                                                "SettingsScreen"
-                                            ),
-                                            sharedTransitionContext.animatedVisibilityScope
-                                        )
-                                    }
-                                    else Modifier
-                                ),
                                 onClick = { backStack.add(Destination.Settings) },
                             ) {
                                 Icon(
@@ -392,21 +377,6 @@ fun HomeScreen(
                         },
                         trailingButton = {
                             SplitButtonDefaults.TrailingButton(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .then(
-                                        if (sharedTransitionContext != null) with(
-                                            sharedTransitionContext.sharedTransitionScope
-                                        ) {
-                                            Modifier.sharedBounds(
-                                                sharedTransitionContext.sharedTransitionScope.rememberSharedContentState(
-                                                    "MapScreen"
-                                                ),
-                                                sharedTransitionContext.animatedVisibilityScope
-                                            )
-                                        }
-                                        else Modifier
-                                    ),
                                 onClick = { backStack.add(Destination.Map) },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.secondary,

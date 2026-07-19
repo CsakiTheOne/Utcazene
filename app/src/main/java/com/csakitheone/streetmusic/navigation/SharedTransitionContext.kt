@@ -10,5 +10,5 @@ data class SharedTransitionContext(
 )
 
 val LocalSharedTransitionContext = staticCompositionLocalOf<SharedTransitionContext?> {
-    error("No SharedTransitionContext provided")
+    null
 }

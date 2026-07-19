@@ -64,7 +64,6 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.model.tagInfo
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
@@ -74,7 +73,6 @@ import com.csakitheone.streetmusic.ui.screens.ChatScreen
 @Composable
 fun ArtistDetailScreen(artistSlug: String) {
     val context = LocalContext.current
-    val sharedTransition = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val artist by repository.getArtist(artistSlug).collectAsState(initial = null)
@@ -115,17 +113,7 @@ fun ArtistDetailScreen(artistSlug: String) {
                     AsyncImage(
                         modifier = Modifier
                             .matchParentSize()
-                            .alpha(1f - scrollBehavior.state.collapsedFraction)
-                            .then(
-                                if (sharedTransition != null) {
-                                    with(sharedTransition.sharedTransitionScope) {
-                                        Modifier.sharedElement(
-                                            rememberSharedContentState("image-${artist?.slug}"),
-                                            sharedTransition.animatedVisibilityScope,
-                                        )
-                                    }
-                                } else Modifier
-                            ),
+                            .alpha(1f - scrollBehavior.state.collapsedFraction),
                         model = artist?.image,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

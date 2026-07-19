@@ -42,7 +42,6 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import java.time.LocalDate
@@ -53,7 +52,6 @@ import java.time.LocalDateTime
 fun PlacesScreen(
     onRequestSearch: () -> Unit,
 ) {
-    val sharedTransitionContext = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -155,19 +153,6 @@ fun PlacesScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                modifier = Modifier.then(
-                    if (sharedTransitionContext != null) with(
-                        sharedTransitionContext.sharedTransitionScope
-                    ) {
-                        Modifier.sharedBounds(
-                            sharedTransitionContext.sharedTransitionScope.rememberSharedContentState(
-                                "MapScreen"
-                            ),
-                            sharedTransitionContext.animatedVisibilityScope
-                        )
-                    }
-                    else Modifier
-                ),
                 onClick = { backStack.add(Destination.Map) },
                 text = { Text("Map") },
                 icon = {

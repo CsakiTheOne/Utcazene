@@ -20,7 +20,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 
 @Composable
 fun FavoritesIndicator(

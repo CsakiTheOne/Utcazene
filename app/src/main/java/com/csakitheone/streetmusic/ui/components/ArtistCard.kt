@@ -27,14 +27,12 @@ import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 
 @Composable
 fun ArtistCard(
     modifier: Modifier = Modifier,
     artist: Artist,
 ) {
-    val sharedTransition = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
@@ -53,17 +51,7 @@ fun ArtistCard(
                 AsyncImage(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16 / 9f)
-                        .then(
-                            if (sharedTransition != null) {
-                                with(sharedTransition.sharedTransitionScope) {
-                                    Modifier.sharedElement(
-                                        rememberSharedContentState("image-${artist.slug}"),
-                                        sharedTransition.animatedVisibilityScope,
-                                    )
-                                }
-                            } else Modifier
-                        ),
+                        .aspectRatio(16 / 9f),
                     model = artist.image,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

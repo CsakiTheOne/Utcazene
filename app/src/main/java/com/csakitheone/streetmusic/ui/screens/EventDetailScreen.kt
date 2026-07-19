@@ -58,7 +58,6 @@ import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
-import com.csakitheone.streetmusic.navigation.LocalSharedTransitionContext
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
@@ -73,7 +72,6 @@ import kotlin.time.Duration.Companion.minutes
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(eventId: Int) {
-    val sharedTransition = LocalSharedTransitionContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
     val event by repository.getEvent(eventId).collectAsState(initial = null)
@@ -124,19 +122,7 @@ fun EventDetailScreen(eventId: Int) {
                     AsyncImage(
                         modifier = Modifier
                             .matchParentSize()
-                            .alpha(1f - scrollBehavior.state.collapsedFraction)
-                            .then(
-                                if (sharedTransition != null) {
-                                    with(sharedTransition.sharedTransitionScope) {
-                                        Modifier.sharedElement(
-                                            sharedTransition.sharedTransitionScope.rememberSharedContentState(
-                                                "image-${artist?.slug}"
-                                            ),
-                                            sharedTransition.animatedVisibilityScope,
-                                        )
-                                    }
-                                } else Modifier
-                            ),
+                            .alpha(1f - scrollBehavior.state.collapsedFraction),
                         model = artist?.image,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

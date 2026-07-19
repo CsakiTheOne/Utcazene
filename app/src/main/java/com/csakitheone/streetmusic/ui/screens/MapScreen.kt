@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +55,9 @@ import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.data.model.Event
+import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.ui.components.EventCard
 import com.utsman.osmandcompose.CameraProperty
 import com.utsman.osmandcompose.CameraState
 import com.utsman.osmandcompose.DefaultMapProperties
@@ -117,7 +120,7 @@ fun MapScreen() {
     }
 
     // Workaround for https://github.com/utsman/osm-android-compose/issues/4
-    var cameraState by retain {
+    var cameraState by remember {
         mutableStateOf(
             CameraState(
                 CameraProperty(
@@ -137,7 +140,7 @@ fun MapScreen() {
         )
     }
 
-    val mapProperties by retain {
+    val mapProperties by remember {
         mutableStateOf(
             DefaultMapProperties.copy(
                 minZoomLevel = 16.0,
@@ -251,8 +254,12 @@ fun MapScreen() {
                                         }
                                         if (nowPlaying.isNotEmpty()) {
                                             Text(
-                                                text = "Now playing: ${nowPlaying[0].artistName}",
+                                                modifier = Modifier.padding(top = 16.dp),
+                                                text = "Now playing:"
                                             )
+                                            nowPlaying.forEach { event ->
+                                                EventCard(event = event)
+                                            }
                                         }
                                     }
                                 }

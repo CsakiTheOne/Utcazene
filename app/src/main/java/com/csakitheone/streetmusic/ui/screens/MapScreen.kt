@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.utsman.osmandcompose.CameraProperty
@@ -181,9 +183,10 @@ fun MapScreen() {
                     Marker(
                         state = rememberMarkerState(key = name, geoPoint = geoPoint),
                         title = name,
+                        snippet = name,
                         icon = ContextCompat.getDrawable(
                             context,
-                            R.drawable.ic_music_circle
+                            R.drawable.marker_music_circle
                         ).apply { this!!.setTint(0xFFff5669.toInt()) },
                     ) {
                         ElevatedCard {
@@ -202,6 +205,31 @@ fun MapScreen() {
                                         text = venue.address,
                                         style = MaterialTheme.typography.labelSmall,
                                     )
+                                }
+                                when (name) {
+                                    "Íródeák Művészeti Udvar" -> {
+                                        TextButton(
+                                            onClick = { backStack.add(Destination.Imu) }
+                                        ) {
+                                            Text("See event")
+                                        }
+                                    }
+
+                                    "Gyárkert" -> {
+                                        TextButton(
+                                            onClick = { backStack.add(Destination.Gyarkert) }
+                                        ) {
+                                            Text("See event")
+                                        }
+                                    }
+
+                                    "TEREM" -> {
+                                        TextButton(
+                                            onClick = { backStack.add(Destination.UnlockFest) }
+                                        ) {
+                                            Text("See event")
+                                        }
+                                    }
                                 }
                                 if (nowPlaying.isNotEmpty()) {
                                     Text(

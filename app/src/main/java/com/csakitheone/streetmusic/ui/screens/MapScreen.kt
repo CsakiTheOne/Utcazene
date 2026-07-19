@@ -4,32 +4,28 @@ import android.content.Intent
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TwoRowsTopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,16 +42,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
-import com.csakitheone.streetmusic.data.model.Event
-import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.utsman.osmandcompose.CameraProperty
@@ -66,7 +58,6 @@ import com.utsman.osmandcompose.OpenStreetMap
 import com.utsman.osmandcompose.rememberMarkerState
 import kotlinx.coroutines.delay
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Marker
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 
@@ -78,19 +69,20 @@ fun MapScreen() {
     val venues by repository.venues.collectAsState(initial = emptyList())
     val events by repository.events.collectAsState(initial = emptyList())
 
+    val googleMapsBackgroundColor = remember { Color(0xFF4d6a79) }
     val googleMyMapsUrl =
-        remember { "https://www.google.com/maps/d/embed?mid=12plW9qjTupsu26_lLGD-lnE4jqUczO4U&ehbc=2E312F" }
+        remember { "https://www.google.com/maps/d/u/0/embed?mid=12plW9qjTupsu26_lLGD-lnE4jqUczO4U&ll=47.09344004259072%2C17.90931178892166&z=17" }
 
     val nameToGeoPointMap = remember {
         mapOf(
             "Cemix színpad" to GeoPoint(47.093254, 17.907600),
             "Fortuna színpad" to GeoPoint(47.093067, 17.908593),
-            "Food Truck Show színpad" to GeoPoint(47.093275, 17.912175),
+            "Food Truck Show színpad" to GeoPoint(47.093418, 17.912079),
             "Man at Work színpad" to GeoPoint(47.093729, 17.910940),
             "Pannon Egyetem színpad" to GeoPoint(47.093118, 17.910564),
             "Meló-Diák színpad" to GeoPoint(47.093613, 17.909783),
             "Kossuth utca" to GeoPoint(47.092774, 17.908938),
-            "Gizella udvar" to GeoPoint(47.0934288, 17.9085051),
+            "Gizella udvar" to GeoPoint(47.093458, 17.908763),
             // External locations
             "Sarolta udvar" to GeoPoint(47.093656, 17.909333),
             "Íródeák Művészeti Udvar" to GeoPoint(47.0906418, 17.9066187),
@@ -100,6 +92,25 @@ fun MapScreen() {
     }
 
     var selectedMapIndex by rememberSaveable { mutableIntStateOf(0) }
+    val colorScheme = MaterialTheme.colorScheme
+    val uiContainerColor by remember(colorScheme, selectedMapIndex) {
+        derivedStateOf {
+            when (selectedMapIndex) {
+                0 -> colorScheme.surfaceContainer.copy(alpha = .75f)
+                1 -> googleMapsBackgroundColor
+                else -> colorScheme.surfaceContainer
+            }
+        }
+    }
+    val uiContentColor by remember(colorScheme, selectedMapIndex) {
+        derivedStateOf {
+            when (selectedMapIndex) {
+                0 -> colorScheme.onSurface
+                1 -> Color.White
+                else -> colorScheme.onSurface
+            }
+        }
+    }
 
     var now by remember { mutableStateOf(LocalDateTime.now()) }
 
@@ -149,142 +160,145 @@ fun MapScreen() {
         )
     }
 
-    Scaffold(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2D2F2F)),
-        topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text("Map") },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = { backStack.removeLastOrNull() },
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_arrow_back),
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    actions = {
-                        OutlinedButton(
-                            onClick = {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        "https://www.google.com/android/find/people".toUri()
-                                    )
-                                )
-                            },
-                        ) {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = ButtonDefaults.IconSpacing)
-                                    .size(24.dp)
-                                    .clip(CircleShape),
-                                painter = painterResource(R.drawable.find_hub_icon),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                            )
-                            Text("Find friends")
-                        }
-                    },
-                )
-                PrimaryTabRow(
-                    selectedTabIndex = selectedMapIndex,
-                ) {
-                    Tab(
-                        selected = selectedMapIndex == 0,
-                        onClick = { selectedMapIndex = 0 },
-                        text = { Text("by Csáki") },
-                    )
-                    Tab(
-                        selected = selectedMapIndex == 1,
-                        onClick = { selectedMapIndex = 1 },
-                        text = { Text("by Utcazene") },
-                    )
-                }
-            }
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            when (selectedMapIndex) {
-                0 -> {
-                    OpenStreetMap(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraState = cameraState,
-                        properties = mapProperties,
-                    ) {
-                        nameToGeoPointMap.keys.forEach { name ->
-                            val geoPoint = remember(name) { nameToGeoPointMap[name]!! }
-                            val venue = remember(name, venues) { venues.find { it.name == name } }
-                            val nowPlaying = remember(name, nowPlayingEvents) {
-                                nowPlayingEvents.filter { it.place == name }
-                            }
+            .background(googleMapsBackgroundColor),
+    ) {
+        if (selectedMapIndex == 0) {
+            OpenStreetMap(
+                modifier = Modifier.fillMaxSize(),
+                cameraState = cameraState,
+                properties = mapProperties,
+            ) {
+                nameToGeoPointMap.keys.forEach { name ->
+                    val geoPoint = remember(name) { nameToGeoPointMap[name]!! }
+                    val venue = remember(name, venues) { venues.find { it.name == name } }
+                    val nowPlaying = remember(name, nowPlayingEvents) {
+                        nowPlayingEvents.filter { it.place == name }
+                    }
 
-                            Marker(
-                                state = rememberMarkerState(key = name, geoPoint = geoPoint),
-                                title = name,
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_music_circle
-                                ).apply { this!!.setTint(0xFFff5669.toInt()) },
+                    Marker(
+                        state = rememberMarkerState(key = name, geoPoint = geoPoint),
+                        title = name,
+                        icon = ContextCompat.getDrawable(
+                            context,
+                            R.drawable.ic_music_circle
+                        ).apply { this!!.setTint(0xFFff5669.toInt()) },
+                    ) {
+                        ElevatedCard {
+                            Column(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .widthIn(min = 150.dp, max = 300.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                ElevatedCard {
-                                    Column(
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .widthIn(min = 150.dp, max = 300.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Text(
-                                            text = name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                        if (venue != null) {
-                                            Text(
-                                                text = venue.address,
-                                                style = MaterialTheme.typography.labelSmall,
-                                            )
-                                        }
-                                        if (nowPlaying.isNotEmpty()) {
-                                            Text(
-                                                modifier = Modifier.padding(top = 16.dp),
-                                                text = "Now playing:"
-                                            )
-                                            nowPlaying.forEach { event ->
-                                                EventCard(event = event)
-                                            }
-                                        }
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                if (venue != null) {
+                                    Text(
+                                        text = venue.address,
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                }
+                                if (nowPlaying.isNotEmpty()) {
+                                    Text(
+                                        modifier = Modifier.padding(top = 16.dp),
+                                        text = "Now playing:"
+                                    )
+                                    nowPlaying.forEach { event ->
+                                        EventCard(event = event)
                                     }
                                 }
                             }
                         }
                     }
                 }
-
-                1 -> {
-                    AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = { context ->
-                            WebView(context).apply {
-                                settings.domStorageEnabled = true
-                                settings.javaScriptEnabled = true
-                                webViewClient = WebViewClient()
-                                loadUrl(googleMyMapsUrl)
-                                layoutParams = ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
+            }
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TopAppBar(
+                title = { Text("Map") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { backStack.removeLastOrNull() },
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = null,
+                        )
+                    }
+                },
+                actions = {
+                    Button(
+                        onClick = {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    "https://www.google.com/android/find/people".toUri()
                                 )
-                            }
+                            )
                         },
-                    )
-                }
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = ButtonDefaults.IconSpacing)
+                                .size(24.dp)
+                                .clip(CircleShape),
+                            painter = painterResource(R.drawable.find_hub_icon),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
+                        Text("Find friends")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = uiContainerColor,
+                    titleContentColor = uiContentColor,
+                    navigationIconContentColor = uiContentColor,
+                    actionIconContentColor = uiContentColor,
+                ),
+            )
+            PrimaryTabRow(
+                selectedTabIndex = selectedMapIndex,
+                divider = {},
+                containerColor = uiContainerColor,
+                contentColor = uiContentColor,
+            ) {
+                Tab(
+                    selected = selectedMapIndex == 0,
+                    onClick = { selectedMapIndex = 0 },
+                    text = { Text("by Csáki") },
+                )
+                Tab(
+                    selected = selectedMapIndex == 1,
+                    onClick = { selectedMapIndex = 1 },
+                    text = { Text("by Utcazene") },
+                )
+            }
+            if (selectedMapIndex == 1) {
+                AndroidView(
+                    modifier = Modifier.weight(1f),
+                    factory = { context ->
+                        WebView(context).apply {
+                            settings.domStorageEnabled = true
+                            settings.javaScriptEnabled = true
+                            webViewClient = WebViewClient()
+                            loadUrl(googleMyMapsUrl)
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
+                        }
+                    },
+                )
             }
         }
     }

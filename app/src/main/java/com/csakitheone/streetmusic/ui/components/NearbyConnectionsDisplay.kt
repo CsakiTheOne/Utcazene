@@ -1,5 +1,6 @@
 package com.csakitheone.streetmusic.ui.components
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
@@ -48,6 +51,7 @@ import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 fun NearbyConnectionsDisplay(
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val backStack = LocalNavBackStack.current
     val repository = LocalRepository.current
     val nearbyFeatures by repository.isNearbyFriendsActive.collectAsState()
@@ -162,7 +166,8 @@ fun NearbyConnectionsDisplay(
                             }
                         }
                         item {
-                            Button(
+                            HorizontalDivider()
+                            TextButton(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
                                     backStack.add(Destination.Chat())
@@ -176,6 +181,28 @@ fun NearbyConnectionsDisplay(
                                 )
                                 Text("Chat with friends")
                             }
+                            TextButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            "https://www.google.com/android/find/people".toUri()
+                                        )
+                                    )
+                                },
+                            ) {
+                                Icon(
+                                    modifier = Modifier
+                                        .padding(end = ButtonDefaults.IconSpacing)
+                                        .size(24.dp)
+                                        .clip(CircleShape),
+                                    painter = painterResource(R.drawable.find_hub_icon),
+                                    contentDescription = null,
+                                    tint = Color.Unspecified,
+                                )
+                                Text("Find friends")
+                            }
                         }
                     }
                 }
@@ -183,7 +210,9 @@ fun NearbyConnectionsDisplay(
         }
 
         Row(
-            modifier = modifier.clickable { showDialog = true },
+            modifier = modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable { showDialog = true },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (connectedFriends.isEmpty()) {

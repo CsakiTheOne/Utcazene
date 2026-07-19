@@ -17,8 +17,8 @@ android {
         applicationId = "com.csakitheone.streetmusic"
         minSdk = 29
         targetSdk = 37
-        versionCode = 57
-        versionName = "2026.13"
+        versionCode = 58
+        versionName = "2026.14"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

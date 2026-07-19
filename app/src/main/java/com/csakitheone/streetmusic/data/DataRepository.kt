@@ -83,7 +83,9 @@ class DataRepository(
                 if (isEnabled) {
                     setUseHighPowerDiscovery(false)
                     setIsNearbyFriendsActive(false)
-                    setAutoUpdateOnUnmetered(false)
+                    if (_autoUpdateMode.value == AutoUpdateMode.ALWAYS) {
+                        setAutoUpdateMode(AutoUpdateMode.NEVER)
+                    }
                     setShowImagesOnMetered(false)
                 }
             }
@@ -121,12 +123,18 @@ class DataRepository(
         _showImagesOnMetered.value = value
     }
 
-    private val _autoUpdateOnUnmetered =
-        MutableStateFlow(prefs.getBoolean("auto_update_on_unmetered", true))
-    val autoUpdateOnUnmetered: StateFlow<Boolean> = _autoUpdateOnUnmetered.asStateFlow()
-    fun setAutoUpdateOnUnmetered(value: Boolean) {
-        prefs.edit { putBoolean("auto_update_on_unmetered", value) }
-        _autoUpdateOnUnmetered.value = value
+    enum class AutoUpdateMode {
+        NEVER, ONLY_UNMETERED, ALWAYS
+    }
+
+    private val _autoUpdateMode = MutableStateFlow(
+        AutoUpdateMode.entries.find { it.name == prefs.getString("auto_update_mode", "") }
+            ?: if (prefs.getBoolean("auto_update_on_unmetered", true)) AutoUpdateMode.ONLY_UNMETERED else AutoUpdateMode.NEVER
+    )
+    val autoUpdateMode: StateFlow<AutoUpdateMode> = _autoUpdateMode.asStateFlow()
+    fun setAutoUpdateMode(value: AutoUpdateMode) {
+        prefs.edit { putString("auto_update_mode", value.name) }
+        _autoUpdateMode.value = value
     }
 
     private val _useHighPowerDiscovery =
@@ -334,35 +342,43 @@ class DataRepository(
 
     /**
      * Tries to download the data from the API and store it in the local database.
-     * This function checks network conditions and if the data is already in the database.
-     * @param force If true, the data will be downloaded even if it is already in the database.
+     * This function checks network conditions, the auto-update setting and if the data is already in the database.
+     * @param force If true, the data will be downloaded regardless of the auto-update setting,
+     * unless there is no network connection.
      * @return [DownloadResult] indicating the result of the attempt.
      */
     suspend fun tryDownloadData(force: Boolean = false): DownloadResult {
-        val isMetered = connectivityManager.isActiveNetworkMetered
-        val hasData =
-            withContext(Dispatchers.IO) { database.eventDao().getCount().first() > 0 }
-
         if (connectivityManager.activeNetwork == null) return DownloadResult.NO_CONNECTION
 
-        if (!isMetered) {
-            if (_autoUpdateOnUnmetered.value || !hasData || force) {
-                downloadData()
-                return DownloadResult.SUCCESS
-            }
-            return DownloadResult.ALREADY_HAS_DATA
+        val isMetered = connectivityManager.isActiveNetworkMetered
+        val hasData = withContext(Dispatchers.IO) { database.eventDao().getCount().first() > 0 }
+
+        // 1. If we don't have any data, we MUST try to get it.
+        if (!hasData) {
+            if (isMetered && !force) return DownloadResult.ASK_FOR_METERED
+            downloadData()
+            return DownloadResult.SUCCESS
         }
 
-        if (hasData && !force) {
-            return DownloadResult.ALREADY_HAS_DATA
+        // 2. We have data. If user explicitly requested (force), we download.
+        if (force) {
+            downloadData()
+            return DownloadResult.SUCCESS
         }
 
-        if (!force) {
-            return DownloadResult.ASK_FOR_METERED
+        // 3. Auto-update logic
+        val shouldUpdate = when (_autoUpdateMode.value) {
+            AutoUpdateMode.NEVER -> false
+            AutoUpdateMode.ONLY_UNMETERED -> !isMetered
+            AutoUpdateMode.ALWAYS -> true
         }
 
-        downloadData()
-        return DownloadResult.SUCCESS
+        if (shouldUpdate) {
+            downloadData()
+            return DownloadResult.SUCCESS
+        }
+
+        return DownloadResult.ALREADY_HAS_DATA
     }
 
     /**

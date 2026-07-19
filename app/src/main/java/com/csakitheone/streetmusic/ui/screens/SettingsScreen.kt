@@ -19,13 +19,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
@@ -36,8 +42,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -45,13 +53,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.DataRepository
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
@@ -60,7 +69,7 @@ fun SettingsScreen() {
     val backStack = LocalNavBackStack.current
 
     val showImagesOnMetered by repository.showImagesOnMetered.collectAsState(initial = false)
-    val autoUpdateOnUnmetered by repository.autoUpdateOnUnmetered.collectAsState(initial = true)
+    val autoUpdateMode by repository.autoUpdateMode.collectAsState()
     val useHighPowerDiscovery by repository.useHighPowerDiscovery.collectAsState(initial = false)
     val isBatterySaverEnabled by repository.isBatterySaverEnabled.collectAsState()
     val nickname by repository.nickname.collectAsState()
@@ -122,7 +131,9 @@ fun SettingsScreen() {
                         onClick = {
                             repository.setUseHighPowerDiscovery(false)
                             repository.setIsNearbyFriendsActive(false)
-                            repository.setAutoUpdateOnUnmetered(false)
+                            if (autoUpdateMode == DataRepository.AutoUpdateMode.ALWAYS) {
+                                repository.setAutoUpdateMode(DataRepository.AutoUpdateMode.NEVER)
+                            }
                             repository.setShowImagesOnMetered(false)
                             Toast.makeText(
                                 context,
@@ -217,29 +228,63 @@ fun SettingsScreen() {
                     text = "Data usage",
                     style = MaterialTheme.typography.titleMedium,
                 )
-                Row(
+                var isAutoUpdateExpanded by remember { mutableStateOf(false) }
+                ExposedDropdownMenuBox(
+                    expanded = isAutoUpdateExpanded,
+                    onExpandedChange = { isAutoUpdateExpanded = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            repository.setAutoUpdateOnUnmetered(!autoUpdateOnUnmetered)
-                        },
-                    verticalAlignment = Alignment.CenterVertically,
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Checkbox(
-                        modifier = Modifier.padding(8.dp),
-                        checked = autoUpdateOnUnmetered,
-                        onCheckedChange = {
-                            repository.setAutoUpdateOnUnmetered(it)
-                        }
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+                            .fillMaxWidth(),
+                        value = when (autoUpdateMode) {
+                            DataRepository.AutoUpdateMode.NEVER -> "Never"
+                            DataRepository.AutoUpdateMode.ONLY_UNMETERED -> "Only on unmetered"
+                            DataRepository.AutoUpdateMode.ALWAYS -> "Always"
+                        },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Auto-update app data") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isAutoUpdateExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                     )
-                    Column(
-                        modifier = Modifier.padding(8.dp),
+                    ExposedDropdownMenu(
+                        expanded = isAutoUpdateExpanded,
+                        onDismissRequest = { isAutoUpdateExpanded = false },
                     ) {
-                        Text("Auto-update app data on unmetered connections")
-                        Text(
-                            text = "App may start up slower.",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
+                        DataRepository.AutoUpdateMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                enabled = mode != DataRepository.AutoUpdateMode.ALWAYS || !isBatterySaverEnabled,
+                                text = {
+                                    Column {
+                                        Text(
+                                            text = when (mode) {
+                                                DataRepository.AutoUpdateMode.NEVER -> "Never"
+                                                DataRepository.AutoUpdateMode.ONLY_UNMETERED -> "Only on unmetered"
+                                                DataRepository.AutoUpdateMode.ALWAYS -> "Always"
+                                            }
+                                        )
+                                        Text(
+                                            text = when (mode) {
+                                                DataRepository.AutoUpdateMode.NEVER -> "Best for battery life"
+                                                DataRepository.AutoUpdateMode.ONLY_UNMETERED -> "Recommended"
+                                                DataRepository.AutoUpdateMode.ALWAYS -> if (isBatterySaverEnabled) "Disabled to save battery"
+                                                else "May cause additional charges"
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    repository.setAutoUpdateMode(mode)
+                                    isAutoUpdateExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                            )
+                        }
                     }
                 }
                 Row(

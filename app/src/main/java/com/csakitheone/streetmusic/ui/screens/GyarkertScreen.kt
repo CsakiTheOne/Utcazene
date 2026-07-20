@@ -36,8 +36,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
+import com.csakitheone.streetmusic.data.FriendRepository
 import com.csakitheone.streetmusic.data.GyarkertRepository
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
+import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
@@ -62,11 +64,28 @@ fun GyarkertScreen() {
     }
 
     val today = remember { LocalDate.now() }
+    val isJuly22 = today.monthValue == 7 && today.dayOfMonth == 22
     val isJuly23 = today.monthValue == 7 && today.dayOfMonth == 23
     val isJuly24 = today.monthValue == 7 && today.dayOfMonth == 24
     val isJuly25 = today.monthValue == 7 && today.dayOfMonth == 25
 
-    val indicatorIndex by remember(currentTime) {
+    val preUtcazeneEvents = remember {
+        FriendRepository.events.filter { it.place == "Gyárkert" }
+    }
+
+    val indicatorIndex22 by remember(currentTime) {
+        derivedStateOf {
+            if (!isJuly22) -1
+            else {
+                val nowTime = currentTime.toLocalTime()
+                preUtcazeneEvents.indexOfFirst {
+                    LocalDateTime.parse(it.startTime).toLocalTime().isAfter(nowTime)
+                }
+            }
+        }
+    }
+
+    val indicatorIndex23 by remember(currentTime) {
         derivedStateOf {
             if (!isJuly23) -1
             else {
@@ -108,16 +127,16 @@ fun GyarkertScreen() {
         ) {
             item {
                 Text(
-                    text = "July 23: Pont Ott Parti",
+                    text = "July 22: Gyárkert",
                     style = MaterialTheme.typography.titleLarge
                 )
             }
 
             itemsIndexed(
-                GyarkertRepository.pontOttPartiEvents,
-                key = { _, event -> event.name },
+                preUtcazeneEvents,
+                key = { _, event -> event.id },
             ) { index, event ->
-                if (index == indicatorIndex) {
+                if (index == indicatorIndex22) {
                     NowIndicator(
                         time = currentTime.toLocalTime(),
                         modifier = Modifier
@@ -131,7 +150,51 @@ fun GyarkertScreen() {
                 )
             }
 
-            if (indicatorIndex == -1 && isJuly23) {
+            if (indicatorIndex22 == -1 && isJuly22) {
+                val lastEvent = preUtcazeneEvents.lastOrNull()
+                val lastEventEndsAfterNow = lastEvent?.let {
+                    LocalDateTime.parse(it.endTime).isAfter(currentTime)
+                } ?: false
+
+                if (!lastEventEndsAfterNow) {
+                    item {
+                        NowIndicator(
+                            time = currentTime.toLocalTime(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        )
+                    }
+                }
+            }
+
+            item {
+                Text(
+                    modifier = Modifier.padding(top = 16.dp),
+                    text = "July 23: Pont Ott Parti",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+
+            itemsIndexed(
+                GyarkertRepository.pontOttPartiEvents,
+                key = { _, event -> event.name },
+            ) { index, event ->
+                if (index == indicatorIndex23) {
+                    NowIndicator(
+                        time = currentTime.toLocalTime(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+                CombinedDisplay(
+                    modifier = Modifier.fillMaxWidth(),
+                    data = event,
+                )
+            }
+
+            if (indicatorIndex23 == -1 && isJuly23) {
                 val lastEvent = GyarkertRepository.pontOttPartiEvents.lastOrNull()
                 val lastEventEndsAfterNow = lastEvent?.let {
                     it.endTime?.isAfter(currentTime.toLocalTime()) ?: false

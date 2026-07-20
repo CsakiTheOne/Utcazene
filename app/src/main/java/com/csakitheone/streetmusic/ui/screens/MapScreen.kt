@@ -114,7 +114,7 @@ fun MapScreen(initialPlaceName: String? = null) {
             "Gizella udvar" to GeoPoint(47.093458, 17.908763),
             // External locations
             "Sarolta udvar" to GeoPoint(47.093656, 17.909333),
-            "Íródeák Művészeti Udvar" to GeoPoint(47.0906418, 17.9066187),
+            "Íródeák" to GeoPoint(47.0906418, 17.9066187),
             "Gyárkert" to GeoPoint(47.0949355, 17.9160484),
             "TEREM" to GeoPoint(47.0926645, 17.9074231),
         )
@@ -298,11 +298,11 @@ fun MapScreen(initialPlaceName: String? = null) {
                     }
 
                     when (name) {
-                        "Íródeák Művészeti Udvar" -> {
+                        "Íródeák" -> {
                             Button(
                                 onClick = { backStack.add(Destination.Imu) }
                             ) {
-                                Text("See more events in IMU")
+                                Text("See what's up in Íródeák Művészeti Udvar")
                             }
                         }
 
@@ -310,7 +310,7 @@ fun MapScreen(initialPlaceName: String? = null) {
                             Button(
                                 onClick = { backStack.add(Destination.Gyarkert) }
                             ) {
-                                Text("See more events in Gyárkert")
+                                Text("See events in Gyárkert")
                             }
                         }
 
@@ -367,14 +367,19 @@ fun MapScreen(initialPlaceName: String? = null) {
                         val geoPoint = remember(name) { nameToGeoPointMap[name]!! }
                         val markerIcon = remember(name, selectedPlaceName == name, colorScheme.primary) {
                             val isSelected = selectedPlaceName == name
-                            val color = if (isSelected) 0xFFff5669.toInt() else colorScheme.primary.toArgb()
+                            val color = if (isSelected) 0xFFff5669.toInt()
+                            else colorScheme.primary.copy(
+                                red = colorScheme.primary.red * 0.75f,
+                                green = colorScheme.primary.green * 0.75f,
+                                blue = colorScheme.primary.blue * 0.75f,
+                            ).toArgb()
                             val icon = ContextCompat.getDrawable(context, R.drawable.marker_music_circle)!!.apply {
                                 setTint(color)
                             }
 
                             val density = resources.displayMetrics.density
                             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                                this.color = color
+                                this.color = Color.Black.toArgb()
                                 textSize = 12 * density
                                 textAlign = Paint.Align.CENTER
                                 typeface = Typeface.DEFAULT_BOLD
@@ -391,20 +396,20 @@ fun MapScreen(initialPlaceName: String? = null) {
                             val bitmap = createBitmap(width, height)
                             val canvas = Canvas(bitmap)
 
+                            icon.setBounds(
+                                (width - iconSize) / 2,
+                                padding,
+                                (width + iconSize) / 2,
+                                padding + iconSize
+                            )
+                            icon.draw(canvas)
+
                             canvas.drawText(
                                 name,
                                 width / 2f,
-                                textBounds.height().toFloat(),
+                                textBounds.height().toFloat() + padding + iconSize,
                                 textPaint
                             )
-
-                            icon.setBounds(
-                                (width - iconSize) / 2,
-                                textBounds.height() + padding,
-                                (width + iconSize) / 2,
-                                textBounds.height() + padding + iconSize
-                            )
-                            icon.draw(canvas)
 
                             bitmap.toDrawable(resources)
                         }

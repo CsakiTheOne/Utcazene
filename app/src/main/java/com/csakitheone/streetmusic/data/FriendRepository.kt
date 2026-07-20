@@ -32,7 +32,25 @@ class FriendRepository {
                 startTime = "2026-07-23T18:00:00",
                 endTime = "2026-07-23T19:00:00",
                 place = "Sarolta udvar",
-            )
+            ),
+            Event(
+                id = -2,
+                artistId = -2,
+                artistSlug = "ring-of-cash",
+                artistName = "Ring Of Cash",
+                startTime = "2026-07-22T19:00:00",
+                endTime = "2026-07-22T20:30:00",
+                place = "Gyárkert",
+            ),
+            Event(
+                id = -3,
+                artistId = -2,
+                artistSlug = "santa-machete",
+                artistName = "Santa Machete",
+                startTime = "2026-07-22T21:30:00",
+                endTime = "2026-07-22T23:00:00",
+                place = "Gyárkert",
+            ),
         )
     }
 }

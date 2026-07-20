@@ -1,32 +1,50 @@
 package com.csakitheone.streetmusic.ui.screens
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,11 +57,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -62,10 +85,14 @@ import kotlinx.coroutines.delay
 import org.osmdroid.util.GeoPoint
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen() {
+fun MapScreen(initialPlaceName: String? = null) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val backStack = LocalNavBackStack.current
     val repository = LocalRepository.current
     val venues by repository.venues.collectAsState(initial = emptyList())
@@ -92,6 +119,8 @@ fun MapScreen() {
             "TEREM" to GeoPoint(47.0926645, 17.9074231),
         )
     }
+
+    var selectedPlaceName by rememberSaveable { mutableStateOf(initialPlaceName) }
 
     var selectedMapIndex by rememberSaveable { mutableIntStateOf(0) }
     val colorScheme = MaterialTheme.colorScheme
@@ -134,14 +163,29 @@ fun MapScreen() {
 
     // Workaround for https://github.com/utsman/osm-android-compose/issues/4
     var cameraState by remember {
+        val initialGeoPoint = initialPlaceName?.let { nameToGeoPointMap[it] }
+            ?: GeoPoint(47.0937412, 17.9104748)
         mutableStateOf(
             CameraState(
                 CameraProperty(
-                    geoPoint = GeoPoint(47.0937412, 17.9104748),
-                    zoom = 17.0
+                    geoPoint = initialGeoPoint,
+                    zoom = if (initialPlaceName != null) 19.0 else 17.0
                 )
             )
         )
+    }
+
+    LaunchedEffect(selectedPlaceName) {
+        selectedPlaceName?.let { name ->
+            nameToGeoPointMap[name]?.let { geoPoint ->
+                cameraState = CameraState(
+                    CameraProperty(
+                        geoPoint = geoPoint,
+                        zoom = 19.0
+                    )
+                )
+            }
+        }
     }
 
     LaunchedEffect(cameraState.zoom, cameraState.geoPoint) {
@@ -162,43 +206,70 @@ fun MapScreen() {
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(googleMapsBackgroundColor),
-    ) {
-        if (selectedMapIndex == 0) {
-            OpenStreetMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraState = cameraState,
-                properties = mapProperties,
-            ) {
-                nameToGeoPointMap.keys.forEach { name ->
-                    val geoPoint = remember(name) { nameToGeoPointMap[name]!! }
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberBottomSheetState(
+            initialValue = if (initialPlaceName != null) SheetValue.PartiallyExpanded else SheetValue.Hidden,
+        )
+    )
+
+    LaunchedEffect(selectedPlaceName) {
+        if (selectedPlaceName != null) {
+            scaffoldState.bottomSheetState.partialExpand()
+        } else {
+            scaffoldState.bottomSheetState.hide()
+        }
+    }
+
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden) {
+            selectedPlaceName = null
+        }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 250.dp,
+        sheetContent = {
+            if (selectedPlaceName != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val name = selectedPlaceName!!
                     val venue = remember(name, venues) { venues.find { it.name == name } }
                     val nowPlaying = remember(name, nowPlayingEvents) {
                         nowPlayingEvents.filter { it.place == name }
                     }
+                    val upcoming = remember(name, events, now) {
+                        val today = now.toLocalDate().toString()
+                        events.filter {
+                            it.place == name &&
+                                    it.startTime.startsWith(today) &&
+                                    LocalDateTime.parse(it.startTime).isAfter(now)
+                        }.sortedBy { it.startTime }
+                    }
+                    val tomorrow = remember(name, events, now) {
+                        val tomorrow = now.plusDays(1).toLocalDate().toString()
+                        events.filter {
+                            it.place == name &&
+                                    it.startTime.startsWith(tomorrow)
+                        }.sortedBy { it.startTime }
+                    }
 
-                    Marker(
-                        state = rememberMarkerState(key = name, geoPoint = geoPoint),
-                        title = name,
-                        snippet = name,
-                        icon = ContextCompat.getDrawable(
-                            context,
-                            R.drawable.marker_music_circle
-                        ).apply { this!!.setTint(0xFFff5669.toInt()) },
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        ElevatedCard {
-                            Column(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .widthIn(min = 150.dp, max = 300.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
+                        SelectionContainer(modifier = Modifier.weight(1f)) {
+                            Column {
                                 Text(
                                     text = name,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleLarge,
                                 )
                                 if (venue != null) {
                                     Text(
@@ -206,127 +277,233 @@ fun MapScreen() {
                                         style = MaterialTheme.typography.labelSmall,
                                     )
                                 }
-                                when (name) {
-                                    "Íródeák Művészeti Udvar" -> {
-                                        TextButton(
-                                            onClick = { backStack.add(Destination.Imu) }
-                                        ) {
-                                            Text("See event")
-                                        }
-                                    }
-
-                                    "Gyárkert" -> {
-                                        TextButton(
-                                            onClick = { backStack.add(Destination.Gyarkert) }
-                                        ) {
-                                            Text("See event")
-                                        }
-                                    }
-
-                                    "TEREM" -> {
-                                        TextButton(
-                                            onClick = { backStack.add(Destination.UnlockFest) }
-                                        ) {
-                                            Text("See event")
-                                        }
-                                    }
-                                }
-                                if (nowPlaying.isNotEmpty()) {
-                                    Text(
-                                        modifier = Modifier.padding(top = 16.dp),
-                                        text = "Now playing:"
-                                    )
-                                    nowPlaying.forEach { event ->
-                                        EventCard(event = event)
-                                    }
-                                }
                             }
+                        }
+                        IconButton(
+                            onClick = { selectedPlaceName = null }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_close),
+                                contentDescription = null,
+                            )
+                        }
+                    }
+
+                    SelectionContainer {
+                        Text(
+                            modifier = Modifier.alpha(.5f),
+                            text = nameToGeoPointMap[name].toString().dropLast(4),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+
+                    when (name) {
+                        "Íródeák Művészeti Udvar" -> {
+                            Button(
+                                onClick = { backStack.add(Destination.Imu) }
+                            ) {
+                                Text("See more events in IMU")
+                            }
+                        }
+
+                        "Gyárkert" -> {
+                            Button(
+                                onClick = { backStack.add(Destination.Gyarkert) }
+                            ) {
+                                Text("See more events in Gyárkert")
+                            }
+                        }
+
+                        "TEREM" -> {
+                            Button(
+                                onClick = { backStack.add(Destination.UnlockFest) }
+                            ) {
+                                Text("See more about Unlock Fest")
+                            }
+                        }
+                    }
+
+                    if (nowPlaying.isNotEmpty()) {
+                        Text("Now playing:")
+                        nowPlaying.forEach { event ->
+                            EventCard(event = event)
+                        }
+                    }
+                    if (upcoming.isNotEmpty()) {
+                        Text("Upcoming today:")
+                        upcoming.forEach { event ->
+                            EventCard(event = event)
+                        }
+                    }
+                    if (tomorrow.isNotEmpty()) {
+                        Text("Tomorrow's lineup:")
+                        tomorrow.forEach { event ->
+                            EventCard(event = event)
                         }
                     }
                 }
             }
         }
-        Column(
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .fillMaxSize()
+                .padding(
+                    horizontal = max(
+                        paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                        paddingValues.calculateEndPadding(LayoutDirection.Ltr)
+                    )
+                )
+                .background(googleMapsBackgroundColor),
         ) {
-            TopAppBar(
-                title = { Text("Map") },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { backStack.removeLastOrNull() },
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = null,
-                        )
-                    }
-                },
-                actions = {
-                    Button(
-                        onClick = {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    "https://www.google.com/android/find/people".toUri()
-                                )
+            if (selectedMapIndex == 0) {
+                OpenStreetMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraState = cameraState,
+                    properties = mapProperties,
+                    onMapClick = { selectedPlaceName = null }
+                ) {
+                    nameToGeoPointMap.keys.forEach { name ->
+                        val geoPoint = remember(name) { nameToGeoPointMap[name]!! }
+                        val markerIcon = remember(name, selectedPlaceName == name, colorScheme.primary) {
+                            val isSelected = selectedPlaceName == name
+                            val color = if (isSelected) 0xFFff5669.toInt() else colorScheme.primary.toArgb()
+                            val icon = ContextCompat.getDrawable(context, R.drawable.marker_music_circle)!!.apply {
+                                setTint(color)
+                            }
+
+                            val density = resources.displayMetrics.density
+                            val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                this.color = color
+                                textSize = 12 * density
+                                textAlign = Paint.Align.CENTER
+                                typeface = Typeface.DEFAULT_BOLD
+                            }
+
+                            val textBounds = Rect()
+                            textPaint.getTextBounds(name, 0, name.length, textBounds)
+
+                            val iconSize = (24 * density).toInt()
+                            val padding = (4 * density).toInt()
+                            val width = maxOf(iconSize, textBounds.width() + padding * 2)
+                            val height = iconSize + textBounds.height() + padding * 2
+
+                            val bitmap = createBitmap(width, height)
+                            val canvas = Canvas(bitmap)
+
+                            canvas.drawText(
+                                name,
+                                width / 2f,
+                                textBounds.height().toFloat(),
+                                textPaint
                             )
-                        },
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .padding(end = ButtonDefaults.IconSpacing)
-                                .size(24.dp)
-                                .clip(CircleShape),
-                            painter = painterResource(R.drawable.find_hub_icon),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
+
+                            icon.setBounds(
+                                (width - iconSize) / 2,
+                                textBounds.height() + padding,
+                                (width + iconSize) / 2,
+                                textBounds.height() + padding + iconSize
+                            )
+                            icon.draw(canvas)
+
+                            bitmap.toDrawable(resources)
+                        }
+
+                        Marker(
+                            state = rememberMarkerState(key = name, geoPoint = geoPoint),
+                            title = name,
+                            snippet = name,
+                            icon = markerIcon,
+                            onClick = {
+                                selectedPlaceName = name
+                                true
+                            }
                         )
-                        Text("Find friends")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = uiContainerColor,
-                    titleContentColor = uiContentColor,
-                    navigationIconContentColor = uiContentColor,
-                    actionIconContentColor = uiContentColor,
-                ),
-            )
-            PrimaryTabRow(
-                selectedTabIndex = selectedMapIndex,
-                divider = {},
-                containerColor = uiContainerColor,
-                contentColor = uiContentColor,
-            ) {
-                Tab(
-                    selected = selectedMapIndex == 0,
-                    onClick = { selectedMapIndex = 0 },
-                    text = { Text("by Csáki") },
-                )
-                Tab(
-                    selected = selectedMapIndex == 1,
-                    onClick = { selectedMapIndex = 1 },
-                    text = { Text("by Utcazene") },
-                )
+                }
             }
-            if (selectedMapIndex == 1) {
-                AndroidView(
-                    modifier = Modifier.weight(1f),
-                    factory = { context ->
-                        WebView(context).apply {
-                            settings.domStorageEnabled = true
-                            settings.javaScriptEnabled = true
-                            webViewClient = WebViewClient()
-                            loadUrl(googleMyMapsUrl)
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT,
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TopAppBar(
+                    title = { Text("Map") },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { backStack.removeLastOrNull() },
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = null,
                             )
                         }
                     },
+                    actions = {
+                        Button(
+                            onClick = {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        "https://www.google.com/android/find/people".toUri()
+                                    )
+                                )
+                            },
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = ButtonDefaults.IconSpacing)
+                                    .size(24.dp)
+                                    .clip(CircleShape),
+                                painter = painterResource(R.drawable.find_hub_icon),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                            )
+                            Text("Find friends")
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = uiContainerColor,
+                        titleContentColor = uiContentColor,
+                        navigationIconContentColor = uiContentColor,
+                        actionIconContentColor = uiContentColor,
+                    ),
                 )
+                PrimaryTabRow(
+                    selectedTabIndex = selectedMapIndex,
+                    divider = {},
+                    containerColor = uiContainerColor,
+                    contentColor = uiContentColor,
+                ) {
+                    Tab(
+                        selected = selectedMapIndex == 0,
+                        onClick = { selectedMapIndex = 0 },
+                        text = { Text("by Csáki") },
+                    )
+                    Tab(
+                        selected = selectedMapIndex == 1,
+                        onClick = { selectedMapIndex = 1 },
+                        text = { Text("by Utcazene") },
+                    )
+                }
+                if (selectedMapIndex == 1) {
+                    AndroidView(
+                        modifier = Modifier.weight(1f),
+                        factory = { context ->
+                            WebView(context).apply {
+                                settings.domStorageEnabled = true
+                                settings.javaScriptEnabled = true
+                                webViewClient = WebViewClient()
+                                loadUrl(googleMyMapsUrl)
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
     }

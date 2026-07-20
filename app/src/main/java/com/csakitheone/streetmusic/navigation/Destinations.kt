@@ -16,7 +16,7 @@ sealed interface Destination : NavKey {
     @Serializable
     data object Places : Destination
     @Serializable
-    data object Map : Destination
+    data class Map(val initialPlaceName: String? = null) : Destination
     @Serializable
     data object Settings : Destination
     @Serializable
@@ -42,7 +42,7 @@ fun Destination.label(): String = when (this) {
     Destination.Calendar -> "Calendar"
     Destination.Artists -> "Artists"
     Destination.Places -> "Places"
-    Destination.Map -> "Map"
+    is Destination.Map -> "Map"
     Destination.Settings -> "Settings"
     Destination.DataSync -> "Data Sync"
     Destination.FavoritesSync -> "Favorites Sync"

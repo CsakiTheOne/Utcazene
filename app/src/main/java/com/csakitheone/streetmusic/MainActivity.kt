@@ -206,8 +206,8 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
 
-                                    Destination.Map -> NavEntry(key) {
-                                        MapScreen()
+                                    is Destination.Map -> NavEntry(key) {
+                                        MapScreen(key.initialPlaceName)
                                     }
 
                                     Destination.Settings -> NavEntry(key) {

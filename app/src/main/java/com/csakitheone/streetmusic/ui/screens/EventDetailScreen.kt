@@ -224,7 +224,7 @@ fun EventDetailScreen(eventId: Int) {
                                 }
                                 FilledIconButton(
                                     modifier = Modifier.padding(start = 16.dp),
-                                    onClick = { backStack.add(Destination.Map) }
+                                    onClick = { backStack.add(Destination.Map(event?.place)) }
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.ic_map),

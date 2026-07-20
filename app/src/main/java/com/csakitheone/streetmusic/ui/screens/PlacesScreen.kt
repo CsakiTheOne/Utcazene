@@ -153,7 +153,7 @@ fun PlacesScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { backStack.add(Destination.Map) },
+                onClick = { backStack.add(Destination.Map()) },
                 text = { Text("Map") },
                 icon = {
                     Icon(

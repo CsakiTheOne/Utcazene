@@ -60,6 +60,7 @@ import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.ui.components.FavoritesIndicator
+import com.csakitheone.streetmusic.ui.components.WeatherCard
 import com.csakitheone.streetmusic.ui.components.YouTubeEmbed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -81,10 +82,13 @@ fun EventDetailScreen(eventId: Int) {
         ?: flowOf(null)).collectAsState(initial = null)
     val allEvents by repository.events.collectAsState(initial = emptyList())
 
-    val isToday by remember(event) {
+    val eventDate by remember(event) {
+        derivedStateOf { event?.startTime?.let { LocalDateTime.parse(it).toLocalDate() } }
+    }
+
+    val isToday by remember(eventDate) {
         derivedStateOf {
             val today = LocalDate.now()
-            val eventDate = event?.startTime?.let { LocalDateTime.parse(it).toLocalDate() }
             today == eventDate
         }
     }
@@ -275,6 +279,10 @@ fun EventDetailScreen(eventId: Int) {
                             }
                         }
                     }
+                }
+
+                eventDate?.let {
+                    WeatherCard(date = it)
                 }
 
                 // Button to Artist Detail

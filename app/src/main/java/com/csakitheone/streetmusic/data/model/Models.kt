@@ -48,6 +48,13 @@ data class Venue(
     val address: String
 )
 
+data class WeatherForecast(
+    val date: String,
+    val minTemp: Double,
+    val maxTemp: Double,
+    val weatherCode: Int
+)
+
 val tagInfo = mapOf(
     "headliner" to "This artist isn't participating in Utcazene's competition. Enjoy the party!",
     "competitor" to "This artist participates in Utcazene's competition. If you like them, you can vote for them on the official website.",

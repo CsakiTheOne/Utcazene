@@ -52,3 +52,16 @@ data class ApiTimeSlot(
     @SerialName("event__start_time") val eventStartTime: String? = null,
     @SerialName("event__venue__name") val eventVenueName: String? = null
 )
+
+@Serializable
+data class ApiWeatherResponse(
+    val daily: ApiWeatherDaily
+)
+
+@Serializable
+data class ApiWeatherDaily(
+    val time: List<String>,
+    @SerialName("temperature_2m_max") val maxTemp: List<Double>,
+    @SerialName("temperature_2m_min") val minTemp: List<Double>,
+    @SerialName("weather_code") val weatherCode: List<Int>
+)

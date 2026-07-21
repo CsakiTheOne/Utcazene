@@ -90,6 +90,7 @@ import com.csakitheone.streetmusic.ui.components.CombinedDisplay
 import com.csakitheone.streetmusic.ui.components.EventCard
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
+import com.csakitheone.streetmusic.ui.components.WeatherCard
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
@@ -575,17 +576,19 @@ fun ColumnScope.HomeSectionToday(repository: DataRepository) {
         }
     }
 
+    val today = now.toLocalDate()
+
     val upcomingStarred by remember(events, allFavs) {
         derivedStateOf {
-            val today = LocalDate.now().dayOfMonth
-            CombinedRepository.getCombinedEventsForDay(today, events)
+            val todayDay = today.dayOfMonth
+            CombinedRepository.getCombinedEventsForDay(todayDay, events)
                 .filter { allFavs.contains(CombinedRepository.getSlugForAny(it)) }
         }
     }
     val nowPlaying by remember(now) {
         derivedStateOf {
-            val today = now.toLocalDate().toString()
-            events.filter { it.startTime.startsWith(today) }
+            val todayStr = today.toString()
+            events.filter { it.startTime.startsWith(todayStr) }
                 .filter {
                     LocalDateTime.parse(it.startTime)
                         .isBefore(now) && LocalDateTime.parse(it.endTime)
@@ -668,21 +671,28 @@ fun ColumnScope.HomeSectionToday(repository: DataRepository) {
             EventCard(modifier = Modifier.padding(horizontal = 16.dp), event = event)
         }
     }
+
+    WeatherCard(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        date = today,
+        showDate = false
+    )
 }
 
 @Composable
 fun ColumnScope.HomeSectionTomorrow(repository: DataRepository) {
     val eventDays by repository.eventDates.collectAsState(initial = emptyList())
+    val tomorrow = LocalDate.now().plusDays(1)
 
-    if (eventDays.isEmpty() || !eventDays.contains(LocalDate.now().plusDays(1).toString())) return
+    if (eventDays.isEmpty() || !eventDays.contains(tomorrow.toString())) return
 
     val backStack = LocalNavBackStack.current
     val events by repository.events.collectAsState(initial = emptyList())
     val allFavs by repository.allFavorites.collectAsState(initial = emptySet())
 
-    val tomorrowStarred by remember(events, allFavs) {
+    val tomorrowStarred by remember(events, allFavs, tomorrow) {
         derivedStateOf {
-            val tomorrowDay = LocalDate.now().plusDays(1).dayOfMonth
+            val tomorrowDay = tomorrow.dayOfMonth
             CombinedRepository.getCombinedEventsForDay(tomorrowDay, events)
                 .filter { allFavs.contains(CombinedRepository.getSlugForAny(it)) }
         }
@@ -708,6 +718,12 @@ fun ColumnScope.HomeSectionTomorrow(repository: DataRepository) {
             CombinedDisplay(modifier = Modifier.padding(horizontal = 16.dp), data = event)
         }
     }
+
+    WeatherCard(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        date = tomorrow,
+        showDate = false
+    )
 }
 
 @Composable

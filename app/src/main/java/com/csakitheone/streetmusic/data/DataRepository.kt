@@ -16,6 +16,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.csakitheone.streetmusic.data.api.UtcazeneApi
+import com.csakitheone.streetmusic.data.api.WeatherApi
 import com.csakitheone.streetmusic.data.local.AppDatabase
 import com.csakitheone.streetmusic.data.local.ArtistEntity
 import com.csakitheone.streetmusic.data.local.EventEntity
@@ -23,6 +24,7 @@ import com.csakitheone.streetmusic.data.local.VenueEntity
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.model.Venue
+import com.csakitheone.streetmusic.data.model.WeatherForecast
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.notifications.AlarmScheduler
 import com.csakitheone.streetmusic.ui.widgets.WidgetUpdateHelper
@@ -46,6 +48,7 @@ val LocalRepository = staticCompositionLocalOf<DataRepository> {
 class DataRepository(
     private val context: Context,
     private val api: UtcazeneApi,
+    private val weatherApi: WeatherApi,
     private val database: AppDatabase,
     private val connectivityManager: ConnectivityManager,
     private val prefs: SharedPreferences,
@@ -104,6 +107,30 @@ class DataRepository(
         prefs.edit { putString("nickname", value) }
         _nickname.value = value
         nearbyManager.updateLocalNickname(value)
+    }
+
+    private val _weather = MutableStateFlow<List<WeatherForecast>>(emptyList())
+    val weather: StateFlow<List<WeatherForecast>> = _weather.asStateFlow()
+    private val _isWeatherLoading = MutableStateFlow(false)
+    val isWeatherLoading: StateFlow<Boolean> = _isWeatherLoading.asStateFlow()
+
+    suspend fun updateWeather() {
+        _isWeatherLoading.value = true
+        try {
+            val response = weatherApi.fetchWeather()
+            _weather.value = response.daily.time.mapIndexed { index, time ->
+                WeatherForecast(
+                    time,
+                    response.daily.minTemp[index],
+                    response.daily.maxTemp[index],
+                    response.daily.weatherCode[index]
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("DataRepository", "Error fetching weather: ${e.message}")
+        } finally {
+            _isWeatherLoading.value = false
+        }
     }
 
     private val _isNearbyFriendsActive =
@@ -241,6 +268,10 @@ class DataRepository(
         nearbyManager.updateLocalFavorites(_userFavorites.value)
         nearbyManager.updateLocalNickname(_nickname.value)
         nearbyManager.useHighPowerDiscovery = _useHighPowerDiscovery.value
+
+        scope.launch {
+            updateWeather()
+        }
     }
 
     var isDownloading by mutableStateOf(false)
@@ -389,6 +420,8 @@ class DataRepository(
         val emulateFirstDayOfEvent = false
 
         isDownloading = true
+
+        updateWeather()
 
         val apiVenues = try {
             api.fetchVenues()

@@ -123,7 +123,11 @@ class DataRepository(
                     time,
                     response.daily.minTemp[index],
                     response.daily.maxTemp[index],
-                    response.daily.weatherCode[index]
+                    response.daily.minApparentTemp[index],
+                    response.daily.maxApparentTemp[index],
+                    response.daily.weatherCode[index],
+                    response.daily.precipitationSum[index],
+                    response.daily.precipitationProbabilityMax[index]
                 )
             }
         } catch (e: Exception) {

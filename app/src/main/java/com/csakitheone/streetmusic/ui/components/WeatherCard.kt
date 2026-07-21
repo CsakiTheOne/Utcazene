@@ -85,15 +85,35 @@ fun WeatherCard(
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                getWeatherDescription(targetWeather.weatherCode),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    16.dp,
+                                    Alignment.CenterHorizontally
+                                )
+                            ) {
+                                Text(
+                                    getWeatherDescription(targetWeather.weatherCode),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                if (targetWeather.precipitationSum > 0 || targetWeather.precipitationProbability > 0) {
+                                    Text(
+                                        text = "🌧️ ${targetWeather.precipitationProbability}% (${targetWeather.precipitationSum} mm)",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                             Text(
                                 text = "${targetWeather.minTemp}°C - ${targetWeather.maxTemp}°C",
                                 style = MaterialTheme.typography.headlineLarge
+                            )
+                            Text(
+                                text = "Feels like ${targetWeather.minApparentTemp.toInt()}°C - ${targetWeather.maxApparentTemp.toInt()}°C",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

@@ -63,5 +63,9 @@ data class ApiWeatherDaily(
     val time: List<String>,
     @SerialName("temperature_2m_max") val maxTemp: List<Double>,
     @SerialName("temperature_2m_min") val minTemp: List<Double>,
-    @SerialName("weather_code") val weatherCode: List<Int>
+    @SerialName("apparent_temperature_max") val maxApparentTemp: List<Double>,
+    @SerialName("apparent_temperature_min") val minApparentTemp: List<Double>,
+    @SerialName("weather_code") val weatherCode: List<Int>,
+    @SerialName("precipitation_sum") val precipitationSum: List<Double>,
+    @SerialName("precipitation_probability_max") val precipitationProbabilityMax: List<Int>
 )

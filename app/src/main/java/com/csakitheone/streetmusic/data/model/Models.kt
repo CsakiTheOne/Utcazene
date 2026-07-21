@@ -52,7 +52,11 @@ data class WeatherForecast(
     val date: String,
     val minTemp: Double,
     val maxTemp: Double,
-    val weatherCode: Int
+    val minApparentTemp: Double,
+    val maxApparentTemp: Double,
+    val weatherCode: Int,
+    val precipitationSum: Double,
+    val precipitationProbability: Int
 )
 
 val tagInfo = mapOf(

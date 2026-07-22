@@ -32,11 +32,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -188,12 +190,12 @@ class DataRepository(
     /**
      * User's favorite items + favorites from nearby devices
      */
-    val allFavorites: Flow<Set<String>> = combine(
+    val allFavorites: StateFlow<Set<String>> = combine(
         userFavorites,
         nearbyManager.friends.nearbyFavorites
     ) { local, nearby ->
         local + nearby.values.flatten()
-    }
+    }.stateIn(scope, SharingStarted.Lazily, _userFavorites.value)
 
     fun setFavorite(slug: String, value: Boolean) {
         val current = _userFavorites.value.toMutableSet()
@@ -285,7 +287,7 @@ class DataRepository(
         SUCCESS, NO_CONNECTION, ALREADY_HAS_DATA, ASK_FOR_METERED
     }
 
-    val artists: Flow<List<Artist>> =
+    val artists: StateFlow<List<Artist>> =
         database.artistDao().getAll().combine(userFavorites) { entities, favs ->
             val dbArtists = entities.map {
                 Artist(
@@ -298,9 +300,9 @@ class DataRepository(
                 it.copy(isStarred = favs.contains(it.slug))
             }
             (dbArtists + friendArtists).sortedBy { it.name }
-        }
+        }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
-    val events: Flow<List<Event>> =
+    val events: StateFlow<List<Event>> =
         database.eventDao().getAll().combine(userFavorites) { entities, favs ->
             val dbEvents = entities.map {
                 Event(
@@ -313,16 +315,16 @@ class DataRepository(
                 it.copy(isStarred = favs.contains("${it.artistSlug} at ${it.startTime}"))
             }
             dbEvents + friendEvents
-        }
+        }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
-    val eventDates: Flow<List<String>> = database.eventDao().getDistinctDates().map { dbDates ->
+    val eventDates: StateFlow<List<String>> = database.eventDao().getDistinctDates().map { dbDates ->
         val friendDates = FriendRepository.events.map { it.startTime.substring(0, 10) }
         (dbDates + friendDates).distinct().sorted()
-    }
+    }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
-    val venues: Flow<List<Venue>> = database.venueDao().getAll().map { entities ->
+    val venues: StateFlow<List<Venue>> = database.venueDao().getAll().map { entities ->
         entities.map { Venue(it.id, it.name, it.address) }.sortedBy { it.name }
-    }
+    }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
     fun getArtist(slug: String): Flow<Artist?> =
         database.artistDao().getBySlug(slug).combine(userFavorites) { entity, favs ->

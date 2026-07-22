@@ -15,6 +15,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -74,6 +75,10 @@ class MainActivity : ComponentActivity() {
             val repository = remember { (context.applicationContext as UZApp).repository }
 
             val backStack = rememberNavBackStack(Destination.Home) as NavBackStack<Destination>
+
+            val artistsListState = rememberLazyListState()
+            val calendarListState = rememberLazyListState()
+            val placesListState = rememberLazyListState()
 
             val permissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -184,6 +189,7 @@ class MainActivity : ComponentActivity() {
 
                                     Destination.Calendar -> NavEntry(key) {
                                         CalendarScreen(
+                                            listState = calendarListState,
                                             onRequestSearch = {
                                                 isUniversalSearchOverlayVisible = true
                                             },
@@ -192,6 +198,7 @@ class MainActivity : ComponentActivity() {
 
                                     Destination.Artists -> NavEntry(key) {
                                         ArtistsScreen(
+                                            listState = artistsListState,
                                             onRequestSearch = {
                                                 isUniversalSearchOverlayVisible = true
                                             },
@@ -200,6 +207,7 @@ class MainActivity : ComponentActivity() {
 
                                     Destination.Places -> NavEntry(key) {
                                         PlacesScreen(
+                                            listState = placesListState,
                                             onRequestSearch = {
                                                 isUniversalSearchOverlayVisible = true
                                             },

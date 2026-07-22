@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -51,14 +53,15 @@ import kotlin.time.Duration.Companion.seconds
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CalendarScreen(
+    listState: LazyListState = rememberLazyListState(),
     onRequestSearch: () -> Unit,
 ) {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
-    val events by repository.events.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
-    val dates by repository.eventDates.collectAsState(initial = emptyList())
+    val events by repository.events.collectAsState()
+    val allStarredSlugs by repository.allFavorites.collectAsState()
+    val dates by repository.eventDates.collectAsState()
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
     var showOnlyStarred by rememberSaveable { mutableStateOf(false) }
     var showOnlyUpcoming by rememberSaveable { mutableStateOf(false) }
@@ -174,6 +177,7 @@ fun CalendarScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
+            state = listState,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(16.dp)
         ) {

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,13 +39,14 @@ import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 
 @Composable
 fun ArtistsScreen(
+    listState: LazyListState = rememberLazyListState(),
     onRequestSearch: () -> Unit,
 ) {
     val context = LocalContext.current
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
-    val artists by repository.artists.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
+    val artists by repository.artists.collectAsState()
+    val allStarredSlugs by repository.allFavorites.collectAsState()
     var showOnlyStarred by rememberSaveable { mutableStateOf(false) }
     var selectedTag by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedCountry by rememberSaveable { mutableStateOf<String?>(null) }
@@ -126,6 +128,7 @@ fun ArtistsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
+            state = listState,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(
                 top = paddingValues.calculateTopPadding() + 16.dp,

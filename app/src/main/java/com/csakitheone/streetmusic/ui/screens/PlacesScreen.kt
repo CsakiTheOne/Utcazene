@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
@@ -50,15 +52,16 @@ import java.time.LocalDateTime
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlacesScreen(
+    listState: LazyListState = rememberLazyListState(),
     onRequestSearch: () -> Unit,
 ) {
     val repository = LocalRepository.current
     val backStack = LocalNavBackStack.current
 
-    val events by repository.events.collectAsState(initial = emptyList())
-    val venues by repository.venues.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
-    val dates by repository.eventDates.collectAsState(initial = emptyList())
+    val events by repository.events.collectAsState()
+    val venues by repository.venues.collectAsState()
+    val allStarredSlugs by repository.allFavorites.collectAsState()
+    val dates by repository.eventDates.collectAsState()
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
     var showOnlyStarred by rememberSaveable { mutableStateOf(false) }
     var showOnlyUpcoming by rememberSaveable { mutableStateOf(false) }
@@ -168,6 +171,7 @@ fun PlacesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
+            state = listState,
             contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {

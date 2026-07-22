@@ -46,6 +46,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
@@ -730,8 +731,10 @@ fun ColumnScope.HomeSectionTomorrow(repository: DataRepository) {
 fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
     val context = LocalContext.current
     val backStack = LocalNavBackStack.current
-    val artists by repository.artists.collectAsState(initial = emptyList())
-    val allStarredSlugs by repository.allFavorites.collectAsState(initial = emptySet())
+    val artists by repository.artists.collectAsState()
+    val allStarredSlugs by repository.allFavorites.collectAsState()
+    val events by repository.events.collectAsState()
+    val venues by repository.venues.collectAsState()
 
     val favoriteArtists by remember {
         derivedStateOf { artists.filter { allStarredSlugs.contains(it.slug) } }
@@ -830,6 +833,42 @@ fun ColumnScope.HomeSectionThisYear(repository: DataRepository) {
                 )
             },
         )
+    }
+
+    OutlinedButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        onClick = {
+            val randomArtist = artists.random()
+            backStack.add(Destination.ArtistDetail(randomArtist.slug))
+        }
+    ) {
+        Text("Open random artist profile")
+    }
+
+    OutlinedButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        onClick = {
+            val randomEvent = events.random()
+            backStack.add(Destination.EventDetail(randomEvent.id))
+        }
+    ) {
+        Text("Open random event")
+    }
+
+    OutlinedButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        onClick = {
+            val randomPlace = venues.random()
+            backStack.add(Destination.Map(randomPlace.name))
+        }
+    ) {
+        Text("Show random place")
     }
 
     Row(

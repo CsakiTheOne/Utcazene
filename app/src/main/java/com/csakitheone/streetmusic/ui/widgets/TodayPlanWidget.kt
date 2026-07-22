@@ -1,14 +1,18 @@
 package com.csakitheone.streetmusic.ui.widgets
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
@@ -26,6 +30,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.csakitheone.streetmusic.MainActivity
 import com.csakitheone.streetmusic.UZApp
 import com.csakitheone.streetmusic.data.model.Event
 import kotlinx.coroutines.flow.first
@@ -46,29 +51,53 @@ class TodayPlanWidget : GlanceAppWidget() {
             }.sortedBy { it.startTime }
 
             GlanceTheme {
-                WidgetContent(todayStarred)
+                WidgetContent(context, todayStarred)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(events: List<Event>) {
+    private fun WidgetContent(context: Context, events: List<Event>) {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.widgetBackground)
                 .appWidgetBackground()
                 .cornerRadius(16.dp)
-                .padding(8.dp),
+                .padding(8.dp)
+                .clickable(actionRunCallback<UpdateWidgetAction>()),
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
-            Text(
-                text = "Today's Plan",
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    color = GlanceTheme.colors.onSurface
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(GlanceModifier.defaultWeight())
+                Text(
+                    text = "Today's Plan",
+                    modifier = GlanceModifier.clickable(actionStartActivity(Intent(context, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    })),
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        color = GlanceTheme.colors.onSurface
+                    )
                 )
-            )
+                Spacer(GlanceModifier.defaultWeight())
+                Box(
+                    modifier = GlanceModifier
+                        .background(GlanceTheme.colors.secondaryContainer)
+                        .cornerRadius(8.dp)
+                        .padding(horizontal = 16.dp, vertical = 2.dp)
+                        .clickable(actionStartActivity(Intent(context, MainActivity::class.java).apply {
+                            action = "com.csakitheone.streetmusic.ACTION_CALENDAR"
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        })),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("+", style = TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontWeight = FontWeight.Bold))
+                }
+            }
             Spacer(GlanceModifier.height(8.dp))
             if (events.isEmpty()) {
                 Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -77,7 +106,7 @@ class TodayPlanWidget : GlanceAppWidget() {
             } else {
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
                     items(events) { event ->
-                        EventItem(event)
+                        EventItem(context, event)
                     }
                 }
             }
@@ -85,8 +114,13 @@ class TodayPlanWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun EventItem(event: Event) {
+    private fun EventItem(context: Context, event: Event) {
         val time = event.startTime.substring(11, 16)
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = "com.csakitheone.streetmusic.ACTION_EVENT_DETAIL"
+            putExtra("eventId", event.id)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
         Column(
             modifier = GlanceModifier
                 .fillMaxWidth()
@@ -94,6 +128,7 @@ class TodayPlanWidget : GlanceAppWidget() {
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(8.dp)
                 .padding(8.dp)
+                .clickable(actionStartActivity(intent))
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(

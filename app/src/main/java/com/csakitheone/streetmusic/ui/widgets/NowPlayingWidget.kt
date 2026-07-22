@@ -1,14 +1,19 @@
 package com.csakitheone.streetmusic.ui.widgets
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
@@ -26,10 +31,13 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import com.csakitheone.streetmusic.MainActivity
 import com.csakitheone.streetmusic.UZApp
 import com.csakitheone.streetmusic.data.model.Event
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
+
+import java.time.format.DateTimeFormatter
 
 class NowPlayingWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -38,33 +46,45 @@ class NowPlayingWidget : GlanceAppWidget() {
 
         provideContent {
             val now = LocalDateTime.now()
+            val lastUpdated = now.format(DateTimeFormatter.ofPattern("HH:mm"))
             val nowPlaying = events.filter {
                 LocalDateTime.parse(it.startTime).isBefore(now) &&
                         LocalDateTime.parse(it.endTime).isAfter(now)
             }
 
             GlanceTheme {
-                WidgetContent(nowPlaying)
+                WidgetContent(context, nowPlaying, lastUpdated)
             }
         }
     }
 
     @Composable
-    private fun WidgetContent(events: List<Event>) {
+    private fun WidgetContent(context: Context, events: List<Event>, lastUpdated: String) {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.widgetBackground)
                 .appWidgetBackground()
                 .cornerRadius(16.dp)
-                .padding(8.dp),
+                .padding(8.dp)
+                .clickable(actionRunCallback<UpdateWidgetAction>()),
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
             Text(
                 text = "Now Playing",
+                modifier = GlanceModifier.clickable(actionStartActivity(Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })),
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     color = GlanceTheme.colors.onSurface
+                )
+            )
+            Text(
+                text = "Updated: $lastUpdated",
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    color = GlanceTheme.colors.onSurfaceVariant
                 )
             )
             Spacer(GlanceModifier.height(8.dp))
@@ -75,7 +95,7 @@ class NowPlayingWidget : GlanceAppWidget() {
             } else {
                 LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
                     items(events) { event ->
-                        EventItem(event)
+                        EventItem(context, event)
                     }
                 }
             }
@@ -83,7 +103,12 @@ class NowPlayingWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun EventItem(event: Event) {
+    private fun EventItem(context: Context, event: Event) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            action = "com.csakitheone.streetmusic.ACTION_EVENT_DETAIL"
+            putExtra("eventId", event.id)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK // Required when starting from outside an Activity
+        }
         Column(
             modifier = GlanceModifier
                 .fillMaxWidth()
@@ -91,6 +116,7 @@ class NowPlayingWidget : GlanceAppWidget() {
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(8.dp)
                 .padding(8.dp)
+                .clickable(actionStartActivity(intent))
         ) {
             Text(
                 text = event.artistName,

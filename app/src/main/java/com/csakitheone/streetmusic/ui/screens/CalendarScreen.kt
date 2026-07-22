@@ -1,7 +1,7 @@
 package com.csakitheone.streetmusic.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,14 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -64,6 +65,7 @@ fun CalendarScreen(
     val dates by repository.eventDates.collectAsState()
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
     var showOnlyStarred by rememberSaveable { mutableStateOf(false) }
+    var showOnlyStarredArtists by rememberSaveable { mutableStateOf(false) }
     var showOnlyUpcoming by rememberSaveable { mutableStateOf(false) }
 
     var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
@@ -78,6 +80,7 @@ fun CalendarScreen(
         events,
         selectedDate,
         showOnlyStarred,
+        showOnlyStarredArtists,
         showOnlyUpcoming,
         allStarredSlugs,
         currentTime
@@ -88,6 +91,11 @@ fun CalendarScreen(
                 .filter {
                     if (showOnlyStarred) {
                         allStarredSlugs.contains("${it.artistSlug} at ${it.startTime}")
+                    } else true
+                }
+                .filter {
+                    if (showOnlyStarredArtists) {
+                        allStarredSlugs.contains(it.artistSlug)
                     } else true
                 }
                 .filter {
@@ -174,44 +182,69 @@ fun CalendarScreen(
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize(),
             state = listState,
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 16.dp,
+                bottom = paddingValues.calculateBottomPadding() + 16.dp,
+            )
         ) {
             item {
                 if (selectedDate != null) {
-                    WeatherCard(date = LocalDate.parse(selectedDate))
+                    WeatherCard(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        date = LocalDate.parse(selectedDate)
+                    )
                 }
             }
             item {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
                     if (selectedDate == today) {
-                        FilterChip(
-                            selected = showOnlyUpcoming,
-                            onClick = { showOnlyUpcoming = !showOnlyUpcoming },
-                            label = { Text("Upcoming") }
-                        )
+                        item {
+                            FilterChip(
+                                selected = showOnlyUpcoming,
+                                onClick = { showOnlyUpcoming = !showOnlyUpcoming },
+                                label = { Text("Upcoming") }
+                            )
+                        }
                     } else if (showOnlyUpcoming) {
-                        SideEffect { showOnlyUpcoming = false }
+                        item { SideEffect { showOnlyUpcoming = false } }
                     }
-                    FilterChip(
-                        selected = showOnlyStarred,
-                        onClick = { showOnlyStarred = !showOnlyStarred },
-                        label = { Text("Starred") },
-                        leadingIcon = if (showOnlyStarred) {
-                            {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_star),
-                                    contentDescription = null
-                                )
-                            }
-                        } else null
-                    )
+                    item {
+                        FilterChip(
+                            selected = showOnlyStarred,
+                            onClick = { showOnlyStarred = !showOnlyStarred },
+                            label = { Text("Starred event") },
+                            leadingIcon = if (showOnlyStarred) {
+                                {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_star),
+                                        contentDescription = null
+                                    )
+                                }
+                            } else null
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = showOnlyStarredArtists,
+                            onClick = { showOnlyStarredArtists = !showOnlyStarredArtists },
+                            label = { Text("Starred artist") },
+                            leadingIcon = if (showOnlyStarredArtists) {
+                                {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_star),
+                                        contentDescription = null
+                                    )
+                                }
+                            } else null
+                        )
+                    }
                 }
             }
             if (events.isEmpty()) {
@@ -225,10 +258,11 @@ fun CalendarScreen(
                         time = currentTime.toLocalTime(),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 8.dp)
                             .padding(bottom = 8.dp)
                     )
                 }
-                EventCard(event = event)
+                EventCard(modifier = Modifier.padding(horizontal = 16.dp), event = event)
             }
             if (indicatorIndex == -1 && selectedDate == today && eventsAtDate.isNotEmpty()) {
                 val lastEventEndsAfterNow = try {
@@ -242,6 +276,7 @@ fun CalendarScreen(
                             time = currentTime.toLocalTime(),
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = 8.dp)
                                 .padding(top = 8.dp)
                         )
                     }

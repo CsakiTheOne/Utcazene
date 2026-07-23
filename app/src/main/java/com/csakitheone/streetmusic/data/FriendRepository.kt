@@ -22,6 +22,16 @@ class FriendRepository {
                 youtubeEmbed = "grWgky_ZIJw",
                 tags = listOf(Artist.TAG_FRIEND),
             ),
+            Artist(
+                id = -2,
+                name = "odaLÖKött KÖLtészet",
+                description = "Ha viszket a tollad, vakard meg a papírt! Ha viszket a füled, hallgasd meg más mit írt!",
+                country = "HU",
+                image = null,
+                slug = "odalokkott_kolteszet",
+                youtubeEmbed = null,
+                tags = listOf(Artist.TAG_FRIEND),
+            ),
         )
 
         val events = listOf(
@@ -36,7 +46,7 @@ class FriendRepository {
             ),
             Event(
                 id = -2,
-                artistId = -2,
+                artistId = -100,
                 artistSlug = "ring-of-cash",
                 artistName = "Ring Of Cash",
                 startTime = "2026-07-22T19:00:00",
@@ -45,12 +55,21 @@ class FriendRepository {
             ),
             Event(
                 id = -3,
-                artistId = -2,
+                artistId = -100,
                 artistSlug = "santa-machete",
                 artistName = "Santa Machete",
                 startTime = "2026-07-22T21:30:00",
                 endTime = "2026-07-22T23:00:00",
                 place = "Nyárkert",
+            ),
+            Event(
+                id = -4,
+                artistId = -2,
+                artistSlug = "odalokkott_kolteszet",
+                artistName = "odaLÖKött KÖLtészet",
+                startTime = "2026-07-24T18:00:00",
+                endTime = "2026-07-24T19:00:00",
+                place = "Kossuth utca félemelet",
             ),
         )
 

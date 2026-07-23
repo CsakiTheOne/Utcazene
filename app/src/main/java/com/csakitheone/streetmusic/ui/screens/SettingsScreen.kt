@@ -2,6 +2,8 @@ package com.csakitheone.streetmusic.ui.screens
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.pdf.models.ListItem
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
@@ -25,11 +27,14 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -50,12 +55,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.csakitheone.streetmusic.R
 import com.csakitheone.streetmusic.data.DataRepository
 import com.csakitheone.streetmusic.data.LocalRepository
+import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
 import com.csakitheone.streetmusic.ui.components.NearbyConnectionsDisplay
 import kotlinx.coroutines.Dispatchers
@@ -75,8 +82,9 @@ fun SettingsScreen() {
     val isBatterySaverEnabled by repository.isBatterySaverEnabled.collectAsState()
     val nickname by repository.nickname.collectAsState()
 
-    val artists by repository.artists.collectAsState(initial = emptyList())
-    val events by repository.events.collectAsState(initial = emptyList())
+    val artists by repository.getAllArtistEntities().collectAsState(initial = emptyList())
+    val events by repository.getAllEventEntities().collectAsState(initial = emptyList())
+    val venues by repository.getAllVenueEntities().collectAsState(initial = emptyList())
 
     val incompleteArtistsCount by remember(artists) {
         derivedStateOf {
@@ -96,9 +104,6 @@ fun SettingsScreen() {
                         )
                     }
                 },
-                actions = {
-                    NearbyConnectionsDisplay()
-                },
             )
         },
     ) { paddingValues ->
@@ -110,70 +115,82 @@ fun SettingsScreen() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card {
-                Column(
+                Text(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
+                    text = "Battery",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                if (isBatterySaverEnabled) {
                     Text(
-                        text = "Battery",
-                        style = MaterialTheme.typography.titleMedium
+                        modifier = Modifier.padding(16.dp),
+                        text = "Battery saver is active. Some features are disabled to save energy.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
                     )
+                }
 
-                    if (isBatterySaverEnabled) {
-                        Text(
-                            text = "Battery saver is active. Some features are disabled to save energy.",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            repository.setUseHighPowerDiscovery(false)
-                            repository.setIsNearbyFriendsActive(false)
-                            repository.setIsNearbyBackgroundEnabled(false)
-                            if (autoUpdateMode == DataRepository.AutoUpdateMode.ALWAYS) {
-                                repository.setAutoUpdateMode(DataRepository.AutoUpdateMode.NEVER)
-                            }
-                            repository.setShowImagesOnMetered(false)
-                            Toast.makeText(
-                                context,
-                                "Settings applied for best battery life",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        },
-                    ) {
+                ListItem(
+                    onClick = {
+                        repository.setUseHighPowerDiscovery(false)
+                        repository.setIsNearbyFriendsActive(false)
+                        repository.setIsNearbyBackgroundEnabled(false)
+                        if (autoUpdateMode == DataRepository.AutoUpdateMode.ALWAYS) {
+                            repository.setAutoUpdateMode(DataRepository.AutoUpdateMode.NEVER)
+                        }
+                        repository.setShowImagesOnMetered(false)
+                        Toast.makeText(
+                            context,
+                            "Settings applied for best battery life",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_battery_android_frame_plus),
                             contentDescription = null,
                         )
-                        Text("Apply settings best for battery")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                        headlineColor = MaterialTheme.colorScheme.primary,
+                        leadingIconColor = MaterialTheme.colorScheme.primary,
+                    )
+                ) {
+                    Text("Apply settings best for battery")
+                }
 
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            context.startActivity(Intent(android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS))
-                        },
-                    ) {
+                ListItem(
+                    onClick = {
+                        context.startActivity(Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS))
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_settings),
                             contentDescription = null,
                         )
-                        Text("Battery saver settings")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                ) {
+                    Text("Battery saver settings")
                 }
             }
 
             Card {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Nearby features",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .weight(1f),
+                        text = "Nearby features",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    NearbyConnectionsDisplay()
+                }
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -183,7 +200,6 @@ fun SettingsScreen() {
                     label = { Text("Nickname") },
                     placeholder = { Text("Friend") },
                     singleLine = true,
-                    supportingText = { Text("Your nickname will be visible to nearby devices.") },
                 )
                 val isNearbyFriendsActive by repository.isNearbyFriendsActive.collectAsState()
                 val isNearbyBackgroundEnabled by repository.isNearbyBackgroundEnabled.collectAsState()
@@ -223,17 +239,12 @@ fun SettingsScreen() {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(
+                    Text(
                         modifier = Modifier
                             .weight(1f)
                             .alpha(if (isBatterySaverEnabled) 0.5f else 1f),
-                    ) {
-                        Text(text = "StreetPass mode")
-                        Text(
-                            text = "Allow Nearby Friends to work while the app is closed and phone is locked.",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
+                        text = "Keep turned on when app is closed"
+                    )
                     Checkbox(
                         enabled = !isBatterySaverEnabled,
                         checked = isNearbyBackgroundEnabled,
@@ -284,7 +295,7 @@ fun SettingsScreen() {
             Card {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = "Data usage",
+                    text = "Internet usage",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 var isAutoUpdateExpanded by remember { mutableStateOf(false) }
@@ -357,7 +368,7 @@ fun SettingsScreen() {
                 ) {
                     Text(
                         modifier = Modifier.weight(1f),
-                        text = "Show images and videos on metered connections",
+                        text = "Always load images and videos",
                     )
                     Checkbox(
                         checked = showImagesOnMetered,
@@ -369,149 +380,175 @@ fun SettingsScreen() {
             }
 
             Card {
-                Column(
+                Text(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Text(text = "Data", style = MaterialTheme.typography.titleMedium)
+                    text = "Data & Storage",
+                    style = MaterialTheme.typography.titleMedium
+                )
 
-                    AnimatedContent(repository.isDownloading) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AnimatedContent(
+                        modifier = Modifier.weight(1f),
+                        targetState = repository.isDownloading,
+                    ) {
                         if (it) {
-                            LoadingIndicator(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .align(Alignment.CenterHorizontally),
-                            )
+                            LoadingIndicator()
                         } else {
-                            Text(text = "${artists.size} artists${if (incompleteArtistsCount > 0) " ($incompleteArtistsCount incomplete)" else ""}\n${events.size} events")
+                            Text(
+                                modifier = Modifier.alpha(.75f),
+                                text = "${artists.size} artists${if (incompleteArtistsCount > 0) " ($incompleteArtistsCount incomplete)" else ""}\n${events.size} events\n${venues.size} venues",
+                                style = MaterialTheme.typography.labelMedium,
+                            )
                         }
                     }
-
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !repository.isDownloading,
+                    OutlinedIconButton(
                         onClick = {
                             coroutineScope.launch(Dispatchers.IO) {
                                 repository.tryDownloadData(force = true)
                             }
-                        },
+                        }
                     ) {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                            painter = painterResource(R.drawable.ic_download),
+                            painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = null,
                         )
-                        Text("Redownload data")
                     }
+                }
 
-                    Text(text = "Sharing is caring", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Sharing is caring",
+                    style = MaterialTheme.typography.titleSmall
+                )
 
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        shareApp(context, true)
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_send),
+                            contentDescription = null,
+                        )
+                    },
+                    trailingContent = {
+                        OutlinedIconButton(
+                            onClick = {
+                                shareApp(context)
+                            },
                         ) {
-                            SplitButtonDefaults.LeadingButton(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(end = SplitButtonDefaults.Spacing),
-                                onClick = {
-                                    shareApp(context, true)
-                                },
-                            ) {
-                                Icon(
-                                    modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
-                                    painter = painterResource(R.drawable.ic_send),
-                                    contentDescription = null,
-                                )
-                                Text("Send app")
-                            }
-                            SplitButtonDefaults.TrailingButton(
-                                onClick = {
-                                    shareApp(context)
-                                },
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_share),
-                                    contentDescription = null,
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.ic_share),
+                                contentDescription = null,
+                            )
                         }
-
+                    },
+                    supportingContent = {
                         Text(
                             text = "Sent apk may not work on the target device. Download UZ App from the Play Store if possible.",
                             style = MaterialTheme.typography.labelSmall,
                         )
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    ),
+                ) {
+                    Text("Send app")
+                }
 
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            backStack.add(com.csakitheone.streetmusic.navigation.Destination.DataSync)
-                        },
-                    ) {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        backStack.add(Destination.DataSync)
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_connect_without_contact),
                             contentDescription = null,
                         )
-                        Text("Send data to another device")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                ) {
+                    Text("Send data to another device")
+                }
 
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            backStack.add(com.csakitheone.streetmusic.navigation.Destination.FavoritesSync)
-                        },
-                    ) {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        backStack.add(Destination.FavoritesSync)
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_star),
                             contentDescription = null,
                         )
-                        Text("Import/Export favorites")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                    )
+                ) {
+                    Text("Import/Export favorites")
+                }
 
-                    Text(text = "Free up space", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Free up space",
+                    style = MaterialTheme.typography.titleSmall
+                )
 
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            repository.clearMessages()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
-                        ),
-                    ) {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        repository.clearMessages()
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_delete_forever),
                             contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
                         )
-                        Text("Remove all messages from device")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                        headlineColor = MaterialTheme.colorScheme.error,
+                    ),
+                ) {
+                    Text("Remove all messages from device")
+                }
 
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
-                        onClick = {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                repository.deleteDatabase()
-                            }
-                            backStack.removeLastOrNull()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError,
-                        ),
-                    ) {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !repository.isDownloading && (artists.isNotEmpty() || events.isNotEmpty()),
+                    onClick = {
+                        coroutineScope.launch(Dispatchers.IO) {
+                            repository.deleteDatabase()
+                        }
+                        backStack.removeLastOrNull()
+                    },
+                    leadingContent = {
                         Icon(
-                            modifier = Modifier.padding(end = ButtonDefaults.IconSpacing),
                             painter = painterResource(R.drawable.ic_delete_forever),
                             contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
                         )
-                        Text("Remove artist and event data from device")
-                    }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = Color.Transparent,
+                        headlineColor = MaterialTheme.colorScheme.error,
+                        disabledHeadlineColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f),
+                        disabledLeadingIconColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f),
+                    ),
+                ) {
+                    Text("Remove artist and event data from device")
                 }
             }
         }

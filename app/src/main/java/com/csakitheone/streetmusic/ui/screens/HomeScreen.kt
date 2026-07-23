@@ -652,7 +652,7 @@ fun ColumnScope.HomeSectionToday(repository: DataRepository) {
                 contentDescription = null,
             )
             Text(
-                text = "Use Find Hub to find your friends. It's the recommended, Android built-in way to see where your friends are.\nTap here to open.",
+                text = "Use Find Hub to find your friends. Doesn't kill battery and it's built-in.\nTap here to open.",
                 style = MaterialTheme.typography.bodySmall,
             )
         }

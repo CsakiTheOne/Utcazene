@@ -116,6 +116,7 @@ fun MapScreen(initialPlaceName: String? = null) {
             "Sarolta udvar" to GeoPoint(47.093656, 17.909333),
             "Íródeák" to GeoPoint(47.0906418, 17.9066187),
             "Gyárkert" to GeoPoint(47.0949355, 17.9160484),
+            "Nyárkert" to GeoPoint(47.0914073, 17.906121),
             "TEREM" to GeoPoint(47.0926645, 17.9074231),
         )
     }

@@ -287,21 +287,6 @@ class DataRepository(
         SUCCESS, NO_CONNECTION, ALREADY_HAS_DATA, ASK_FOR_METERED
     }
 
-    val artists: StateFlow<List<Artist>> =
-        database.artistDao().getAll().combine(userFavorites) { entities, favs ->
-            val dbArtists = entities.map {
-                Artist(
-                    it.id, it.name, it.country, it.description, it.image, it.slug,
-                    it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
-                    isStarred = favs.contains(it.slug)
-                )
-            }
-            val friendArtists = FriendRepository.artists.map {
-                it.copy(isStarred = favs.contains(it.slug))
-            }
-            (dbArtists + friendArtists).sortedBy { it.name }
-        }.stateIn(scope, SharingStarted.Lazily, emptyList())
-
     val events: StateFlow<List<Event>> =
         database.eventDao().getAll().combine(userFavorites) { entities, favs ->
             val dbEvents = entities.map {
@@ -323,21 +308,34 @@ class DataRepository(
     }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
     val venues: StateFlow<List<Venue>> = database.venueDao().getAll().map { entities ->
-        entities.map { Venue(it.id, it.name, it.address) }.sortedBy { it.name }
+        val dbVenues = entities.map { Venue(it.id, it.name, it.address) }
+        val friendVenues = FriendRepository.venues
+        (dbVenues + friendVenues).sortedBy { it.name }
     }.stateIn(scope, SharingStarted.Lazily, emptyList())
 
-    fun getArtist(slug: String): Flow<Artist?> =
-        database.artistDao().getBySlug(slug).combine(userFavorites) { entity, favs ->
-            entity?.let {
-                Artist(
-                    it.id, it.name, it.country, it.description, it.image, it.slug,
-                    it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
-                    isStarred = favs.contains(it.slug)
-                )
-            } ?: FriendRepository.artists.find { it.slug == slug }?.copy(
-                isStarred = favs.contains(slug)
+    val artists: StateFlow<List<Artist>> = combine(
+        database.artistDao().getAll(),
+        events,
+        eventDates,
+        userFavorites
+    ) { entities, allEvents, allEventDates, favs ->
+        val dbArtists = entities.map {
+            Artist(
+                it.id, it.name, it.country, it.description, it.image, it.slug,
+                it.youtubeEmbed, it.tags.split(",").filter { tag -> tag.isNotBlank() },
+                isStarred = favs.contains(it.slug)
             )
         }
+        val friendArtists = FriendRepository.artists.map {
+            it.copy(isStarred = favs.contains(it.slug))
+        }
+        val allArtists = (dbArtists + friendArtists).sortedBy { it.name }
+        applyVirtualTags(allArtists, allArtists, allEvents, allEventDates)
+    }.stateIn(scope, SharingStarted.Lazily, emptyList())
+
+    fun getArtist(slug: String): Flow<Artist?> = artists.map { allArtists ->
+        allArtists.find { it.slug == slug }
+    }
 
     fun getEvent(id: Int): Flow<Event?> =
         database.eventDao().getById(id).combine(userFavorites) { entity, favs ->
@@ -524,39 +522,6 @@ class DataRepository(
                 }
             }
 
-            Log.d(
-                "DataRepository",
-                "Finished downloading data. Now tagging artists based on event info..."
-            )
-
-            val eventDays = database.eventDao().getDistinctDates().first()
-            val artists = database.artistDao().getAll().first()
-            val completeArtists = artists.filter {
-                it.description.isNotBlank() && !it.image.isNullOrBlank() && !it.youtubeEmbed.isNullOrBlank()
-            }
-            val taggedArtists = artists.map { artist ->
-                val events = database.eventDao().getEventsByArtist(artist.slug).first()
-                val tags = artist.tags.split(",").map { it.trim() }.toMutableSet()
-
-                if (events.size < eventDays.size) {
-                    if (events.size == 1) tags.add("onechance")
-                    else if (events.size == 2) tags.add("twoshot")
-                } else if (events.size > eventDays.size) {
-                    tags.add("encore")
-                }
-
-                if (completeArtists.size != artists.size) {
-                    tags.add(
-                        if (artist.slug in completeArtists.map { it.slug }) "complete"
-                        else "incomplete"
-                    )
-                }
-
-                artist.copy(tags = tags.joinToString(","))
-            }
-            database.artistDao().deleteAll()
-            database.artistDao().insertAll(taggedArtists)
-
             AlarmScheduler.rescheduleAll(context, this@DataRepository)
         }
         isDownloading = false
@@ -582,4 +547,39 @@ class DataRepository(
     fun getAllArtistEntities(): Flow<List<ArtistEntity>> = database.artistDao().getAll()
     fun getAllEventEntities(): Flow<List<EventEntity>> = database.eventDao().getAll()
     fun getAllVenueEntities(): Flow<List<VenueEntity>> = database.venueDao().getAll()
+
+    private fun applyVirtualTags(
+        artistsToTag: List<Artist>,
+        allArtists: List<Artist>,
+        allEvents: List<Event>,
+        allEventDates: List<String>
+    ): List<Artist> {
+        val completeArtists = allArtists.filter {
+            it.description.isNotBlank() && !it.image.isNullOrBlank() && !it.youtubeEmbed.isNullOrBlank()
+        }
+        val isAnyIncomplete = completeArtists.size != allArtists.size
+
+        return artistsToTag.map { artist ->
+            val artistEvents = allEvents.filter { it.artistSlug == artist.slug }
+            val tags = artist.tags.toMutableSet()
+
+            if (allEventDates.isNotEmpty()) {
+                if (artistEvents.size < allEventDates.size) {
+                    if (artistEvents.size == 1) tags.add("onechance")
+                    else if (artistEvents.size == 2) tags.add("twoshot")
+                } else if (artistEvents.size > allEventDates.size) {
+                    tags.add("encore")
+                }
+            }
+
+            if (isAnyIncomplete) {
+                val isComplete = artist.description.isNotBlank() &&
+                        !artist.image.isNullOrBlank() &&
+                        !artist.youtubeEmbed.isNullOrBlank()
+                tags.add(if (isComplete) "complete" else "incomplete")
+            }
+
+            artist.copy(tags = tags.toList().sorted())
+        }
+    }
 }

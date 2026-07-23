@@ -2,6 +2,7 @@ package com.csakitheone.streetmusic.data
 
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
+import com.csakitheone.streetmusic.data.model.Venue
 
 class FriendRepository {
     companion object {
@@ -40,7 +41,7 @@ class FriendRepository {
                 artistName = "Ring Of Cash",
                 startTime = "2026-07-22T19:00:00",
                 endTime = "2026-07-22T20:30:00",
-                place = "Gyárkert",
+                place = "Nyárkert",
             ),
             Event(
                 id = -3,
@@ -49,8 +50,16 @@ class FriendRepository {
                 artistName = "Santa Machete",
                 startTime = "2026-07-22T21:30:00",
                 endTime = "2026-07-22T23:00:00",
-                place = "Gyárkert",
+                place = "Nyárkert",
             ),
+        )
+
+        val venues = listOf(
+            Venue(
+                id = -1,
+                name = "Nyárkert",
+                address = "Színházkert",
+            )
         )
     }
 }

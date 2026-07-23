@@ -429,6 +429,13 @@ fun HomeScreen(
                 }
             }
 
+            OutlinedButton(
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                onClick = { backStack.add(Destination.Table) },
+            ) {
+                Text("Sit to the table")
+            }
+
             HomeSectionToday(repository)
 
             HomeSectionTomorrow(repository)

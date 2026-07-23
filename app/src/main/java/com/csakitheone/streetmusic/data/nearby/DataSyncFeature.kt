@@ -28,6 +28,7 @@ class DataSyncFeature(
     private val nearbyManager: NearbyManager,
     private val scope: CoroutineScope
 ) {
+    private val json = Json { ignoreUnknownKeys = true }
     private val serviceId = "com.csakitheone.streetmusic.nearby_data_sync"
     private val strategy = Strategy.P2P_STAR
 
@@ -90,7 +91,7 @@ class DataSyncFeature(
         events: List<EventEntity>,
         venues: List<VenueEntity>
     ) {
-        val payloadData = Json.encodeToString(DataSyncPayload(artists, events, venues))
+        val payloadData = json.encodeToString(DataSyncPayload(artists, events, venues))
         val payload = Payload.fromBytes(payloadData.toByteArray())
         nearbyManager.connectionsClient.sendPayload(endpointId, payload)
     }
@@ -138,7 +139,7 @@ class DataSyncFeature(
             if (payload.type == Payload.Type.BYTES) {
                 val data = payload.asBytes()?.let { String(it) } ?: return
                 try {
-                    val syncPayload = Json.decodeFromString<DataSyncPayload>(data)
+                    val syncPayload = json.decodeFromString<DataSyncPayload>(data)
                     _incomingData.value = syncPayload
                 } catch (e: Exception) {
                     Log.e("DataSyncFeature", "Error decoding payload", e)

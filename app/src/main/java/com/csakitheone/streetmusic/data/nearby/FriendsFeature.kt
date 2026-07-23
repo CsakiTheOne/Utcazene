@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import android.util.Log
 import com.csakitheone.streetmusic.data.local.ThreadNode
+import com.csakitheone.streetmusic.data.model.TableItem
 import com.google.android.gms.nearby.connection.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -19,6 +20,7 @@ data class FriendsPayload(
     val threadNodes: Set<ThreadNode> = emptySet(),
     val peerId: String = "",
     val batteryLevel: Int = -1,
+    val tableItems: List<TableItem> = emptyList(),
 )
 
 class FriendsFeature(
@@ -26,11 +28,29 @@ class FriendsFeature(
     private val scope: CoroutineScope,
     private val threadNodeDao: com.csakitheone.streetmusic.data.local.ThreadNodeDao
 ) {
+    private val json = Json { ignoreUnknownKeys = true }
     private val serviceId = "com.csakitheone.streetmusic.NEARBY_GANG"
     private val strategy = Strategy.P2P_CLUSTER
 
     private val _connectedFriends = MutableStateFlow<Map<String, FriendsPayload>>(emptyMap())
     val connectedFriends: StateFlow<Map<String, FriendsPayload>> = _connectedFriends.asStateFlow()
+
+    private val _localTableItems = MutableStateFlow<Map<String, TableItem>>(emptyMap())
+    val allTableItems: StateFlow<List<TableItem>> = combine(
+        _localTableItems,
+        _connectedFriends
+    ) { local, connected ->
+        val all = local.toMutableMap()
+        connected.values.forEach { friend ->
+            friend.tableItems.forEach { item ->
+                val existing = all[item.id]
+                if (existing == null || item.lastUpdated > existing.lastUpdated) {
+                    all[item.id] = item
+                }
+            }
+        }
+        all.values.filter { !it.isDeleted }.toList()
+    }.stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val localThreadNodes: StateFlow<Set<ThreadNode>> = threadNodeDao.getAll()
         .map { it.toSet() + ThreadNode.MAIN }
@@ -124,6 +144,31 @@ class FriendsFeature(
         }
     }
 
+    fun updateTableItems(items: List<TableItem>) {
+        val newLocal = _localTableItems.value.toMutableMap()
+        items.forEach { newLocal[it.id] = it }
+        _localTableItems.value = newLocal
+        if (isActive) {
+            broadcastFavorites()
+        }
+    }
+
+    fun clearTable() {
+        val now = System.currentTimeMillis()
+        val newLocal = _localTableItems.value.mapValues { (_, item) ->
+            when (item) {
+                is TableItem.Die -> item.copy(isDeleted = true, lastUpdated = now)
+                is TableItem.CardStack -> item.copy(isDeleted = true, lastUpdated = now)
+                is TableItem.Coin -> item.copy(isDeleted = true, lastUpdated = now)
+                is TableItem.Counter -> item.copy(isDeleted = true, lastUpdated = now)
+            }
+        }
+        _localTableItems.value = newLocal
+        if (isActive) {
+            broadcastFavorites()
+        }
+    }
+
     private fun start() {
         nearbyManager.requestAdvertising(
             this,
@@ -162,14 +207,15 @@ class FriendsFeature(
     private fun broadcastFavorites() {
         scope.launch {
             val localNodes = threadNodeDao.getAll().first().toSet()
-            val payloadData = Json.encodeToString(
+            val payloadData = json.encodeToString(
                 FriendsPayload(
                     localNickname,
                     localScreen,
                     localFavorites,
                     localNodes,
                     nearbyManager.localId,
-                    localBatteryLevel
+                    localBatteryLevel,
+                    _localTableItems.value.values.toList()
                 )
             )
             val payload = Payload.fromBytes(payloadData.toByteArray())
@@ -329,7 +375,7 @@ class FriendsFeature(
             if (payload.type == Payload.Type.BYTES) {
                 val data = payload.asBytes()?.let { String(it) } ?: return
                 try {
-                    val friendsPayload = Json.decodeFromString<FriendsPayload>(data)
+                    val friendsPayload = json.decodeFromString<FriendsPayload>(data)
                     _connectedFriends.value += (endpointId to friendsPayload)
                     // Merge incoming thread nodes into local set
                     scope.launch {

@@ -260,6 +260,10 @@ class MainActivity : ComponentActivity() {
                                     is Destination.Chat -> NavEntry(key) {
                                         ChatScreen(initialRootNodeId = key.rootNodeId)
                                     }
+
+                                    Destination.Table -> NavEntry(key) {
+                                        com.csakitheone.streetmusic.ui.screens.TableScreen()
+                                    }
                                 }
                             }
                         )

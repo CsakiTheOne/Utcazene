@@ -25,6 +25,7 @@ import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
 import com.csakitheone.streetmusic.data.model.HourlyWeather
 import com.csakitheone.streetmusic.data.model.Venue
+import com.csakitheone.streetmusic.data.model.TableItem
 import com.csakitheone.streetmusic.data.model.WeatherForecast
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
 import com.csakitheone.streetmusic.notifications.AlarmScheduler
@@ -286,6 +287,26 @@ class DataRepository(
 
     fun clearMessages() {
         nearbyManager.friends.clearMessages()
+    }
+
+    val tableItems: StateFlow<List<TableItem>> = nearbyManager.friends.allTableItems
+
+    fun updateTableItem(item: TableItem) {
+        nearbyManager.friends.updateTableItems(listOf(item))
+    }
+
+    fun removeTableItem(item: TableItem) {
+        val deletedItem = when (item) {
+            is TableItem.Die -> item.copy(isDeleted = true, lastUpdated = System.currentTimeMillis())
+            is TableItem.CardStack -> item.copy(isDeleted = true, lastUpdated = System.currentTimeMillis())
+            is TableItem.Coin -> item.copy(isDeleted = true, lastUpdated = System.currentTimeMillis())
+            is TableItem.Counter -> item.copy(isDeleted = true, lastUpdated = System.currentTimeMillis())
+        }
+        nearbyManager.friends.updateTableItems(listOf(deletedItem))
+    }
+
+    fun clearTable() {
+        nearbyManager.friends.clearTable()
     }
 
     init {

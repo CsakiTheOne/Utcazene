@@ -104,9 +104,13 @@ fun DataSyncScreen() {
                 NavigationBarItem(
                     selected = isDiscovering,
                     onClick = {
-                        isDiscovering = true
-                        isAdvertising = false
-                        repository.nearbyManager.dataSync.startDiscovery()
+                        if (repository.nearbyManager.hasPermissions()) {
+                            isDiscovering = true
+                            isAdvertising = false
+                            repository.nearbyManager.dataSync.startDiscovery()
+                        } else {
+                            permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
+                        }
                     },
                     icon = {
                         Icon(
@@ -119,9 +123,13 @@ fun DataSyncScreen() {
                 NavigationBarItem(
                     selected = isAdvertising,
                     onClick = {
-                        isAdvertising = true
-                        isDiscovering = false
-                        repository.nearbyManager.dataSync.startAdvertising(repository.nickname.value)
+                        if (repository.nearbyManager.hasPermissions()) {
+                            isAdvertising = true
+                            isDiscovering = false
+                            repository.nearbyManager.dataSync.startAdvertising(repository.nickname.value)
+                        } else {
+                            permissionLauncher.launch(NearbyManager.REQUIRED_PERMISSIONS.toTypedArray())
+                        }
                     },
                     icon = {
                         Icon(

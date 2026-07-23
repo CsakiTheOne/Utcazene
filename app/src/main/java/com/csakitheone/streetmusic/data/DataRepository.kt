@@ -88,6 +88,7 @@ class DataRepository(
                 if (isEnabled) {
                     setUseHighPowerDiscovery(false)
                     setIsNearbyFriendsActive(false)
+                    setIsNearbyBackgroundEnabled(false)
                     if (_autoUpdateMode.value == AutoUpdateMode.ALWAYS) {
                         setAutoUpdateMode(AutoUpdateMode.NEVER)
                     }
@@ -146,6 +147,25 @@ class DataRepository(
         prefs.edit { putBoolean("nearby_features", value) }
         _isNearbyFriendsActive.value = value
         nearbyManager.setNearbyFriendsActive(value)
+        updateNearbyBackgroundService()
+    }
+
+    private val _isNearbyBackgroundEnabled =
+        MutableStateFlow(prefs.getBoolean("nearby_background", false))
+    val isNearbyBackgroundEnabled: StateFlow<Boolean> = _isNearbyBackgroundEnabled.asStateFlow()
+    fun setIsNearbyBackgroundEnabled(value: Boolean) {
+        prefs.edit { putBoolean("nearby_background", value) }
+        _isNearbyBackgroundEnabled.value = value
+        updateNearbyBackgroundService()
+    }
+
+    private fun updateNearbyBackgroundService() {
+        val intent = Intent(context, com.csakitheone.streetmusic.data.nearby.NearbyBackgroundService::class.java)
+        if (_isNearbyFriendsActive.value && _isNearbyBackgroundEnabled.value) {
+            ContextCompat.startForegroundService(context, intent)
+        } else {
+            context.stopService(intent)
+        }
     }
 
     private val _showImagesOnMetered =

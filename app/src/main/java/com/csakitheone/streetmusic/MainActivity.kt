@@ -40,6 +40,7 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.csakitheone.streetmusic.data.nearby.NearbyBackgroundService
 import com.csakitheone.streetmusic.data.LocalRepository
 import com.csakitheone.streetmusic.navigation.Destination
 import com.csakitheone.streetmusic.navigation.LocalNavBackStack
@@ -105,6 +106,9 @@ class MainActivity : ComponentActivity() {
                     "com.csakitheone.streetmusic.ACTION_CALENDAR" -> Destination.Calendar
                     "com.csakitheone.streetmusic.ACTION_ARTISTS" -> Destination.Artists
                     "com.csakitheone.streetmusic.ACTION_PLACES" -> Destination.Places
+                    "com.csakitheone.streetmusic.ACTION_SETTINGS",
+                    NearbyBackgroundService.ACTION_SETTINGS -> Destination.Settings
+
                     "com.csakitheone.streetmusic.ACTION_EVENT_DETAIL" -> {
                         val eventId = intent.getIntExtra("eventId", -1)
                         Log.d("MainActivity", "Deep link to event: $eventId")
@@ -126,7 +130,10 @@ class MainActivity : ComponentActivity() {
                     try {
                         awaitCancellation()
                     } finally {
-                        repository.nearbyManager.setNearbyFriendsActive(false)
+                        // If background is NOT enabled, we stop nearby features when app is closed/stopped
+                        if (!repository.isNearbyBackgroundEnabled.value) {
+                            repository.nearbyManager.setNearbyFriendsActive(false)
+                        }
                     }
                 }
             }

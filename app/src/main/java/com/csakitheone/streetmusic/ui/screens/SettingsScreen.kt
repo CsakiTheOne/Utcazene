@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.SplitButtonDefaults
 import androidx.compose.material3.SplitButtonLayout
 import androidx.compose.material3.Text
@@ -131,6 +132,7 @@ fun SettingsScreen() {
                         onClick = {
                             repository.setUseHighPowerDiscovery(false)
                             repository.setIsNearbyFriendsActive(false)
+                            repository.setIsNearbyBackgroundEnabled(false)
                             if (autoUpdateMode == DataRepository.AutoUpdateMode.ALWAYS) {
                                 repository.setAutoUpdateMode(DataRepository.AutoUpdateMode.NEVER)
                             }
@@ -183,6 +185,64 @@ fun SettingsScreen() {
                     singleLine = true,
                     supportingText = { Text("Your nickname will be visible to nearby devices.") },
                 )
+                val isNearbyFriendsActive by repository.isNearbyFriendsActive.collectAsState()
+                val isNearbyBackgroundEnabled by repository.isNearbyBackgroundEnabled.collectAsState()
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            repository.setIsNearbyFriendsActive(!isNearbyFriendsActive)
+                        }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(text = "Nearby Friends")
+                        Text(
+                            text = "Discover and connect with nearby friends to see their favorites and chat.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                    Switch(
+                        checked = isNearbyFriendsActive,
+                        onCheckedChange = {
+                            repository.setIsNearbyFriendsActive(it)
+                        },
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = !isBatterySaverEnabled) {
+                            repository.setIsNearbyBackgroundEnabled(!isNearbyBackgroundEnabled)
+                        }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .alpha(if (isBatterySaverEnabled) 0.5f else 1f),
+                    ) {
+                        Text(text = "StreetPass mode")
+                        Text(
+                            text = "Allow Nearby Friends to work while the app is closed and phone is locked.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                    Checkbox(
+                        enabled = !isBatterySaverEnabled,
+                        checked = isNearbyBackgroundEnabled,
+                        onCheckedChange = {
+                            repository.setIsNearbyBackgroundEnabled(it)
+                        },
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -196,20 +256,12 @@ fun SettingsScreen() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
-                        },
+                        }
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Checkbox(
-                        modifier = Modifier.padding(8.dp),
-                        enabled = !isBatterySaverEnabled,
-                        checked = useHighPowerDiscovery,
-                        onCheckedChange = {
-                            repository.setUseHighPowerDiscovery(it)
-                        },
-                    )
                     Column(
                         modifier = Modifier
-                            .padding(8.dp)
                             .weight(1f)
                             .alpha(if (isBatterySaverEnabled) 0.5f else 1f),
                     ) {
@@ -219,6 +271,13 @@ fun SettingsScreen() {
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
+                    Checkbox(
+                        enabled = !isBatterySaverEnabled,
+                        checked = useHighPowerDiscovery,
+                        onCheckedChange = {
+                            repository.setUseHighPowerDiscovery(it)
+                        },
+                    )
                 }
             }
 
@@ -292,19 +351,19 @@ fun SettingsScreen() {
                         .fillMaxWidth()
                         .clickable {
                             repository.setShowImagesOnMetered(!showImagesOnMetered)
-                        },
+                        }
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = "Show images and videos on metered connections",
+                    )
                     Checkbox(
-                        modifier = Modifier.padding(8.dp),
                         checked = showImagesOnMetered,
                         onCheckedChange = {
                             repository.setShowImagesOnMetered(it)
                         }
-                    )
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = "Show images and videos on metered connections",
                     )
                 }
             }

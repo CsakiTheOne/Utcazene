@@ -17,7 +17,7 @@ class WeatherApi {
     private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun fetchWeather(): ApiWeatherResponse =
-        fetch("https://api.open-meteo.com/v1/forecast?latitude=47.09&longitude=17.91&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max&timezone=auto")
+        fetch("https://api.open-meteo.com/v1/forecast?latitude=47.09&longitude=17.91&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto")
 
     /**
      * Creates an OkHttpClient that trusts all certificates.

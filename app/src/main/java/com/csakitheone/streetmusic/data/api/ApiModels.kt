@@ -55,7 +55,8 @@ data class ApiTimeSlot(
 
 @Serializable
 data class ApiWeatherResponse(
-    val daily: ApiWeatherDaily
+    val daily: ApiWeatherDaily,
+    val hourly: ApiWeatherHourly
 )
 
 @Serializable
@@ -68,4 +69,12 @@ data class ApiWeatherDaily(
     @SerialName("weather_code") val weatherCode: List<Int>,
     @SerialName("precipitation_sum") val precipitationSum: List<Double>,
     @SerialName("precipitation_probability_max") val precipitationProbabilityMax: List<Int>
+)
+
+@Serializable
+data class ApiWeatherHourly(
+    val time: List<String>,
+    @SerialName("temperature_2m") val temperature: List<Double>,
+    @SerialName("weather_code") val weatherCode: List<Int>,
+    @SerialName("precipitation_probability") val precipitationProbability: List<Int>
 )

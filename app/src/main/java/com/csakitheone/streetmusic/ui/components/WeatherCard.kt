@@ -7,21 +7,31 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,7 +42,7 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherCard(
     modifier: Modifier = Modifier,
@@ -46,6 +56,8 @@ fun WeatherCard(
     val weather by remember(weatherList, date) {
         derivedStateOf { weatherList.find { it.date == date.toString() } }
     }
+
+    var isHourlyVisible by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier,
@@ -115,11 +127,74 @@ fun WeatherCard(
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
+                            TextButton(
+                                modifier = Modifier.align(Alignment.End),
+                                onClick = { isHourlyVisible = !isHourlyVisible },
+                            ) {
+                                Text("Hourly forecast")
+                                ExposedDropdownMenuDefaults.TrailingIcon(isHourlyVisible)
+                            }
+
+                            AnimatedVisibility(isHourlyVisible) {
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                    contentPadding = PaddingValues(vertical = 8.dp)
+                                ) {
+                                    items(targetWeather.hourly) { hour ->
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                text = hour.time.substring(11),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.secondary
+                                            )
+                                            Text(
+                                                text = getWeatherEmoji(hour.weatherCode),
+                                                style = MaterialTheme.typography.titleLarge
+                                            )
+                                            Text(
+                                                text = "${hour.temperature.toInt()}°C",
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                            if (hour.precipitationProbability > 0) {
+                                                Text(
+                                                    text = "${hour.precipitationProbability}%",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+private fun getWeatherEmoji(code: Int): String {
+    return when (code) {
+        0 -> "☀️"
+        1 -> "🌤️"
+        2 -> "⛅"
+        3 -> "☁️"
+        45, 48 -> "🌫️"
+        51, 53, 55 -> "🌧️"
+        61, 63, 65 -> "🌧️"
+        71, 73, 75 -> "❄️"
+        77 -> "❄️"
+        80, 81, 82 -> "🌦️"
+        85, 86 -> "🌨️"
+        95 -> "⛈️"
+        96, 99 -> "⛈️"
+        else -> "❓"
     }
 }
 

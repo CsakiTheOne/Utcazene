@@ -56,6 +56,14 @@ data class WeatherForecast(
     val maxApparentTemp: Double,
     val weatherCode: Int,
     val precipitationSum: Double,
+    val precipitationProbability: Int,
+    val hourly: List<HourlyWeather>
+)
+
+data class HourlyWeather(
+    val time: String, // ISO 8601
+    val temperature: Double,
+    val weatherCode: Int,
     val precipitationProbability: Int
 )
 

@@ -23,6 +23,7 @@ import com.csakitheone.streetmusic.data.local.EventEntity
 import com.csakitheone.streetmusic.data.local.VenueEntity
 import com.csakitheone.streetmusic.data.model.Artist
 import com.csakitheone.streetmusic.data.model.Event
+import com.csakitheone.streetmusic.data.model.HourlyWeather
 import com.csakitheone.streetmusic.data.model.Venue
 import com.csakitheone.streetmusic.data.model.WeatherForecast
 import com.csakitheone.streetmusic.data.nearby.NearbyManager
@@ -130,7 +131,17 @@ class DataRepository(
                     response.daily.maxApparentTemp[index],
                     response.daily.weatherCode[index],
                     response.daily.precipitationSum[index],
-                    response.daily.precipitationProbabilityMax[index]
+                    response.daily.precipitationProbabilityMax[index],
+                    hourly = response.hourly.time.mapIndexedNotNull { hIndex, hTime ->
+                        if (hTime.startsWith(time)) {
+                            HourlyWeather(
+                                hTime,
+                                response.hourly.temperature[hIndex],
+                                response.hourly.weatherCode[hIndex],
+                                response.hourly.precipitationProbability[hIndex]
+                            )
+                        } else null
+                    }
                 )
             }
         } catch (e: Exception) {
